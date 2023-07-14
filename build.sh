@@ -11,6 +11,6 @@ cd ..
 
 # Move output to output folder
 cp ./build/game output/game
-cp -R assets ./output/.
+cp -R IDKGame/assets ./output/.
 cp -R ./IDKGameEngine/shaders ./output/.
 
