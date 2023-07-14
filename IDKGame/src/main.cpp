@@ -31,7 +31,7 @@ int ENTRY(int argc, const char **argv)
     auto &charCS  = engine.getCS<CharacterController_CS>(CHARCONTROL);
 
     idk::RenderEngine &ren = engine.rengine();
-    ren.modelManager().loadTextures("assets/textures/");
+    ren.modelManager().loadTEXs("assets/textures/");
     ren.getCamera().ylock(true);
     ren.getCamera().transform().translate(glm::vec3(0.0f, 0.0f, 20.0f));
 
@@ -42,12 +42,16 @@ int ENTRY(int argc, const char **argv)
         "shaders/", "deferred/geometrypass.vs", "skydome.fs"
     );
 
-
     int player_obj = engine.createGameObject();
     engine.giveComponents(player_obj, TRANSFORM, PHYSICS, CAMERA, CHARCONTROL);
     transCS.translate(player_obj, glm::vec3(0.0f, 20.0f, 0.0f));
     physCS.giveCapsuleCollider(player_obj);
     charCS.controlMethod(player_obj, controlmethods::player);
+
+    idk::AudioEngine &aen = engine.aengine();
+    int footsteps = aen.loadWav("assets/audio/footsteps.wav");
+    int emitter = aen.createEmitter(footsteps, transCS.getTransform(player_obj));
+    aen.playSound(emitter);
 
     int skydome_obj = engine.createGameObject();
     int skydome_model = ren.modelManager().loadOBJ("assets/models/", "skydome.obj", "skydome.mtl");
