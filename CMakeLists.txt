@@ -22,6 +22,7 @@ add_subdirectory(IDKGameEngine/src/)
 # --------------------------------------------
 
 add_subdirectory(IDKGame/src/ComponentSystems/)
+add_subdirectory(IDKGame/src/modules/)
 
 project(game)
 
@@ -33,6 +34,7 @@ target_link_libraries(
     ${PROJECT_NAME} PUBLIC
     IDKengine
     IDKcomponentsystems
+    IDKmodules
 )
 
 

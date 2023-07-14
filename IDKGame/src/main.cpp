@@ -7,7 +7,7 @@
 #include <iostream>
 #include "IDKengine.h"
 #include "ComponentSystems/IDKcomponentsystems.h"
-
+#include "modules/idk_modules.h"
 
 int ENTRY(int argc, const char **argv)
 {
