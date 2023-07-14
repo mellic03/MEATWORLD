@@ -10,17 +10,25 @@ set(CMAKE_BUILD_PARALLEL_LEVEL 8)
 set (CMAKE_CXX_FLAGS "-lstdc++fs -std=c++17 -fsanitize=undefined -g -fdiagnostics-color=always")
 add_definitions(-DCMAKE_EXPORT_COMPILE_COMMANDS=ON)
 
+
+# Debugging
+# --------------------------------------------
 add_definitions(-DIDK_DEBUG)
+# --------------------------------------------
 
-
+# IDKEngine source directory
+# --------------------------------------------
 set(idkengine_source_dir "IDKGameEngine/src/")
+add_subdirectory(IDKGameEngine/src/)
+# --------------------------------------------
+
+
+add_subdirectory(IDKGame/src/ComponentSystems/)
 
 project(IDKGame)
 
-add_subdirectory(IDKGameEngine/src/)
-
 add_executable(
-    ${PROJECT_NAME} "src/main.cpp"
+    ${PROJECT_NAME} "IDKGame/src/main.cpp"
 )
 
 target_link_libraries(
@@ -28,37 +36,4 @@ target_link_libraries(
     IDKengine
 )
 
-
-
-
-# project(objconvert)
-
-# include_directories(src)
-
-# add_executable(
-#     ${PROJECT_NAME} "src/IDKtools/objconvert.cpp"
-# )
-
-# target_link_libraries(
-#     ${PROJECT_NAME} PUBLIC
-#     IDKengine
-# )
-
-
-
-
-# project(convexdecompose)
-
-# include_directories(src)
-
-# add_executable(
-#     ${PROJECT_NAME} "src/IDKtools/convexdecompose.cpp"
-# )
-
-# target_link_libraries(
-#     ${PROJECT_NAME} PUBLIC
-#     IDKengine
-# )
-    
-    
 
