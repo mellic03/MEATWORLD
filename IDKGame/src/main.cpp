@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include "IDKengine.h"
+#include "ComponentSystems/IDKcomponentsystems.h"
 
 
 /*

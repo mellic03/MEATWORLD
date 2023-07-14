@@ -9,13 +9,8 @@ file(GLOB SOURCES
     "./idk_character_controller_CS/*.cpp"
 )
 
-
 add_subdirectory(idk_physics_CS)
-
-add_library(
-    ${PROJECT_NAME} SHARED
-    ${SOURCES}
-)
+add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
 target_link_libraries(
     ${PROJECT_NAME} PUBLIC

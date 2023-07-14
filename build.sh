@@ -10,6 +10,6 @@ cd ..
 
 
 # Move output to output folder
-cp ./build/IDKGame output/IDKGame
+cp ./build/game output/game
 cp -R assets ./output/.
 
