@@ -9,6 +9,7 @@
 #include "ComponentSystems/IDKcomponentsystems.h"
 #include "modules/idk_modules.h"
 
+
 int ENTRY(int argc, const char **argv)
 {
     idk::Engine engine("IDK Game", 1920, 1080);
@@ -40,9 +41,6 @@ int ENTRY(int argc, const char **argv)
     GLuint default_geometrypass = idk::glInterface::compileProgram(
         "shaders/deferred/", "geometrypass.vs", "geometrypass.fs"
     );
-    GLuint skydome_shader = idk::glInterface::compileProgram(
-        "shaders/", "deferred/geometrypass.vs", "skydome.fs"
-    );
 
     int player_obj = engine.createGameObject();
     engine.giveComponents(player_obj, TRANSFORM, PHYSICS, CAMERA, CHARCONTROL);
@@ -54,12 +52,6 @@ int ENTRY(int argc, const char **argv)
     // int footsteps = aen.loadWav("assets/audio/footsteps.wav");
     // int emitter = aen.createEmitter(footsteps, transCS.getTransform(player_obj));
     // aen.playSound(emitter);
-
-    // int skydome_obj = engine.createGameObject();
-    // int skydome_model = ren.modelManager().loadOBJ("assets/models/", "skydome.obj", "skydome.mtl");
-    // engine.giveComponents(skydome_obj, TRANSFORM, MODEL);
-    // modelCS.useModel(skydome_obj, skydome_model, skydome_shader);
-    // transCS.getTransform(skydome_obj).scale(glm::vec3(120.0f));
 
     int terrain_obj = engine.createGameObject();
     int terrain_model = ren.modelManager().loadOBJ("assets/models/", "tree.obj", "tree.mtl");
@@ -90,6 +82,12 @@ int ENTRY(int argc, const char **argv)
         last_dir += 10.0f * engine.deltaTime() * dir;
         
         spotCS.getSpotlight(spotlight_obj).direction = glm::vec4(last_dir, 0.0f);
+
+
+        if (engine.keylog().keyTapped(idk_keycode::E))
+        {
+            ren.compileShaders();
+        }
 
         engine.endFrame();
     }
