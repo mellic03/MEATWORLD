@@ -9,7 +9,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd /home/michael/Desktop/code/C++/IDK/assets/textures/bark.png
+map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/diffuse/bark.png
 
 newmtl Material.002
 Ns 250.000000
@@ -19,7 +19,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd /home/michael/Desktop/code/C++/IDK/assets/textures/concreteSmooth.png
+map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/diffuse/concreteSmooth.png
 
 newmtl Material.003
 Ns 250.000000
@@ -29,7 +29,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 1
-map_Kd /home/michael/Desktop/code/C++/IDK/assets/textures/grass2.png
+map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/diffuse/grass2.png
 
 newmtl branch
 Ns 250.000000
@@ -39,7 +39,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 1
-map_Kd /home/michael/Desktop/code/C++/IDK/assets/textures/branch.png
+map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/diffuse/branch.png
 
 newmtl wall
 Ns 250.000000
@@ -48,5 +48,5 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd /home/michael/Desktop/code/C++/IDK/assets/textures/wall_metal.png
-map_Ks /home/michael/Desktop/code/C++/IDK/assets/textures/wall_metal_specular.png
+map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/diffuse/wall_metal.png
+map_Ks /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/specular/wall_metal_specular.png

@@ -18,5 +18,9 @@ cp -R ./IDKGameEngine/shaders ./output/.
 
 rm -R ./output/assets/textures
 mkdir ./output/assets/textures
+
 cp ./build/texconvert ./output/IDKGE/IDKtools/texconvert
-./output/IDKGE/IDKtools/texconvert ./IDKGame/assets/textures/ ./output/assets/textures/
+./build/texconvert IDKGame/assets/textures/diffuse output/assets/textures/diffuse.texpak
+./build/texconvert IDKGame/assets/textures/specular output/assets/textures/specular.texpak
+./build/texconvert IDKGame/assets/textures/normal output/assets/textures/normal.texpak
+./build/texconvert IDKGame/assets/textures/emission output/assets/textures/emission.texpak

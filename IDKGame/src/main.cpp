@@ -31,7 +31,9 @@ int ENTRY(int argc, const char **argv)
     auto &charCS  = engine.getCS<CharacterController_CS>(CHARCONTROL);
 
     idk::RenderEngine &ren = engine.rengine();
-    ren.modelManager().loadTEXs("assets/textures/");
+    ren.modelManager().loadIDKtexpak("assets/textures/diffuse.texpak",  true);
+    ren.modelManager().loadIDKtexpak("assets/textures/specular.texpak", false);
+
     ren.getCamera().ylock(true);
     ren.getCamera().transform().translate(glm::vec3(0.0f, 0.0f, 20.0f));
 
@@ -48,16 +50,16 @@ int ENTRY(int argc, const char **argv)
     physCS.giveCapsuleCollider(player_obj);
     charCS.controlMethod(player_obj, controlmethods::player);
 
-    idk::AudioEngine &aen = engine.aengine();
-    int footsteps = aen.loadWav("assets/audio/footsteps.wav");
-    int emitter = aen.createEmitter(footsteps, transCS.getTransform(player_obj));
-    aen.playSound(emitter);
+    // idk::AudioEngine &aen = engine.aengine();
+    // int footsteps = aen.loadWav("assets/audio/footsteps.wav");
+    // int emitter = aen.createEmitter(footsteps, transCS.getTransform(player_obj));
+    // aen.playSound(emitter);
 
-    int skydome_obj = engine.createGameObject();
-    int skydome_model = ren.modelManager().loadOBJ("assets/models/", "skydome.obj", "skydome.mtl");
-    engine.giveComponents(skydome_obj, TRANSFORM, MODEL);
-    modelCS.useModel(skydome_obj, skydome_model, skydome_shader);
-    transCS.getTransform(skydome_obj).scale(glm::vec3(120.0f));
+    // int skydome_obj = engine.createGameObject();
+    // int skydome_model = ren.modelManager().loadOBJ("assets/models/", "skydome.obj", "skydome.mtl");
+    // engine.giveComponents(skydome_obj, TRANSFORM, MODEL);
+    // modelCS.useModel(skydome_obj, skydome_model, skydome_shader);
+    // transCS.getTransform(skydome_obj).scale(glm::vec3(120.0f));
 
     int terrain_obj = engine.createGameObject();
     int terrain_model = ren.modelManager().loadOBJ("assets/models/", "tree.obj", "tree.mtl");
