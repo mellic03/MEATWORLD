@@ -32,7 +32,6 @@ int ENTRY(int argc, const char **argv)
     auto &grabCS  = engine.getCS<Grabbable_CS>(GRABBABLE);
     auto &charCS  = engine.getCS<CharacterController_CS>(CHARCONTROL);
 
-
     engine.registerModule<ImGui_Module>("imgui");
 
 
@@ -57,8 +56,6 @@ int ENTRY(int argc, const char **argv)
     physCS.drawMeshColliders(true);
     modelCS.useModel(terrain_obj, terrain_model, default_geometrypass);
 
-    // demos::cube_physics(engine, TRANSFORM, MODEL, PHYSICS, GRABBABLE);
-    // demos::school(engine, TRANSFORM, MODEL, PHYSICS, GRABBABLE);
 
     ren.createDirlight();
 

@@ -23,5 +23,5 @@ public:
 
     void        visualize( int obj_id, bool draw ) { _draw_spotlight[obj_id] = draw; };
 
-    idk::lightsource::Spot &getSpotlight( int obj_id ) { return _engineptr->rengine().spotlights().get(_spotlight_ids[obj_id]); };
+    idk::Spotlight &getSpotlight( int obj_id ) { return _engineptr->rengine().spotlights().get(_spotlight_ids[obj_id]); };
 };

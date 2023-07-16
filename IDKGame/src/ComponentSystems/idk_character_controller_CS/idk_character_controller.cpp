@@ -44,7 +44,7 @@ CharacterController_CS::stage_B( idk::Engine &engine )
 void
 CharacterController_CS::onGameObjectCreation( int obj_id, idk::Engine &engine )
 {
-    if (obj_id >= _controller_ids.size())
+    if (obj_id >= (int)_controller_ids.size())
     {
         _controller_ids.resize(obj_id+1, -1);
     }

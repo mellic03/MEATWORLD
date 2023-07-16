@@ -20,7 +20,7 @@ public:
     void        onGameObjectCopy( int src_obj_id, int dest_obj_id, idk::Engine & );
     
     
-    idk::lightsource::Point &
+    idk::Pointlight &
     getPointlight( int obj_id )
     {
         return _engineptr->rengine().pointlights().get(_pointlight_ids[obj_id]);

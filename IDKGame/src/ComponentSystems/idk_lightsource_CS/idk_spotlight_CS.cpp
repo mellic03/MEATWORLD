@@ -21,7 +21,7 @@ SpotLight_CS::stage_B( idk::Engine &engine )
     for (int obj_id: obj_ids)
     {
         auto &obj_transform = tCS.getTransform(obj_id);
-        idk::lightsource::Spot &spotlight = ren.spotlights().get(_spotlight_ids[obj_id]);
+        idk::Spotlight &spotlight = ren.spotlights().get(_spotlight_ids[obj_id]);
         spotlight.position = glm::vec4(obj_transform.position(), 1.0f);
 
         if (_draw_spotlight[obj_id])

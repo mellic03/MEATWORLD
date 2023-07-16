@@ -10,8 +10,10 @@ class ImGui_Module: public idk::Module
 {
 private:
     
-    void        f_main_menu_bar();
+    std::string m_menu_action = "";
 
+    void        f_settings_graphics();
+    void        f_main_menu_bar();
 
 public:
     void        init( idk::Engine & );
