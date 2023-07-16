@@ -45,7 +45,7 @@ Grabbable_CS::stage_B( idk::Engine &engine )
 
     idk::Camera &cam = engine.rengine().getCamera();
 
-    idk::Keylog &keylog = engine.keylog();
+    idk::Keylog &keylog = engine.eventManager().keylog();
     const float dtime = engine.deltaTime();
 
     for (int obj_id: engine.gameObjects_byComponent(_component_index))
@@ -65,7 +65,7 @@ Grabbable_CS::stage_B( idk::Engine &engine )
 
         if (distSq < 2.0f)
         {
-            if (engine.mouseDown(idk::MouseButton::LEFT))
+            if (engine.eventManager().mouseDown(idk::MouseButton::LEFT))
             {
                 grabbed_id = obj_id;
             }

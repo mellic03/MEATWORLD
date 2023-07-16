@@ -85,18 +85,17 @@ controlmethods::player( int obj_id, idk::Engine &engine )
 
     idk::Camera &camera = engine.rengine().getCamera();
     idk::Transform &transform = tCS.getTransform(obj_id);
-    idk::Keylog &keylog = engine.keylog();
+    idk::Keylog &keylog = engine.eventManager().keylog();
     
     float dtime = engine.deltaTime();
 
     if (keylog.keyTapped(idk_keycode::C))
-        engine.mouseCapture(!engine.mouseCaptured());
+        engine.eventManager().mouseCapture(!engine.eventManager().mouseCaptured());
 
     float speed = 24.32f;
 
     if (keylog.keyDown(idk_keycode::LSHIFT))
         speed = 64.0f;
-
 
     camera.roll(-roll_sway);
 
@@ -128,9 +127,9 @@ controlmethods::player( int obj_id, idk::Engine &engine )
     glm::vec3 dir = 10.0f * dtime * (rpos - campos);
     camera.transform().translate(dir);
 
-    if (engine.mouseCaptured())
+    if (engine.eventManager().mouseCaptured())
     {
-        glm::vec2 dmouse = 0.001f * engine.dMouse();
+        glm::vec2 dmouse = 0.001f * engine.eventManager().mouseDelta();
         camera.transform().pitch(-dmouse.y);
         camera.transform().yaw(-dmouse.x);
         roll_sway -= speed * SWAY_SPEED_LOOK * dmouse.x;

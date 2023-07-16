@@ -12,7 +12,8 @@
 
 int ENTRY(int argc, const char **argv)
 {
-    idk::Engine engine("IDK Game", 1920, 1080);
+    idk::Engine engine("IDK Game", 1920, 1080, 1);
+    idk::RenderEngine &ren = engine.rengine();
 
     const int TRANSFORM     = engine.registerCS<Transform_CS>("transform");
     const int MODEL         = engine.registerCS<Model_CS>("model");
@@ -31,12 +32,13 @@ int ENTRY(int argc, const char **argv)
     auto &grabCS  = engine.getCS<Grabbable_CS>(GRABBABLE);
     auto &charCS  = engine.getCS<CharacterController_CS>(CHARCONTROL);
 
-    idk::RenderEngine &ren = engine.rengine();
+
+    engine.registerModule<ImGui_Module>("imgui");
+
+
     ren.modelManager().loadIDKtexpak("assets/textures/diffuse.texpak",  true);
     ren.modelManager().loadIDKtexpak("assets/textures/specular.texpak", false);
-
     ren.getCamera().ylock(true);
-    ren.getCamera().transform().translate(glm::vec3(0.0f, 0.0f, 20.0f));
 
     GLuint default_geometrypass = idk::glInterface::compileProgram(
         "shaders/deferred/", "geometrypass.vs", "geometrypass.fs"
@@ -47,11 +49,6 @@ int ENTRY(int argc, const char **argv)
     transCS.translate(player_obj, glm::vec3(0.0f, 20.0f, 0.0f));
     physCS.giveCapsuleCollider(player_obj);
     charCS.controlMethod(player_obj, controlmethods::player);
-
-    // idk::AudioEngine &aen = engine.aengine();
-    // int footsteps = aen.loadWav("assets/audio/footsteps.wav");
-    // int emitter = aen.createEmitter(footsteps, transCS.getTransform(player_obj));
-    // aen.playSound(emitter);
 
     int terrain_obj = engine.createGameObject();
     int terrain_model = ren.modelManager().loadOBJ("assets/models/", "tree.obj", "tree.mtl");
@@ -83,11 +80,6 @@ int ENTRY(int argc, const char **argv)
         
         spotCS.getSpotlight(spotlight_obj).direction = glm::vec4(last_dir, 0.0f);
 
-
-        if (engine.keylog().keyTapped(idk_keycode::E))
-        {
-            ren.compileShaders();
-        }
 
         engine.endFrame();
     }
