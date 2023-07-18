@@ -16,7 +16,7 @@ Model_CS::stage_A(idk::Engine &engine)
 
     idk::RenderEngine &ren = engine.rengine();
 
-    std::vector<int> obj_ids = engine.gameObjects_byComponent(_component_index);
+    std::vector<int> obj_ids = engine.gameObjects_byComponent(m_id);
     for (int obj_id: obj_ids)
     {
         ren.drawModel(_shader_ids[obj_id], _model_ids[obj_id], tCS.getTransform(obj_id));

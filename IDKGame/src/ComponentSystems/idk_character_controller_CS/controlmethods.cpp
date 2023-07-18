@@ -47,7 +47,7 @@ static void keyinput(idk::Camera &camera, idk::Keylog &keylog, float speed, floa
 }
 
 void
-controlmethods::player( int obj_id, idk::Engine &engine )
+controlmethods::player( int obj_id, idk::Engine &engine, CharacterController &controller )
 {
     Transform_CS &tCS = engine.getCS<Transform_CS>("transform");
     Physics_CS &pCS = engine.getCS<Physics_CS>("physics");

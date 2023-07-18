@@ -4,7 +4,7 @@
 
 // idk_physics::MeshCollider::MeshCollider( std::vector<idk::Vertex> &vertices )
 // {
-//     _vertices = vertices;
+//     m_vertices = vertices;
 // }
 
 // btRigidBody* BulletWrap::addTriangleMesh( btVector3 &p0, btVector3 &p1, btVector3 &p2,btVector3 &position,

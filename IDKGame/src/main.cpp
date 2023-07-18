@@ -45,7 +45,7 @@ int ENTRY(int argc, const char **argv)
 
     int player_obj = engine.createGameObject();
     engine.giveComponents(player_obj, TRANSFORM, PHYSICS, CAMERA, CHARCONTROL);
-    transCS.translate(player_obj, glm::vec3(0.0f, 20.0f, 0.0f));
+    transCS.translate(player_obj, glm::vec3(0.0f, 5.0f, 10.0f));
     physCS.giveCapsuleCollider(player_obj);
     charCS.controlMethod(player_obj, controlmethods::player);
 
@@ -57,7 +57,34 @@ int ENTRY(int argc, const char **argv)
     modelCS.useModel(terrain_obj, terrain_model, default_geometrypass);
 
 
-    ren.createDirlight();
+    int worm_obj = engine.createGameObject();
+    int worm_model = ren.modelManager().loadOBJ("assets/models/", "worm.obj", "worm.mtl");
+    engine.giveComponents(worm_obj, TRANSFORM, MODEL, PHYSICS, CHARCONTROL);
+    transCS.translate(worm_obj, glm::vec3(0.0f, 10.0f, 0.0f));
+    modelCS.useModel(worm_obj, worm_model, default_geometrypass);
+    physCS.giveCapsuleCollider(worm_obj);
+
+
+    auto enemycontrol = [&player_obj]( int obj_id, idk::Engine &engine, CharacterController &controller )
+    {
+        auto &tCS = engine.getCS<Transform_CS>("transform");
+        auto &pCS = engine.getCS<Physics_CS>("physics");
+
+        btRigidBody *playerbody = pCS.getBtCapsule(player_obj);
+        btRigidBody *enemybody  = pCS.getBtCapsule(obj_id);
+
+        glm::vec3 playerpos = b3::glmvec3_cast(playerbody->getWorldTransform().getOrigin());
+        glm::vec3 enemypos  = b3::glmvec3_cast(enemybody->getWorldTransform().getOrigin());
+
+        glm::vec3 dir = 2.0f * glm::normalize(playerpos - enemypos);
+    
+        enemybody->applyCentralForce(b3::btVec3_cast(dir));
+    };
+    charCS.controlMethod(worm_obj, enemycontrol);
+
+
+    int dirlight_id = ren.createDirlight();
+
 
     int spotlight_obj = engine.createGameObject();
     engine.giveComponents(spotlight_obj, TRANSFORM, SPOTLIGHT);
@@ -77,6 +104,10 @@ int ENTRY(int argc, const char **argv)
         
         spotCS.getSpotlight(spotlight_obj).direction = glm::vec4(last_dir, 0.0f);
 
+        if (engine.eventManager().keylog().keyTapped(idk_keycode::E))
+        {
+            engine.rengine().compileShaders();
+        }
 
         engine.endFrame();
     }

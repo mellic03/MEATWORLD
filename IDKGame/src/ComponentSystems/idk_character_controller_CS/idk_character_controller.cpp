@@ -3,7 +3,7 @@
 
 
 void
-CharacterController_CS::controlMethod(int obj_id, std::function<void(int, idk::Engine &)> lambda)
+CharacterController_CS::controlMethod(int obj_id, std::function<void(int, idk::Engine &, CharacterController &)> lambda)
 {
     int controller_id = _controller_ids[obj_id];
     _controllers.get(controller_id).controlMethod = lambda;
@@ -35,7 +35,7 @@ CharacterController_CS::stage_B( idk::Engine &engine )
     _controllers.for_each(
         [&engine](CharacterController &controller)
         {
-            controller.controlMethod(controller.obj_id, engine);
+            controller.controlMethod(controller.obj_id, engine, controller);
         }
     );
 }

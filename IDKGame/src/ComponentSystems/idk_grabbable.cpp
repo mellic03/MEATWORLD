@@ -48,7 +48,7 @@ Grabbable_CS::stage_B( idk::Engine &engine )
     idk::Keylog &keylog = engine.eventManager().keylog();
     const float dtime = engine.deltaTime();
 
-    for (int obj_id: engine.gameObjects_byComponent(_component_index))
+    for (int obj_id: engine.gameObjects_byComponent(m_id))
     {
         if (pCS.hasRigidBody(obj_id) == false)
             continue;

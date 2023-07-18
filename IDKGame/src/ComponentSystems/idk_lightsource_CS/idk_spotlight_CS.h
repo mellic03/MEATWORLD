@@ -15,6 +15,7 @@ public:
     void        init( idk::Engine & );
     void        stage_A( idk::Engine & )    {  };
     void        stage_B( idk::Engine & );
+    void        stage_C( idk::Engine & )    {  };
 
     void        onAssignment( int obj_id, idk::Engine & );
     void        onGameObjectCreation( int obj_id, idk::Engine & );
@@ -23,5 +24,9 @@ public:
 
     void        visualize( int obj_id, bool draw ) { _draw_spotlight[obj_id] = draw; };
 
-    idk::Spotlight &getSpotlight( int obj_id ) { return _engineptr->rengine().spotlights().get(_spotlight_ids[obj_id]); };
+    idk::Spotlight &
+    getSpotlight( int obj_id )
+    {
+        return _engineptr->rengine().spotlights().get(_spotlight_ids[obj_id]);
+    };
 };

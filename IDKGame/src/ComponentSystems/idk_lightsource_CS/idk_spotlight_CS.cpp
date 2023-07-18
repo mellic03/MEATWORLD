@@ -17,7 +17,7 @@ SpotLight_CS::stage_B( idk::Engine &engine )
     idk::RenderEngine &ren = engine.rengine();
 
     auto &tCS = engine.getCS<Transform_CS>("transform");
-    auto obj_ids = engine.gameObjects_byComponent(_component_index);
+    auto obj_ids = engine.gameObjects_byComponent(m_id);
     for (int obj_id: obj_ids)
     {
         auto &obj_transform = tCS.getTransform(obj_id);

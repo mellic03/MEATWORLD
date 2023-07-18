@@ -11,7 +11,7 @@
 // class idk_physics::MeshCollider
 // {
 // private:
-//     std::vector<idk::Vertex>    _vertices;
+//     std::vector<idk::Vertex>    m_vertices;
 
 // public:
 //             MeshCollider( std::vector<idk::Vertex> & ) {  };
