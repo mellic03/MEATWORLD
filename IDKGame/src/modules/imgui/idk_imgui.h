@@ -12,7 +12,7 @@ private:
     
     std::string m_menu_action = "";
 
-    void        f_settings_graphics();
+    void        f_settings_graphics( idk::Engine &engine );
     void        f_main_menu_bar();
 
 public:

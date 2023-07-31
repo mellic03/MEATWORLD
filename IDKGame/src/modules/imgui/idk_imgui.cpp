@@ -66,12 +66,23 @@ ImGui_Module::init( idk::Engine &engine )
 
 
 void
-ImGui_Module::f_settings_graphics()
+ImGui_Module::f_settings_graphics( idk::Engine &engine )
 {
     if (ImGui::BeginChild("Settings_Graphics"))
     {
         ImGui::Text("WOWOWOWOW");
     
+
+        // for (int i=0; i<4; i++)
+        // {
+
+        //     ImGui::Image(
+        //         *(ImTextureID *)(void *)&engine.rengine().m_dirlight_depthmap_buffer.output_textures[i],
+        //         {500, 500}, {0, 1}, {1, 0}
+        //     );
+        // }
+
+
         if(ImGui::Button("Cancel"))
         {
             m_menu_action = "";
@@ -152,7 +163,7 @@ ImGui_Module::stage_B( idk::Engine &engine )
 
     if (m_menu_action == "Settings_Graphics")
     {
-        f_settings_graphics();
+        f_settings_graphics(engine);
     }
 
     ImGui::Render();

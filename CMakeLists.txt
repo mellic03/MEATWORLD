@@ -5,7 +5,7 @@ set(CMAKE_DISABLE_SOURCE_CHANGES  ON)
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 set(CMAKE_BUILD_PARALLEL_LEVEL 8)
-set(CMAKE_CXX_FLAGS "-lstdc++fs -std=c++17 -Wuninitialized -Winit-self -Wmaybe-uninitialized -Werror -fsanitize=undefined -fdiagnostics-color=always -g")
+set(CMAKE_CXX_FLAGS "-std=c++17 -Wuninitialized -Winit-self -Wmaybe-uninitialized -Werror -fsanitize=undefined -fdiagnostics-color=always -Ofast -lstdc++fs")
 
 add_definitions(-DCMAKE_EXPORT_COMPILE_COMMANDS=ON)
 
