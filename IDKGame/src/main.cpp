@@ -57,7 +57,6 @@ int ENTRY(int argc, const char **argv)
 
     int dirlight_id = ren.createDirlight();
 
-
     int spotlight_obj = engine.createGameObject();
     engine.giveComponents(spotlight_obj, TRANSFORM, SPOTLIGHT);
     glm::vec3 last_dir = ren.getCamera().front();
@@ -86,4 +85,3 @@ int ENTRY(int argc, const char **argv)
 
     return 0;
 }
-

@@ -106,6 +106,8 @@
     "C_Cpp.default.includePath": [
         "${default}",
         "${workspaceFolder}/IDKGameEngine/src/",
-        "/usr/local/include/bullet/"
-    ]
+        "/usr/local/include/bullet/",
+    ],
+
+    "C_Cpp.default.cppStandard": "gnu++23"
 }
