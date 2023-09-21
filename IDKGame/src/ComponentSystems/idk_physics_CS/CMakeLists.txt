@@ -6,7 +6,7 @@ project(idk_physics_CS)
 file(GLOB SOURCES
     "./*.cpp"
 )
-add_library(${PROJECT_NAME} SHARED ${SOURCES})
+add_library(${PROJECT_NAME} STATIC ${SOURCES})
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/${idkengine_source_dir})
 

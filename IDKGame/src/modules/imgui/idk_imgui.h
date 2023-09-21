@@ -12,6 +12,8 @@ private:
     
     std::string m_menu_action = "";
 
+    void        f_settings_dirlight( idk::Engine &engine );
+    void        f_settings_camera( idk::Engine &engine );
     void        f_settings_graphics( idk::Engine &engine );
     void        f_main_menu_bar();
 

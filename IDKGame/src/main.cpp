@@ -9,6 +9,12 @@
 #include "ComponentSystems/IDKcomponentsystems.h"
 #include "modules/idk_modules.h"
 
+// #include "ComponentSystems/hands_opencv/hands_opencv.hpp"
+
+
+
+
+
 int ENTRY(int argc, const char **argv)
 {
     idk::Engine engine("IDK Game", 1920, 1080, 1);
@@ -22,6 +28,8 @@ int ENTRY(int argc, const char **argv)
     const int CHARCONTROL   = engine.registerCS<CharacterController_CS>("charactercontrol");
     const int SPOTLIGHT     = engine.registerCS<SpotLight_CS>("spotlight");
     const int CAMERA        = engine.registerCS<Camera_CS>("camera");
+    // const int OPENCV        = engine.registerCS<Hands_OpenCV>("hands_opencv");
+
 
     auto &transCS = engine.getCS<Transform_CS>(TRANSFORM);
     auto &modelCS = engine.getCS<Model_CS>(MODEL);
@@ -30,9 +38,10 @@ int ENTRY(int argc, const char **argv)
     auto &spotCS  = engine.getCS<SpotLight_CS>(SPOTLIGHT);
     auto &grabCS  = engine.getCS<Grabbable_CS>(GRABBABLE);
     auto &charCS  = engine.getCS<CharacterController_CS>(CHARCONTROL);
+    // auto &handCS  = engine.getCS<Hands_OpenCV>(OPENCV);
+
 
     engine.registerModule<ImGui_Module>("imgui");
-
     ren.modelManager().loadIDKtexpak("assets/textures/diffuse.texpak",  true);
     ren.modelManager().loadIDKtexpak("assets/textures/specular.texpak", false);
     ren.getCamera().ylock(true);
@@ -40,6 +49,16 @@ int ENTRY(int argc, const char **argv)
     GLuint default_geometrypass = idk::glInterface::compileProgram(
         "shaders/deferred/", "geometrypass.vs", "geometrypass.fs"
     );
+
+
+    int terrain2_obj = engine.createGameObject();
+    int terrain2_model = ren.modelManager().loadOBJ("assets/models/", "man.obj", "man.mtl");
+    engine.giveComponents(terrain2_obj, TRANSFORM, MODEL, PHYSICS);
+    transCS.translate(terrain2_obj, glm::vec3(0.0f, 15.0f, 2.0f));
+    physCS.giveMeshCollider(terrain2_obj, ren.modelManager().getModel(terrain2_model).vertices);
+    physCS.drawMeshColliders(true);
+    modelCS.useModel(terrain2_obj, terrain2_model, default_geometrypass);
+
 
     int player_obj = engine.createGameObject();
     engine.giveComponents(player_obj, TRANSFORM, PHYSICS, CAMERA, CHARCONTROL);
@@ -57,23 +76,23 @@ int ENTRY(int argc, const char **argv)
 
     int dirlight_id = ren.createDirlight();
 
-    int spotlight_obj = engine.createGameObject();
-    engine.giveComponents(spotlight_obj, TRANSFORM, SPOTLIGHT);
-    glm::vec3 last_dir = ren.getCamera().front();
+    // int spotlight_obj = engine.createGameObject();
+    // engine.giveComponents(spotlight_obj, TRANSFORM, SPOTLIGHT);
+    // glm::vec3 last_dir = ren.getCamera().front();
 
     while (engine.running())
     {
         engine.beginFrame();
 
-        auto &transform = transCS.getTransform(spotlight_obj);
-        transform = idk::Transform(glm::inverse(ren.getCamera().view()));
-        transform.localTranslate(glm::vec3(0.0f, 0.0f, 1.0f));
+        // auto &transform = transCS.getTransform(spotlight_obj);
+        // transform = idk::Transform(glm::inverse(ren.getCamera().view()));
+        // transform.localTranslate(glm::vec3(0.0f, 0.0f, 1.0f));
 
-        glm::vec3 front = glm::mat3(ren.getCamera().transform().modelMatrix()) * glm::vec3(0.0f, 0.0f, -1.0f);
-        glm::vec3 dir = (front - last_dir);
-        last_dir += 10.0f * engine.deltaTime() * dir;
+        // glm::vec3 front = glm::mat3(ren.getCamera().transform().modelMatrix()) * glm::vec3(0.0f, 0.0f, -1.0f);
+        // glm::vec3 dir = (front - last_dir);
+        // last_dir += 10.0f * engine.deltaTime() * dir;
         
-        spotCS.getSpotlight(spotlight_obj).direction = glm::vec4(last_dir, 0.0f);
+        // spotCS.getSpotlight(spotlight_obj).direction = glm::vec4(last_dir, 0.0f);
 
         if (engine.eventManager().keylog().keyTapped(idk_keycode::E))
         {

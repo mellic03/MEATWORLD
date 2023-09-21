@@ -100,13 +100,18 @@
         "stop_token": "cpp",
         "__mutex_base": "cpp",
         "stdfloat": "cpp",
-        "codecvt": "cpp"
+        "codecvt": "cpp",
+        "csignal": "cpp",
+        "__std_stream": "cpp",
+        "shared_mutex": "cpp"
     },
     "cmake.configureOnOpen": false,
     "C_Cpp.default.includePath": [
         "${default}",
         "${workspaceFolder}/IDKGameEngine/src/",
         "/usr/local/include/bullet/",
+        "/usr/include/opencv4/",
+        "/usr/include/opencv4/opencv2/"
     ],
 
     "C_Cpp.default.cppStandard": "gnu++23"

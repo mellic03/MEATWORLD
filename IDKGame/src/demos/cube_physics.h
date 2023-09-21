@@ -12,7 +12,7 @@ void cube_physics( idk::Engine &engine, int TRANS, int MOD, int PHYS, int GRAB )
     auto &pCS = engine.getCS<Physics_CS>(PHYS);
 
     idk::RenderEngine &ren = engine.rengine();
-    GLuint default_shader = idk::glInterface::compileProgram("assets/shaders/", "gb_geom.vs", "gb_geom.fs");
+    GLuint default_shader = idk::glInterface::compileProgram("shaders/deferred/", "geometrypass.vs", "geometrypass.fs");
 
     int cube = ren.modelManager().loadOBJ("assets/models/", "cube.obj", "cube.mtl");
     int stoneplane = ren.modelManager().loadOBJ("assets/models/", "stoneplane.obj", "stoneplane.mtl");

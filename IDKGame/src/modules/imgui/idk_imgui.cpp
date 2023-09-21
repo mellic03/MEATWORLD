@@ -6,34 +6,6 @@ SDL_GLContext m2_SDL_GL_Context;
 void
 ImGui_Module::init( idk::Engine &engine )
 {
-    // if (SDL_Init(SDL_INIT_VIDEO) < 0)
-    // {
-    //     std::cout << "Error creating window\n";
-    //     exit(1);
-    // }
-
-    // m2_SDL_window = SDL_CreateWindow(
-    //     "test",
-    //     SDL_WINDOWPOS_CENTERED,
-    //     SDL_WINDOWPOS_CENTERED,
-    //     500,
-    //     500,
-    //     SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
-    // );
-    // SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-    // SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 4);
-
-    // m2_SDL_GL_Context = SDL_GL_CreateContext(m2_SDL_window);
-    // SDL_GL_MakeCurrent(m2_SDL_window, m2_SDL_GL_Context);
-    // SDL_SetRelativeMouseMode(SDL_FALSE);
-
-    // if (glewInit() != GLEW_OK)
-    // {
-    //     std::cout << "Error initializing glew\n";
-    //     exit(1);
-    // }
-
-
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -47,11 +19,6 @@ ImGui_Module::init( idk::Engine &engine )
         engine.rengine().SDLGLContext()
     );
 
-    // ImGui_ImplSDL2_InitForOpenGL(
-    //     m2_SDL_window,
-    //     m2_SDL_GL_Context
-    // );
-
     ImGui_ImplOpenGL3_Init("#version 440");
 
     engine.eventManager().onSDLPollEvent(
@@ -61,7 +28,6 @@ ImGui_Module::init( idk::Engine &engine )
         }
     );
 
-    // SDL_GL_MakeCurrent(engine.rengine().SDLWindow(), engine.rengine().SDLGLContext());
 }
 
 
@@ -70,20 +36,58 @@ ImGui_Module::f_settings_graphics( idk::Engine &engine )
 {
     if (ImGui::BeginChild("Settings_Graphics"))
     {
-        ImGui::Text("WOWOWOWOW");
-    
-
-        // for (int i=0; i<4; i++)
-        // {
-
-        //     ImGui::Image(
-        //         *(ImTextureID *)(void *)&engine.rengine().m_dirlight_depthmap_buffer.output_textures[i],
-        //         {500, 500}, {0, 1}, {1, 0}
-        //     );
-        // }
-
+        ImGui::Image(
+            *(ImTextureID *)(void *)&engine.rengine().m_dirlight_depthmap_buffer.output_textures[0],
+            {500, 500}, {0, 1}, {1, 0}
+        );
 
         if(ImGui::Button("Cancel"))
+        {
+            m_menu_action = "";
+        }
+
+        ImGui::EndChild();
+    }
+}
+
+
+void
+ImGui_Module::f_settings_camera( idk::Engine &engine )
+{
+    if (ImGui::BeginChild("Settings_Camera"))
+    {
+        idk::Camera &cam = engine.rengine().getCamera();
+
+        static glm::vec3 offset(0.0f);
+        ImGui::SliderFloat3("Offset", &offset[0], -2.0f, 2.0f, "%.3f");
+        cam.offset(offset);
+
+        if (ImGui::Button("Cancel"))
+        {
+            m_menu_action = "";
+        }
+
+        ImGui::EndChild();
+    }
+}
+
+
+void
+ImGui_Module::f_settings_dirlight( idk::Engine &engine )
+{
+    if (ImGui::BeginChild("Settings_Dirlight"))
+    {
+
+        auto &dirlight = engine.rengine().dirlights().get(0);
+
+
+        ImGui::ColorEdit3("Ambient", &dirlight.ambient[0]);
+        ImGui::ColorEdit3("Diffuse", &dirlight.diffuse[0]);
+        ImGui::SliderFloat3("Direction", &dirlight.direction[0], -1.0f, 1.0f, "%.2f");
+
+
+
+        if (ImGui::Button("Cancel"))
         {
             m_menu_action = "";
         }
@@ -129,6 +133,13 @@ ImGui_Module::f_main_menu_bar()
         {
             if (ImGui::MenuItem("Graphics", ""))
                 m_menu_action = "Settings_Graphics";
+
+            if (ImGui::MenuItem("Camera", ""))
+                m_menu_action = "Settings_Camera";
+
+            if (ImGui::MenuItem("Dirlight", ""))
+                m_menu_action = "Settings_Dirlight";
+
             ImGui::EndMenu();
         }
 
@@ -148,10 +159,6 @@ ImGui_Module::stage_A( idk::Engine &engine )
 void
 ImGui_Module::stage_B( idk::Engine &engine )
 {
-    // SDL_GL_MakeCurrent(m2_SDL_window, m2_SDL_GL_Context);
-    // idk::gl::clearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    // idk::gl::clear(GL_COLOR_BUFFER_BIT);
-
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
@@ -166,12 +173,18 @@ ImGui_Module::stage_B( idk::Engine &engine )
         f_settings_graphics(engine);
     }
 
+    else if (m_menu_action == "Settings_Camera")
+    {
+        f_settings_camera(engine);
+    }
+
+    else if (m_menu_action == "Settings_Dirlight")
+    {
+        f_settings_dirlight(engine);
+    }
+
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    // SDL_GL_SwapWindow(m2_SDL_window);
-
-
-    // SDL_GL_MakeCurrent(engine.rengine().SDLWindow(), engine.rengine().SDLGLContext());
 }
 
 
