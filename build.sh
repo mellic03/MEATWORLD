@@ -23,4 +23,4 @@ cp ./build/texconvert ./output/IDKGE/IDKtools/texconvert
 ./build/texconvert ./IDKGame/assets/textures/diffuse  ./output/assets/textures/diffuse.texpak
 ./build/texconvert ./IDKGame/assets/textures/specular ./output/assets/textures/specular.texpak
 ./build/texconvert ./IDKGame/assets/textures/normal   ./output/assets/textures/normal.texpak
-./build/texconvert ./IDKGame/assets/textures/emission ./output/assets/textures/emission.texpak
+./build/texconvert ./IDKGame/assets/textures/reflection ./output/assets/textures/reflection.texpak

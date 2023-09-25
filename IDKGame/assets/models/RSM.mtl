@@ -1,4 +1,4 @@
-# Blender 3.6.0 MTL File: 'None'
+# Blender 4.0.0 Alpha MTL File: 'None'
 # www.blender.org
 
 newmtl green
@@ -12,7 +12,7 @@ illum 2
 map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/diffuse/green.png
 
 newmtl grey
-Ns 64.000000
+Ns 64.000023
 Ka 1.000000 1.000000 1.000000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000

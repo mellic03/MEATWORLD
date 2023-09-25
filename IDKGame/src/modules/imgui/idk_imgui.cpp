@@ -36,11 +36,11 @@ ImGui_Module::f_settings_graphics( idk::Engine &engine )
 {
     if (ImGui::BeginChild("Settings_Graphics"))
     {
-        ImGui::Image(
-            *(ImTextureID *)(void *)&engine.rengine().m_dirlight_depthmap_buffer.output_textures[0],
-            {500, 500}, {0, 1}, {1, 0}
-        );
+        GLuint textureid = engine.rengine().m_scratchbuf3.output_textures[0];
 
+        ImGui::Text("Depth Map");
+        ImGui::Image((void*)(intptr_t)textureid, ImVec2(512, 512));
+        
         if(ImGui::Button("Cancel"))
         {
             m_menu_action = "";
@@ -62,6 +62,32 @@ ImGui_Module::f_settings_camera( idk::Engine &engine )
         ImGui::SliderFloat3("Offset", &offset[0], -2.0f, 2.0f, "%.3f");
         cam.offset(offset);
 
+
+        ImGui::SliderFloat("Strength", &engine.rengine().m_abbr_str, 0.0f, 0.01f, "%.4f");
+        ImGui::SliderFloat2("R",  &engine.rengine().m_r_abbr.x,  -1.0f, 1.0f, "%.3f");
+        ImGui::SameLine();
+        if (ImGui::Button("RReset"))
+            engine.rengine().m_r_abbr = glm::vec2(0.0f);
+
+        ImGui::SliderFloat2("G",  &engine.rengine().m_g_abbr.x,  -1.0f, 1.0f, "%.3f");
+        ImGui::SameLine();
+        if (ImGui::Button("GReset"))
+            engine.rengine().m_g_abbr = glm::vec2(0.0f);
+
+        ImGui::SliderFloat2("B",  &engine.rengine().m_b_abbr.x,  -1.0f, 1.0f, "%.3f");
+        ImGui::SameLine();
+        if (ImGui::Button("BReset"))
+            engine.rengine().m_b_abbr = glm::vec2(0.0f);
+
+
+        static float bloom = 0.0001f;
+        ImGui::SliderFloat("Bloom", &bloom, 0.0f, 0.005f, "%.5f");
+        engine.rengine().setBloomIntensity(bloom);
+
+        ImGui::SliderFloat("Exposure", &engine.rengine().m_exposure, 0.0f, 2.0f, "%.4f");
+        ImGui::SliderFloat("Gamma", &engine.rengine().m_gamma, 0.0f, 4.0f, "%.4f");
+
+
         if (ImGui::Button("Cancel"))
         {
             m_menu_action = "";
@@ -77,14 +103,11 @@ ImGui_Module::f_settings_dirlight( idk::Engine &engine )
 {
     if (ImGui::BeginChild("Settings_Dirlight"))
     {
-
         auto &dirlight = engine.rengine().dirlights().get(0);
-
 
         ImGui::ColorEdit3("Ambient", &dirlight.ambient[0]);
         ImGui::ColorEdit3("Diffuse", &dirlight.diffuse[0]);
         ImGui::SliderFloat3("Direction", &dirlight.direction[0], -1.0f, 1.0f, "%.2f");
-
 
 
         if (ImGui::Button("Cancel"))
@@ -168,9 +191,45 @@ ImGui_Module::stage_B( idk::Engine &engine )
     
     f_main_menu_bar();
 
-    if (m_menu_action == "Settings_Graphics")
+    // if (m_menu_action == "Settings_Graphics")
+    // {
+    //     f_settings_graphics(engine);
+    // }
+    // if (ImGui::Begin("Settings_Graphics"))
+    // {
+    //     GLuint textureid0 = engine.rengine().m_scratchbuf4.output_textures[0];
+    //     GLuint textureid = engine.rengine().m_scratchbuf3.output_textures[0];
+    //     GLuint textureid2 = engine.rengine().m_scratchbuf3_d2.output_textures[0];
+    //     GLuint textureid3 = engine.rengine().m_scratchbuf3_d4.output_textures[0];
+
+    //     ImGui::Text("scratch 3_d4");
+    //     ImGui::Image((void*)(intptr_t)textureid3, ImVec2(512, 512), ImVec2(0, 1), ImVec2(1, 0));
+        
+    //     ImGui::Text("scratch 3_d2");
+    //     ImGui::Image((void*)(intptr_t)textureid2, ImVec2(512, 512), ImVec2(0, 1), ImVec2(1, 0));
+
+    //     ImGui::Text("scratch 3");
+    //     ImGui::Image((void*)(intptr_t)textureid, ImVec2(512, 512), ImVec2(0, 1), ImVec2(1, 0));
+
+    //     ImGui::Text("scratch 4");
+    //     ImGui::Image((void*)(intptr_t)textureid0, ImVec2(512, 512), ImVec2(0, 1), ImVec2(1, 0));
+
+    //     if(ImGui::Button("Cancel"))
+    //     {
+    //         m_menu_action = "";
+    //     }
+
+    //     ImGui::End();
+    // }
+
+    if (m_menu_action == "Settings_Camera")
     {
-        f_settings_graphics(engine);
+        f_settings_camera(engine);
+    }
+
+    else if (m_menu_action == "Settings_Dirlight")
+    {
+        f_settings_dirlight(engine);
     }
 
     else if (m_menu_action == "Settings_Camera")

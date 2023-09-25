@@ -44,12 +44,12 @@ int ENTRY(int argc, const char **argv)
     engine.registerModule<ImGui_Module>("imgui");
     ren.modelManager().loadIDKtexpak("assets/textures/diffuse.texpak",  true);
     ren.modelManager().loadIDKtexpak("assets/textures/specular.texpak", false);
+    ren.modelManager().loadIDKtexpak("assets/textures/reflection.texpak", false);
     ren.getCamera().ylock(true);
 
-    GLuint default_geometrypass = idk::glInterface::compileProgram(
+    GLuint default_geometrypass = idk::gltools::compileProgram(
         "shaders/deferred/", "geometrypass.vs", "geometrypass.fs"
     );
-
 
     int terrain2_obj = engine.createGameObject();
     int terrain2_model = ren.modelManager().loadOBJ("assets/models/", "man.obj", "man.mtl");
@@ -66,12 +66,36 @@ int ENTRY(int argc, const char **argv)
     physCS.giveCapsuleCollider(player_obj);
     charCS.controlMethod(player_obj, controlmethods::player);
 
-    int terrain_obj = engine.createGameObject();
-    int terrain_model = ren.modelManager().loadOBJ("assets/models/", "tree.obj", "tree.mtl");
-    engine.giveComponents(terrain_obj, TRANSFORM, MODEL, PHYSICS);
-    physCS.giveMeshCollider(terrain_obj, ren.modelManager().getModel(terrain_model).vertices);
+
+    int platform_obj = engine.createGameObject();
+    int platform_model = ren.modelManager().loadOBJ("assets/models/", "hall.obj", "hall.mtl");
+    engine.giveComponents(platform_obj, TRANSFORM, MODEL, PHYSICS);
+    physCS.giveMeshCollider(platform_obj, ren.modelManager().getModel(platform_model).vertices);
     physCS.drawMeshColliders(true);
-    modelCS.useModel(terrain_obj, terrain_model, default_geometrypass);
+    modelCS.useModel(platform_obj, platform_model, default_geometrypass);
+
+
+    int angel_obj = engine.createGameObject();
+    int angel_model = ren.modelManager().loadOBJ("assets/models/", "angel.obj", "angel.mtl");
+    engine.giveComponents(angel_obj, TRANSFORM, MODEL);
+    modelCS.useModel(angel_obj, angel_model, default_geometrypass);
+
+
+    int sphere_obj = engine.createGameObject();
+    int sphere_model = ren.modelManager().loadOBJ("assets/models/", "sphere.obj", "sphere.mtl");
+    engine.giveComponents(sphere_obj, TRANSFORM, MODEL);
+    modelCS.useModel(sphere_obj, sphere_model, default_geometrypass);
+    transCS.translate(sphere_obj, glm::vec3(0.0f, 0.0f, 10.0f));
+
+
+    // int soundobj = engine.createGameObject();
+    // engine.giveComponent(soundobj, TRANSFORM);
+    // int nier1 = engine.aengine().loadWav("assets/audio/nier2.wav");
+    // int emitter = engine.aengine().createEmitter(nier1, transCS.getTransform(soundobj));
+    // engine.aengine().playSound(emitter);
+    // engine.aengine().listenerPosition(&transCS.getTransform(player_obj));
+
+
 
 
     int dirlight_id = ren.createDirlight();
@@ -83,6 +107,9 @@ int ENTRY(int argc, const char **argv)
     while (engine.running())
     {
         engine.beginFrame();
+        // m_audio_engine.update();
+
+        transCS.getTransform(angel_obj).rotateY( 0.5f * engine.deltaTime() );
 
         // auto &transform = transCS.getTransform(spotlight_obj);
         // transform = idk::Transform(glm::inverse(ren.getCamera().view()));
