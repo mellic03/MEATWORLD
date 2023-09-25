@@ -1,0 +1,92 @@
+# Blender 3.6.2 MTL File: 'None'
+# www.blender.org
+
+newmtl brick2.003
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+Pr 0.500000
+Pm 0.000000
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/diffuse/brick2.png
+map_Ks /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/specular/marble2-specular.png
+
+newmtl marble.004
+Ke 0.000000 0.000000 0.000000
+Ni 128.000000
+d 1.000000
+illum 1
+Pr 0.500000
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/diffuse/marble2.png
+map_Pm /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/reflection/full.png
+map_Ks /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/specular/imperfections.png
+
+newmtl marble.005
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+Pr 0.500000
+Pm 0.000000
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/diffuse/marble.png
+map_Ks /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/specular/marble2-specular.png
+
+newmtl peelars
+Ke 0.000000 0.000000 0.000000
+Ni 128.000000
+d 1.000000
+illum 1
+Pr 0.500000
+Pm 0.000000
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/diffuse/marble2.png
+map_Ks /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/specular/imperfections.png
+
+newmtl pillars
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+Pr 0.500000
+Pm 0.000000
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+
+newmtl wood2.002
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+Pr 0.500000
+Pm 0.000000
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/diffuse/wood2.png
+map_Ks /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/specular/marble2-specular.png
