@@ -9,9 +9,6 @@
 #include "ComponentSystems/IDKcomponentsystems.h"
 #include "modules/idk_modules.h"
 
-// #include "ComponentSystems/hands_opencv/hands_opencv.hpp"
-
-
 
 
 
@@ -20,16 +17,14 @@ int ENTRY(int argc, const char **argv)
     idk::Engine engine("IDK Game", 1920, 1080, 1);
     idk::RenderEngine &ren = engine.rengine();
 
-    const int TRANSFORM     = engine.registerCS<Transform_CS>("transform");
-    const int MODEL         = engine.registerCS<Model_CS>("model");
-    const int PHYSICS       = engine.registerCS<Physics_CS>("physics");
-    const int GRABBABLE     = engine.registerCS<Grabbable_CS>("grabbable");
-    const int POINTLIGHT    = engine.registerCS<PointLight_CS>("pointlight");
-    const int CHARCONTROL   = engine.registerCS<CharacterController_CS>("charactercontrol");
-    const int SPOTLIGHT     = engine.registerCS<SpotLight_CS>("spotlight");
-    const int CAMERA        = engine.registerCS<Camera_CS>("camera");
-    // const int OPENCV        = engine.registerCS<Hands_OpenCV>("hands_opencv");
-
+    const int TRANSFORM  = engine.registerCS<Transform_CS>("transform");
+    const int MODEL      = engine.registerCS<Model_CS>("model");
+    const int PHYSICS    = engine.registerCS<Physics_CS>("physics");
+    const int GRABBABLE  = engine.registerCS<Grabbable_CS>("grabbable");
+    const int POINTLIGHT = engine.registerCS<PointLight_CS>("pointlight");
+    const int CHARCONTROL= engine.registerCS<CharacterController_CS>("charactercontrol");
+    const int SPOTLIGHT  = engine.registerCS<SpotLight_CS>("spotlight");
+    const int CAMERA     = engine.registerCS<Camera_CS>("camera");
 
     auto &transCS = engine.getCS<Transform_CS>(TRANSFORM);
     auto &modelCS = engine.getCS<Model_CS>(MODEL);
@@ -38,7 +33,6 @@ int ENTRY(int argc, const char **argv)
     auto &spotCS  = engine.getCS<SpotLight_CS>(SPOTLIGHT);
     auto &grabCS  = engine.getCS<Grabbable_CS>(GRABBABLE);
     auto &charCS  = engine.getCS<CharacterController_CS>(CHARCONTROL);
-    // auto &handCS  = engine.getCS<Hands_OpenCV>(OPENCV);
 
 
     engine.registerModule<ImGui_Module>("imgui");
@@ -51,12 +45,11 @@ int ENTRY(int argc, const char **argv)
         "shaders/deferred/", "geometrypass.vs", "geometrypass.fs"
     );
 
+
     int terrain2_obj = engine.createGameObject();
     int terrain2_model = ren.modelManager().loadOBJ("assets/models/", "man.obj", "man.mtl");
-    engine.giveComponents(terrain2_obj, TRANSFORM, MODEL, PHYSICS);
+    engine.giveComponents(terrain2_obj, TRANSFORM, MODEL);
     transCS.translate(terrain2_obj, glm::vec3(0.0f, 15.0f, 2.0f));
-    physCS.giveMeshCollider(terrain2_obj, ren.modelManager().getModel(terrain2_model).vertices);
-    physCS.drawMeshColliders(true);
     modelCS.useModel(terrain2_obj, terrain2_model, default_geometrypass);
 
 
@@ -69,9 +62,7 @@ int ENTRY(int argc, const char **argv)
 
     int platform_obj = engine.createGameObject();
     int platform_model = ren.modelManager().loadOBJ("assets/models/", "hall.obj", "hall.mtl");
-    engine.giveComponents(platform_obj, TRANSFORM, MODEL, PHYSICS);
-    physCS.giveMeshCollider(platform_obj, ren.modelManager().getModel(platform_model).vertices);
-    physCS.drawMeshColliders(true);
+    engine.giveComponents(platform_obj, TRANSFORM, MODEL);
     modelCS.useModel(platform_obj, platform_model, default_geometrypass);
 
 
@@ -104,12 +95,28 @@ int ENTRY(int argc, const char **argv)
     // engine.giveComponents(spotlight_obj, TRANSFORM, SPOTLIGHT);
     // glm::vec3 last_dir = ren.getCamera().front();
 
+
     while (engine.running())
     {
         engine.beginFrame();
         // m_audio_engine.update();
 
-        transCS.getTransform(angel_obj).rotateY( 0.5f * engine.deltaTime() );
+        idk::Engine::threadpool.push(
+            [&transCS, &angel_obj, &engine]()
+            {
+                transCS.getTransform(angel_obj).rotateY( 0.5f * engine.deltaTime() );
+            }
+        );
+
+        idk::Engine::threadpool.push(
+            [&transCS, &terrain2_obj, &engine]()
+            {
+                transCS.getTransform(terrain2_obj).rotateY( 0.5f * engine.deltaTime() );
+            }
+        );
+
+
+        idk::Engine::threadpool.join();
 
         // auto &transform = transCS.getTransform(spotlight_obj);
         // transform = idk::Transform(glm::inverse(ren.getCamera().view()));

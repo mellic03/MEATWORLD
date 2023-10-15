@@ -10,12 +10,10 @@ file(GLOB SOURCES
 )
 
 add_subdirectory(idk_physics_CS)
-add_subdirectory(hands_opencv)
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
 
 target_link_libraries(
     ${PROJECT_NAME} PUBLIC
     idk_physics_CS
-    hands_opencv
 )
 
