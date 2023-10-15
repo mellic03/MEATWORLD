@@ -4,7 +4,7 @@
 void
 Transform_CS::onAssignment( int obj_id, idk::Engine &engine )
 {
-    _transform_IDs[obj_id] = _transforms.add();
+    _transform_IDs[obj_id] = _transforms.create();
 }
 
 
@@ -27,7 +27,7 @@ Transform_CS::onGameObjectCreation( int obj_id, idk::Engine &engine )
 void
 Transform_CS::onGameObjectDeletion( int obj_id, idk::Engine &engine )
 {
-    _transforms.remove(_transform_IDs[obj_id]);
+    _transforms.destroy(_transform_IDs[obj_id]);
     _transform_IDs[obj_id] = -1;
 }
 
@@ -35,7 +35,7 @@ Transform_CS::onGameObjectDeletion( int obj_id, idk::Engine &engine )
 void
 Transform_CS::onGameObjectCopy( int src_obj_id, int dest_obj_id, idk::Engine &engine )
 {
-    _transform_IDs[dest_obj_id] = _transforms.add();
+    _transform_IDs[dest_obj_id] = _transforms.create();
 }
 
 

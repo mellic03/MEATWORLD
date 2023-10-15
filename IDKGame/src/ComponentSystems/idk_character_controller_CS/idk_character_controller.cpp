@@ -25,7 +25,7 @@ CharacterController_CS::onAssignment( int obj_id, idk::Engine &engine )
 
     CharacterController controller;
     controller.obj_id = obj_id;
-    _controller_ids[obj_id] = _controllers.add(controller);
+    _controller_ids[obj_id] = _controllers.create(controller);
 }
 
 
@@ -59,7 +59,7 @@ CharacterController_CS::onGameObjectCreation( int obj_id, idk::Engine &engine )
 void
 CharacterController_CS::onGameObjectDeletion( int obj_id, idk::Engine &engine )
 {
-    _controllers.remove(_controller_ids[obj_id]);
+    _controllers.destroy(_controller_ids[obj_id]);
     _controller_ids[obj_id] = -1;
 }
 
@@ -67,5 +67,5 @@ CharacterController_CS::onGameObjectDeletion( int obj_id, idk::Engine &engine )
 void
 CharacterController_CS::onGameObjectCopy( int src_obj_id, int dest_obj_id, idk::Engine &engine )
 {
-    _controller_ids[dest_obj_id] = _controllers.add();
+    _controller_ids[dest_obj_id] = _controllers.create();
 }

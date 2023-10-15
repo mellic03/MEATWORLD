@@ -6,6 +6,7 @@ project(IDKmodules)
 file(GLOB SOURCES
     "./imgui/*.cpp"
     "./imgui/imgui-1.89.7/*.cpp"
+    "./voxel/*.cpp"
 )
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})

@@ -105,6 +105,7 @@ int ENTRY(int argc, const char **argv)
             [&transCS, &angel_obj, &engine]()
             {
                 transCS.getTransform(angel_obj).rotateY( 0.5f * engine.deltaTime() );
+                // transCS.getTransform(angel_obj).translate(glm::vec3(0.0f, 0.1f * engine.deltaTime(), 0.0f));
             }
         );
 
