@@ -1,12 +1,12 @@
 #pragma once
 
 #include "IDKengine.h"
+#include "idk_svoctree.hpp"
 
-
-class idk_Voxel: idk::Module
+class idk_Voxel: public idk::Module
 {
 private:
-    idk::SVOctree   m_svo;
+    idk::SVOctree m_svo = idk::SVOctree(32.0f, 1.0f / 4.0f);
 
 public:
     void        init    ( idk::Engine & );
