@@ -5,10 +5,37 @@
 void
 idk_Voxel::init( idk::Engine &engine )
 {
-    m_svo.insert(glm::ivec3(0, 255, 0), glm::vec3(10.0f, 1.0f, -3.0f));
+    idk::gl::genVertexArrays(1, &m_dummy_VAO);
 
-    auto ree = idk::glFramebufferNew(1000, 1000);
+    idk::ColorAttachmentConfig color_config = {
+        .internalformat = GL_RGBA16F,
+        .minfilter      = GL_LINEAR,
+        .magfilter      = GL_LINEAR,
+        .datatype       = GL_FLOAT
+    };
 
+
+    idk::RenderEngine &ren = engine.rengine();
+    idk::glFramebuffer &framebuffer = m_framebuffer;
+
+    auto resize_callback = [&ren, &framebuffer, color_config]()
+    {
+        glm::ivec2 size = ren.resolution();
+        framebuffer.reset(size.x, size.y, 2);
+        framebuffer.colorAttachment(0, color_config);
+        framebuffer.colorAttachment(1, color_config);
+    };
+    engine.eventManager().onWindowEvent(idk::WindowEvent::RESIZE, resize_callback);
+    resize_callback();
+
+
+    GLuint &shader = m_shader;
+    auto shader_callback = [&shader]()
+    {
+        shader = idk::gltools::compileProgram("shaders/", "screenquad.vs", "SVOctree.fs");
+    };
+    engine.eventManager().onKeyEvent(idk::Keycode::E, idk::KeyEvent::TAPPED, shader_callback);
+    shader_callback();
 }
 
 
@@ -50,9 +77,6 @@ svo_draw( idk::RenderEngine &ren, idk::Allocator<idk::SVOctree::Node> &nodes,
 void
 idk_Voxel::stage_A( idk::Engine &engine )
 {
-    // Need to provide an API where I can run a fragment shader, rendering the result to a buffer.
-    // The buffer needs to be blitted onto the main one including depth during Engine::endframe().
-
     idk::RenderEngine &ren = engine.rengine();
     svo_draw(ren, m_svo.nodes(), 0, glm::vec3(0.0f), 0, m_svo.SPAN, m_svo.MINIMUM);
 
@@ -63,6 +87,21 @@ idk_Voxel::stage_A( idk::Engine &engine )
 
         m_svo.insert(glm::ivec3(0), cam.transform().position() + dir);
     }
+
+
+    m_framebuffer.bind();
+    m_framebuffer.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    idk::gltools::useProgram(m_shader);
+
+    idk::gl::disable(GL_DEPTH_TEST, GL_CULL_FACE);
+    idk::gl::bindVertexArray(m_dummy_VAO);
+    idk::gl::drawArrays(GL_TRIANGLES, 0, 3);
+    idk::gl::bindVertexArray(0);
+    idk::gl::enable(GL_DEPTH_TEST, GL_CULL_FACE);
+    
+    m_framebuffer.unbind();
+
+    engine.rengine().blitFramebuffer(m_framebuffer);
 
 }
 

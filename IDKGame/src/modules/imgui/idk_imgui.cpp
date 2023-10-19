@@ -34,20 +34,20 @@ ImGui_Module::init( idk::Engine &engine )
 void
 ImGui_Module::f_settings_graphics( idk::Engine &engine )
 {
-    if (ImGui::BeginChild("Settings_Graphics"))
-    {
-        GLuint textureid = engine.rengine().m_scratchbuf3.output_textures[0];
+    // if (ImGui::BeginChild("Settings_Graphics"))
+    // {
+    //     GLuint textureid = engine.rengine().m_scratchbuf3.output_textures[0];
 
-        ImGui::Text("Depth Map");
-        ImGui::Image((void*)(intptr_t)textureid, ImVec2(512, 512));
+    //     ImGui::Text("Depth Map");
+    //     ImGui::Image((void*)(intptr_t)textureid, ImVec2(512, 512));
         
-        if(ImGui::Button("Cancel"))
-        {
-            m_menu_action = "";
-        }
+    //     if(ImGui::Button("Cancel"))
+    //     {
+    //         m_menu_action = "";
+    //     }
 
-        ImGui::EndChild();
-    }
+    //     ImGui::EndChild();
+    // }
 }
 
 

@@ -20,36 +20,36 @@ controlmethods::player( int obj_id, idk::Engine &engine, CharacterController &co
     
     float dtime = engine.deltaTime();
 
-    if (keylog.keyTapped(idk_keycode::C))
+    if (keylog.keyTapped(idk::Keycode::C))
         engine.eventManager().mouseCapture(!engine.eventManager().mouseCaptured());
 
     float speed = 24.32f;
 
-    if (keylog.keyDown(idk_keycode::LSHIFT))
+    if (keylog.keyDown(idk::Keycode::LSHIFT))
         speed = 64.0f;
 
     camera.roll(-roll_sway);
 
-    if (keylog.keyDown(idk_keycode::ESCAPE))
+    if (keylog.keyDown(idk::Keycode::ESCAPE))
     {
         engine.shutdown();
     }
 
     constexpr float MOVESPEED = 5.0f;
 
-    if (keylog.keyDown(idk_keycode::A))
+    if (keylog.keyDown(idk::Keycode::A))
         camera.translate(MOVESPEED*dtime*glm::vec3(-1.0f, 0.0f, 0.0f));
-    if (keylog.keyDown(idk_keycode::D))
+    if (keylog.keyDown(idk::Keycode::D))
         camera.translate(MOVESPEED*dtime*glm::vec3(+1.0f, 0.0f, 0.0f));
-    if (keylog.keyDown(idk_keycode::W))
+    if (keylog.keyDown(idk::Keycode::W))
         camera.translate(MOVESPEED*dtime*glm::vec3(0.0f, 0.0f, -1.0f));
-    if (keylog.keyDown(idk_keycode::S))
+    if (keylog.keyDown(idk::Keycode::S))
         camera.translate(MOVESPEED*dtime*glm::vec3(0.0f, 0.0f, +1.0f));
 
 
-    if (keylog.keyDown(idk_keycode::SPACE))
+    if (keylog.keyDown(idk::Keycode::SPACE))
         camera.elevation(+MOVESPEED*dtime);
-    if (keylog.keyDown(idk_keycode::LCTRL))
+    if (keylog.keyDown(idk::Keycode::LCTRL))
         camera.elevation(-MOVESPEED*dtime);
 
 

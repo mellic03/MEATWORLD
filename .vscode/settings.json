@@ -103,7 +103,9 @@
         "codecvt": "cpp",
         "csignal": "cpp",
         "__std_stream": "cpp",
-        "shared_mutex": "cpp"
+        "shared_mutex": "cpp",
+        "hash_map": "cpp",
+        "any": "cpp"
     },
     "cmake.configureOnOpen": false,
     "C_Cpp.default.includePath": [

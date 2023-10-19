@@ -61,16 +61,16 @@ int ENTRY(int argc, const char **argv)
     charCS.controlMethod(player_obj, controlmethods::player);
 
 
-    // int platform_obj = engine.createGameObject();
-    // int platform_model = ren.modelManager().loadOBJ("assets/models/", "hall.obj", "hall.mtl");
-    // engine.giveComponents(platform_obj, TRANSFORM, MODEL);
-    // modelCS.useModel(platform_obj, platform_model, default_geometrypass);
+    int platform_obj = engine.createGameObject();
+    int platform_model = ren.modelManager().loadOBJ("assets/models/", "hall.obj", "hall.mtl");
+    engine.giveComponents(platform_obj, TRANSFORM, MODEL);
+    modelCS.useModel(platform_obj, platform_model, default_geometrypass);
 
 
-    // int angel_obj = engine.createGameObject();
-    // int angel_model = ren.modelManager().loadOBJ("assets/models/", "angel.obj", "angel.mtl");
-    // engine.giveComponents(angel_obj, TRANSFORM, MODEL);
-    // modelCS.useModel(angel_obj, angel_model, default_geometrypass);
+    int angel_obj = engine.createGameObject();
+    int angel_model = ren.modelManager().loadOBJ("assets/models/", "angel.obj", "angel.mtl");
+    engine.giveComponents(angel_obj, TRANSFORM, MODEL);
+    modelCS.useModel(angel_obj, angel_model, default_geometrypass);
 
 
     // int sphere_obj = engine.createGameObject();
@@ -120,7 +120,7 @@ int ENTRY(int argc, const char **argv)
         
         // spotCS.getSpotlight(spotlight_obj).direction = glm::vec4(last_dir, 0.0f);
 
-        if (engine.eventManager().keylog().keyTapped(idk_keycode::E))
+        if (engine.eventManager().keylog().keyTapped(idk::Keycode::E))
         {
             engine.rengine().compileShaders();
         }
