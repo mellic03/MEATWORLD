@@ -19,7 +19,6 @@ int ENTRY(int argc, const char **argv)
 
     const int TRANSFORM  = engine.registerCS<Transform_CS>("transform");
     const int MODEL      = engine.registerCS<Model_CS>("model");
-    const int PHYSICS    = engine.registerCS<Physics_CS>("physics");
     const int GRABBABLE  = engine.registerCS<Grabbable_CS>("grabbable");
     const int POINTLIGHT = engine.registerCS<PointLight_CS>("pointlight");
     const int CHARCONTROL= engine.registerCS<CharacterController_CS>("charactercontrol");
@@ -29,7 +28,6 @@ int ENTRY(int argc, const char **argv)
 
     auto &transCS = engine.getCS<Transform_CS>(TRANSFORM);
     auto &modelCS = engine.getCS<Model_CS>(MODEL);
-    auto &physCS  = engine.getCS<Physics_CS>(PHYSICS);
     auto &pointCS = engine.getCS<PointLight_CS>(POINTLIGHT);
     auto &spotCS  = engine.getCS<SpotLight_CS>(SPOTLIGHT);
     auto &grabCS  = engine.getCS<Grabbable_CS>(GRABBABLE);
@@ -58,9 +56,8 @@ int ENTRY(int argc, const char **argv)
 
 
     int player_obj = engine.createGameObject();
-    engine.giveComponents(player_obj, TRANSFORM, PHYSICS, CAMERA, CHARCONTROL);
+    engine.giveComponents(player_obj, TRANSFORM, CAMERA, CHARCONTROL);
     transCS.translate(player_obj, glm::vec3(0.0f, 5.0f, 2.0f));
-    physCS.giveCapsuleCollider(player_obj);
     charCS.controlMethod(player_obj, controlmethods::player);
 
 

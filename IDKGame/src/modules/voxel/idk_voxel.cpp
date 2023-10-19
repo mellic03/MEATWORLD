@@ -7,6 +7,8 @@ idk_Voxel::init( idk::Engine &engine )
 {
     m_svo.insert(glm::ivec3(0, 255, 0), glm::vec3(10.0f, 1.0f, -3.0f));
 
+    auto ree = idk::glFramebufferNew(1000, 1000);
+
 }
 
 
