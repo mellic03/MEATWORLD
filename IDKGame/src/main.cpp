@@ -73,13 +73,6 @@ int ENTRY(int argc, const char **argv)
     modelCS.useModel(angel_obj, angel_model, default_geometrypass);
 
 
-    // int sphere_obj = engine.createGameObject();
-    // int sphere_model = ren.modelManager().loadOBJ("assets/models/", "sphere.obj", "sphere.mtl");
-    // engine.giveComponents(sphere_obj, TRANSFORM, MODEL);
-    // modelCS.useModel(sphere_obj, sphere_model, default_geometrypass);
-    // transCS.translate(sphere_obj, glm::vec3(0.0f, 0.0f, 10.0f));
-
-
     // int soundobj = engine.createGameObject();
     // engine.giveComponent(soundobj, TRANSFORM);
     // int nier1 = engine.aengine().loadWav("assets/audio/nier2.wav");
@@ -94,13 +87,13 @@ int ENTRY(int argc, const char **argv)
     {
         engine.beginFrame();
 
-        // idk::Engine::threadpool.push(
-        //     [&transCS, &angel_obj, &engine]()
-        //     {
-        //         transCS.getTransform(angel_obj).rotateY( 0.5f * engine.deltaTime() );
-        //         // transCS.getTransform(angel_obj).translate(glm::vec3(0.0f, 0.0f, 0.1f * engine.deltaTime()));
-        //     }
-        // );
+        idk::Engine::threadpool.push(
+            [&transCS, &angel_obj, &engine]()
+            {
+                transCS.getTransform(angel_obj).rotateY( 0.5f * engine.deltaTime() );
+                // transCS.getTransform(angel_obj).translate(glm::vec3(0.0f, 0.0f, 0.1f * engine.deltaTime()));
+            }
+        );
 
         // idk::Engine::threadpool.push(
         //     [&transCS, &terrain2_obj, &engine]()
@@ -108,17 +101,6 @@ int ENTRY(int argc, const char **argv)
         //         transCS.getTransform(terrain2_obj).rotateY( 0.5f * engine.deltaTime() );
         //     }
         // );
-
-
-        // auto &transform = transCS.getTransform(spotlight_obj);
-        // transform = idk::Transform(glm::inverse(ren.getCamera().view()));
-        // transform.localTranslate(glm::vec3(0.0f, 0.0f, 1.0f));
-
-        // glm::vec3 front = glm::mat3(ren.getCamera().transform().modelMatrix()) * glm::vec3(0.0f, 0.0f, -1.0f);
-        // glm::vec3 dir = (front - last_dir);
-        // last_dir += 10.0f * engine.deltaTime() * dir;
-        
-        // spotCS.getSpotlight(spotlight_obj).direction = glm::vec4(last_dir, 0.0f);
 
         if (engine.eventManager().keylog().keyTapped(idk::Keycode::E))
         {

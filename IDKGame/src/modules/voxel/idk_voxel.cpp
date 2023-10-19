@@ -101,7 +101,6 @@ idk_Voxel::stage_A( idk::Engine &engine )
     
     m_framebuffer.unbind();
 
-    engine.rengine().blitFramebuffer(m_framebuffer);
-
+    ren.blitFramebuffer(m_framebuffer);
 }
 
