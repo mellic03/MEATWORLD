@@ -4,46 +4,45 @@
 
 idk::SVOctree::SVOctree( float span, float minimum ): SPAN(span), MINIMUM(minimum)
 {
-    m_root_id = new_node(glm::ivec3(0), true);
+    m_root_id = new_node(span);
+    node(m_root_id).blocktype = 0;
 }
 
 
 int
 idk::SVOctree::get_octant( glm::vec3 pos, glm::vec3 center )
 {
-    constexpr int OCTANTS[2][2][2] = {
-        {{1, 0}, {5, 4}},
-        {{2, 3}, {6, 7}}
-    };
+    int octant = 0;
 
-    return OCTANTS[pos.y<center.y][pos.z>center.z][pos.x>center.x];
+    if (pos.x < center.x) octant |= 1;
+    if (pos.y < center.y) octant |= 2;
+    if (pos.z < center.z) octant |= 4;
+
+    return octant;
 }
 
 
 glm::vec3
 idk::SVOctree::shift_center( int octant, glm::vec3 center, float span )
 {
-    constexpr glm::vec3 OFFSETS[8] = {
-        {+1.0f, +1.0f, -1.0f}, {-1.0f, +1.0f, -1.0f},
-        {-1.0f, -1.0f, -1.0f}, {+1.0f, -1.0f, -1.0f},
+    glm::vec3 offset;
+    
+    offset.x = (octant & 1) == 0 ? span/4.0f : -span/4.0f;
+    offset.y = (octant & 2) == 0 ? span/4.0f : -span/4.0f;
+    offset.z = (octant & 4) == 0 ? span/4.0f : -span/4.0f;
 
-        {+1.0f, +1.0f, +1.0f}, {-1.0f, +1.0f, +1.0f},
-        {-1.0f, -1.0f, +1.0f}, {+1.0f, -1.0f, +1.0f}
-    };
-
-    return center + (span/4.0f) * OFFSETS[octant];
+    return center + offset;
 }
 
 int
-idk::SVOctree::new_node( glm::ivec3 color, bool leaf )
+idk::SVOctree::new_node( bool leaf )
 {
     int id = m_nodes.create();
-    m_nodes.get(id).color = color;
-    m_nodes.get(id).leaf  = leaf;
+    node(id).leaf = leaf;
 
     for (int i=0; i<8; i++)
     {
-        m_nodes.get(id).children[i] = -1;
+        node(id).children[i] = -1;
     }
 
     return id;
@@ -51,37 +50,92 @@ idk::SVOctree::new_node( glm::ivec3 color, bool leaf )
 
 
 void
-idk::SVOctree::f_insert( int id, glm::ivec3 color, glm::vec3 pos, glm::vec3 center, int depth )
+idk::SVOctree::f_give_children( int id )
 {
-    m_nodes.get(id).leaf = false;
-
-    const float span = SPAN / pow(2, depth);
-    if (span <= MINIMUM)
-    {
-        m_nodes.get(id).leaf = true;
-        return;
-    }
-
-    const int octant = SVOctree::get_octant(pos, center);
-
     for (int i=0; i<8; i++)
     {
-        if (m_nodes.get(id).children[i] == -1)
+        node(id).children[i] = new_node(true);
+    }
+}
+
+
+bool
+idk::SVOctree::f_children_same( int id )
+{
+    for (int i=0; i<8; i++)
+    {
+        int child_id = node(id).children[i];
+
+        if (node(child_id).leaf == false)
         {
-            m_nodes.get(id).children[i] = new_node(glm::ivec3(0), true);
+            return false;
         }
     }
 
+    for (int i=1; i<8; i++)
+    {
+        int child1_id = node(id).children[i];
+        int child2_id = node(id).children[i-1];
 
-    const glm::vec3 new_center = SVOctree::shift_center(octant, center, span);
-    f_insert(m_nodes.get(id).children[octant], color, pos, new_center, depth+1);
+        if (node(child1_id).blocktype != node(child2_id).blocktype)
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 
 void
-idk::SVOctree::insert( glm::ivec3 color, glm::vec3 position )
+idk::SVOctree::f_insert( int id, int blocktype, glm::vec3 pos, glm::vec3 center, int depth )
 {
-    f_insert(m_root_id, color, position, glm::vec3(0.0f), 0);
+    const float span = SPAN / pow(2, depth);
+
+    if (span <= MINIMUM)
+    {
+        node(id).leaf = true;
+        node(id).blocktype = blocktype;
+        return;
+    }
+
+    if (node(id).blocktype == blocktype)
+    {
+        return;
+    }
+
+    if (node(id).leaf == true)
+    {
+        node(id).leaf = false;
+        f_give_children(id);
+    }
+
+    const int octant = SVOctree::get_octant(pos, center);
+    const glm::vec3 new_center = SVOctree::shift_center(octant, center, span);
+    f_insert(node(id).children[octant], blocktype, pos, new_center, depth+1);
+
+
+
+    // Merge if all children are the same and are all leaves.
+    if (f_children_same(id))
+    {
+        node(id).leaf = true;
+        node(id).blocktype = node(node(id).children[0]).blocktype;
+
+        for (int i=0; i<8; i++)
+        {
+            int child_id = node(id).children[i];
+            node(id).children[i] = -1;
+            m_nodes.destroy(child_id);
+        }
+    }
+}
+
+
+void
+idk::SVOctree::insert( int blocktype, glm::vec3 position )
+{
+    f_insert(m_root_id, blocktype, position, glm::vec3(0.0f), 0);
 }
 
 
