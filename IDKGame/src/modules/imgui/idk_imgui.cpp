@@ -166,6 +166,8 @@ ImGui_Module::f_main_menu_bar()
             ImGui::EndMenu();
         }
 
+        float fps = ImGui::GetIO().Framerate;
+        ImGui::Text("Frame Time: %f", fps);
 
         ImGui::EndMainMenuBar();
     }

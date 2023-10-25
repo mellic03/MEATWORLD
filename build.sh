@@ -12,6 +12,7 @@ cd ..
 
 
 cp ./build/game output/game
+cp -R IDKGame/src/shaders output/.
 cp -R IDKGame/assets ./output/.
 cp -R ./IDKGameEngine/shaders ./output/.
 

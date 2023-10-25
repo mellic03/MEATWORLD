@@ -35,7 +35,7 @@ int ENTRY(int argc, const char **argv)
 
 
     engine.registerModule<ImGui_Module>("imgui");
-    engine.registerModule<idk_Voxel>("voxel");
+    // engine.registerModule<idk_Voxel>("voxel");
 
 
     ren.modelManager().loadIDKtexpak("assets/textures/diffuse.texpak",  true);
@@ -57,8 +57,10 @@ int ENTRY(int argc, const char **argv)
 
     int player_obj = engine.createGameObject();
     engine.giveComponents(player_obj, TRANSFORM, CAMERA, CHARCONTROL);
-    transCS.translate(player_obj, glm::vec3(0.0f, 5.0f, 2.0f));
     charCS.controlMethod(player_obj, controlmethods::player);
+
+    engine.rengine().getCamera().translate(glm::vec3(0.0f, 5.0f, 5.0f));
+    engine.rengine().getCamera().elevation(2.0f);
 
 
     int platform_obj = engine.createGameObject();
@@ -87,15 +89,15 @@ int ENTRY(int argc, const char **argv)
     {
         engine.beginFrame();
 
-        idk::Engine::threadpool.push(
-            [&transCS, &angel_obj, &engine]()
-            {
-                transCS.getTransform(angel_obj).rotateY( 0.5f * engine.deltaTime() );
-                // transCS.getTransform(angel_obj).translate(glm::vec3(0.0f, 0.0f, 0.1f * engine.deltaTime()));
-            }
-        );
+        // idk::Engine::threadpool.create(
+        //     [&transCS, &angel_obj, &engine]()
+        //     {
+        //         transCS.getTransform(angel_obj).rotateY( 0.5f * engine.deltaTime() );
+        //         // transCS.getTransform(angel_obj).translate(glm::vec3(0.0f, 0.0f, 0.1f * engine.deltaTime()));
+        //     }
+        // );
 
-        // idk::Engine::threadpool.push(
+        // idk::Engine::threadpool.create(
         //     [&transCS, &terrain2_obj, &engine]()
         //     {
         //         transCS.getTransform(terrain2_obj).rotateY( 0.5f * engine.deltaTime() );
