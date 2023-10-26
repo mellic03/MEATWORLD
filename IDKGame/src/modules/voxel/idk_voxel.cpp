@@ -108,8 +108,8 @@ idk_Voxel::render( idk::Engine &engine, idk::glFramebuffer framebuffer )
     glm::mat4 modelmat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -0.5f * ren.getCamera().farPlane()));
     modelmat = glm::scale(modelmat, glm::vec3(300.0f, 300.0f, 1.0f));
 
-    ren.m_background_shader.bind();
-    ren.m_background_shader.set_mat4("un_model", modelmat);
+    ren.getProgram("background").bind();
+    ren.getProgram("background").set_mat4("un_model", modelmat);
 
     idk::gl::bindVertexArray(ren.m_quad_VAO);
     idk::gl::drawArrays(GL_TRIANGLES, 0, 6);

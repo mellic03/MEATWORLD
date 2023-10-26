@@ -43,9 +43,9 @@ int ENTRY(int argc, const char **argv)
     ren.modelManager().loadIDKtexpak("assets/textures/reflection.texpak", false);
     ren.getCamera().ylock(true);
 
-    GLuint default_geometrypass = idk::gltools::compileProgram(
-        "shaders/deferred/", "geometrypass.vs", "geometrypass.fs"
-    );
+    // GLuint default_geometrypass = idk::gltools::compileProgram(
+    //     "shaders/deferred/", "geometrypass.vs", "geometrypass.fs"
+    // );
 
 
     // int terrain2_obj = engine.createGameObject();
@@ -66,13 +66,13 @@ int ENTRY(int argc, const char **argv)
     int platform_obj = engine.createGameObject();
     int platform_model = ren.modelManager().loadOBJ("assets/models/", "hall.obj", "hall.mtl");
     engine.giveComponents(platform_obj, TRANSFORM, MODEL);
-    modelCS.useModel(platform_obj, platform_model, default_geometrypass);
+    modelCS.useModel(platform_obj, platform_model, 0);
 
 
     int angel_obj = engine.createGameObject();
     int angel_model = ren.modelManager().loadOBJ("assets/models/", "angel.obj", "angel.mtl");
     engine.giveComponents(angel_obj, TRANSFORM, MODEL);
-    modelCS.useModel(angel_obj, angel_model, default_geometrypass);
+    modelCS.useModel(angel_obj, angel_model, 0);
 
 
     // int soundobj = engine.createGameObject();
