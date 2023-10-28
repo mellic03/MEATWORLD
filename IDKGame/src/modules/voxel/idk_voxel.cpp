@@ -5,8 +5,23 @@
 void
 idk_Voxel::init( idk::Engine &engine )
 {
-    m_shader.load("shaders/", "screenquad.vs", "SVOctree.fs");
-    m_whitenoise = idk::noisegen2D::white(512, 512);
+    idk::RenderEngine &ren = engine.rengine();
+
+    ren.createProgram(m_shader_name, "shaders/", "screenquad.vs", "SVOctree.fs");
+
+    std::string shader_name = m_shader_name;
+    auto shader_callback = [&ren, shader_name]()
+    {
+        ren.getProgram(shader_name).compile();
+    };
+    engine.eventManager().onKeyEvent(idk::Keycode::E, idk::KeyEvent::TAPPED, shader_callback);
+
+
+    m_whitenoise = idk::noisegen3D::white(1024, 1024, 32);
+
+    // auto tex = idk::filetools::texFromIMG("assets/bluenoise.png");
+    // m_bluenoise = idk::gltools::loadTexture(1024, 1024, tex.data);
+
 
     idk::ColorAttachmentConfig color_config = {
         .internalformat = GL_RGBA16F,
@@ -15,40 +30,37 @@ idk_Voxel::init( idk::Engine &engine )
         .datatype       = GL_FLOAT
     };
 
-    idk::RenderEngine &ren = engine.rengine();
-    idk::glFramebuffer &framebuffer = m_framebuffer;
-    idk::glFramebuffer &framebuffer_2 = m_framebuffer_2;
-    idk::glFramebuffer &gbuffer = m_gbuffer;
+    auto &framebuffers = m_framebuffers;
+    auto &gbuffers = m_gbuffers;
 
-    auto resize_callback = [&ren, &framebuffer, &framebuffer_2, &gbuffer, color_config]()
+    auto resize_callback = [&ren, &framebuffers, &gbuffers, color_config]()
     {
         glm::ivec2 size = ren.resolution();
-        framebuffer.reset(size.x/2, size.y/2, 2);
-        framebuffer.colorAttachment(0, color_config);
-        framebuffer.colorAttachment(1, color_config);
+        framebuffers[0].reset(size.x/2, size.y/2, 2);
+        framebuffers[0].colorAttachment(0, color_config);
+        framebuffers[0].colorAttachment(1, color_config);
+        framebuffers[0].colorAttachment(2, color_config);
 
-        framebuffer_2.reset(size.x/8, size.y/8, 2);
-        framebuffer_2.colorAttachment(0, color_config);
-        framebuffer_2.colorAttachment(1, color_config);
+        framebuffers[1].reset(size.x/2, size.y/2, 2);
+        framebuffers[1].colorAttachment(0, color_config);
+        framebuffers[1].colorAttachment(1, color_config);
+        framebuffers[1].colorAttachment(2, color_config);
 
-        gbuffer.reset(size.x, size.y, 4);
-        gbuffer.colorAttachment(0, color_config);
-        gbuffer.colorAttachment(1, color_config);
-        gbuffer.colorAttachment(2, color_config);
-        gbuffer.colorAttachment(3, color_config);
+        gbuffers[0].reset(size.x, size.y, 4);
+        gbuffers[0].colorAttachment(0, color_config);
+        gbuffers[0].colorAttachment(1, color_config);
+        gbuffers[0].colorAttachment(2, color_config);
+        gbuffers[0].colorAttachment(3, color_config);
+
+        gbuffers[1].reset(size.x, size.y, 4);
+        gbuffers[1].colorAttachment(0, color_config);
+        gbuffers[1].colorAttachment(1, color_config);
+        gbuffers[1].colorAttachment(2, color_config);
+        gbuffers[1].colorAttachment(3, color_config);
     };
     engine.eventManager().onWindowEvent(idk::WindowEvent::RESIZE, resize_callback);
     resize_callback();
 
-
-
-    idk::glShader &shader = m_shader;
-    auto shader_callback = [&shader]()
-    {
-        shader.compile();
-    };
-    engine.eventManager().onKeyEvent(idk::Keycode::E, idk::KeyEvent::TAPPED, shader_callback);
-    shader_callback();
 
 
     for (int z=-15; z<16; z++)
@@ -96,55 +108,39 @@ idk_Voxel::init( idk::Engine &engine )
 
 
 void
-idk_Voxel::render( idk::Engine &engine, idk::glFramebuffer framebuffer )
+idk_Voxel::render_quad( idk::Engine &engine )
 {
     idk::RenderEngine &ren = engine.rengine();
-
-    // First draw background quad to make creating rays easier
-    // -----------------------------------------------------------------------------------------
-    m_gbuffer.bind();
-    m_gbuffer.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glm::mat4 modelmat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -0.5f * ren.getCamera().farPlane()));
     modelmat = glm::scale(modelmat, glm::vec3(300.0f, 300.0f, 1.0f));
 
-    ren.getProgram("background").bind();
-    ren.getProgram("background").set_mat4("un_model", modelmat);
+    idk::glShader &background = ren.getProgram("background");
+    background.bind();
+    background.set_mat4("un_model", modelmat);
 
     idk::gl::bindVertexArray(ren.m_quad_VAO);
     idk::gl::drawArrays(GL_TRIANGLES, 0, 6);
+    background.unbind();
+}
 
-    m_gbuffer.unbind();
-    // -----------------------------------------------------------------------------------------
 
-    static float increment = 0.0f;
-
-    increment += 0.0001f;
-    if (increment >= 1.0f)
-    {
-        increment = 0.0f;
-    }
-
+void
+idk_Voxel::render( idk::Engine &engine, idk::glFramebuffer framebuffer )
+{
+    idk::RenderEngine &ren = engine.rengine();
 
     framebuffer.bind();
-    framebuffer.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    m_shader.bind();
-    m_shader.set_sampler2D("un_texture_1", m_gbuffer.attachments[1]);
-    m_shader.set_sampler2D("un_whitenoise", m_whitenoise);
-    m_shader.set_float("un_span", m_svo.SPAN);
-    m_shader.set_float("un_increment", increment);
-
-
+    framebuffer.clear(GL_DEPTH_BUFFER_BIT);
 
     idk::gl::disable(GL_DEPTH_TEST, GL_CULL_FACE);
+
     idk::gl::bindVertexArray(ren.m_quad_VAO);
     idk::gl::drawArrays(GL_TRIANGLES, 0, 6);
-    idk::gl::bindVertexArray(0);
+
     idk::gl::enable(GL_DEPTH_TEST, GL_CULL_FACE);
     
     framebuffer.unbind();
-
 }
 
 
@@ -155,20 +151,12 @@ void idk_Voxel::place( idk::Engine &engine, int blocktype, int ksize, float span
     glm::vec3 dir = glm::normalize(cam.front());
 
     glm::vec3 pos = cam.transform().position();
+    pos = pos + 3.0f * (float)ksize * span * dir;
 
-    glm::vec3 pos1 = pos + 1.0f*dir;
-    glm::vec3 hitpoint = m_svo.hitpoint(pos, dir);
+    // glm::vec3 pos1 = pos + 1.0f*dir;
+    // glm::vec3 hitpoint = m_svo.hitpoint(pos, dir);
 
-    // if (glm::distance(pos, hitpoint) < glm::distance(pos, pos1))
-    // {
-    //     pos = hitpoint;
-    // }
-
-    // else
-    {
-        pos = pos1;
-    }
-
+    size_t svo_size = m_svo.nodegroups().bytesize();
 
     if (pos != glm::vec3(0.0f))
     {
@@ -191,44 +179,54 @@ void idk_Voxel::place( idk::Engine &engine, int blocktype, int ksize, float span
                     ipos.x = x;
                     ipos.y = y;
                     ipos.z = z;
+
                     m_svo.insert(blocktype, ipos, 2.0f*span);
                 }
             }
         }
 
-        // auto &svo = m_svo;
-        // m_svo.nodegroups().for_each(
-        //     [&svo](int id, idk::SVOctree::Nodes &nodes)
-        //     {
-        //         for (int i=0; i<8; i++)
-        //         {
-        //             svo.node(id, i).irradiance.x /= 4.0f;
-        //             svo.node(id, i).irradiance.y /= 4.0f;
-        //             svo.node(id, i).irradiance.z /= 4.0f;
-        //             svo.node(id, i).irradiance.w = 1.0f;
-        //         }
-        //     }
-        // );
+        // Need to copy entire buffer if octree was reallocated.
+        if (svo_size != m_svo.nodegroups().bytesize())
+        {
+            m_SSBO.bufferData(m_svo.nodegroups().bytesize(), m_svo.nodegroups().data());
+            std::cout << "KB: " << m_svo.nodegroups().bytesize() / 1000 << "\n";
+        }
+
+        // Otherwise only copy changed nodes
+        else
+        {
+            auto &changes = m_svo.getChanges();
+
+            idk::SVOctree::Nodes *gpudata = (idk::SVOctree::Nodes *)m_SSBO.mapBuffer();
+            idk::SVOctree::Nodes *cpudata = (idk::SVOctree::Nodes *)m_svo.nodegroups().data();
+
+            for (int groupid: changes)
+            {
+                gpudata[groupid] = cpudata[groupid];
+            }
+
+            m_SSBO.unmapBuffer();
+            std::cout << "Changes: " << changes.size() << "\n";
+            m_svo.clearChanges();
+        }
+
     }
-
-
-    m_SSBO.bufferData(m_svo.nodegroups().bytesize(), m_svo.nodegroups().data());
-
-    std::cout << "KB: " << m_svo.nodegroups().bytesize() / 1000 << "\n";
 }
+
+
 
 void
 idk_Voxel::stage_A( idk::Engine &engine )
 {
     idk::RenderEngine &ren = engine.rengine();
 
-    static int blocktype = 1;
+    static int blocktype = 0;
     static int ksize = 8;
     static float span = 0.0625f; //1.0f / 4.0f;
 
     if (engine.eventManager().keylog().keyTapped(idk::Keycode::F))
     {
-        blocktype = (blocktype + 1) % 7;
+        blocktype = (blocktype + 1) % 8;
         std::cout << "blocktype: " << blocktype << std::endl;
     }
 
@@ -257,41 +255,77 @@ idk_Voxel::stage_A( idk::Engine &engine )
     }
 
 
-    static bool can_place = true;
 
-    if (can_place && engine.eventManager().mouseDown(idk::MouseButton::LEFT))
+    if (engine.eventManager().mouseDown(idk::MouseButton::LEFT))
     {
         place(engine, blocktype, ksize, span);
-        can_place = false;
-    }
-    else if (engine.eventManager().mouseUp(idk::MouseButton::LEFT))
-    {
-        can_place = true;
     }
 
     if (engine.eventManager().mouseDown(idk::MouseButton::RIGHT))
     {
         place(engine, 0, ksize, span);
     }
+    
+    static int idx = 0;
+    static glm::vec3 last_viewpos = glm::vec3(1.0f);
+    static glm::mat4 last_view = glm::mat4(1.0f);
+    static int count = 0;
 
 
-    m_shader.bind();
+    m_gbuffers[idx].bind();
+    m_gbuffers[idx].clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    this->render_quad(engine);
+    m_gbuffers[idx].unbind();
 
-    m_shader.set_float("un_f_sign", -1.0f);
-    this->render(engine, m_framebuffer_2);
+    static float increment = 0.0f;
+    increment += 1.0f / 32.0f;
+    if (increment >= 1.0f)
+    {
+        increment = 0.0f;
+    }
 
-    m_shader.set_float("un_f_sign", +1.0f);
-    this->render(engine, m_framebuffer);
+    idk::glShader &SVOprogram = ren.getProgram(m_shader_name);
+    SVOprogram.bind();
 
-    ren.blitFramebuffer(m_framebuffer);
-    m_shader.unbind();
+    SVOprogram.set_sampler2D("un_current_position", m_gbuffers[idx].attachments[1]);
+    SVOprogram.set_sampler2D("un_last_depth", m_framebuffers[(idx + 1) % 2].attachments[1]);
+    SVOprogram.set_sampler2D("un_last_position", m_framebuffers[(idx + 1) % 2].attachments[2]);
+    SVOprogram.set_sampler2D("un_last_frame", m_framebuffers[(idx + 1) % 2].attachments[0]);
+    SVOprogram.set_vec3("un_last_viewpos", last_viewpos);
+    SVOprogram.set_mat4("un_last_view", last_view);
 
+    SVOprogram.set_sampler3D("un_whitenoise", m_whitenoise);
+    SVOprogram.set_sampler2D("un_bluenoise",  m_bluenoise);
+    SVOprogram.set_float("un_span", m_svo.SPAN);
+    SVOprogram.set_float("un_increment", increment);
+    SVOprogram.set_float("un_w", (float)ren.width());
+    SVOprogram.set_float("un_h", (float)ren.height());
+    SVOprogram.set_float("un_f_sign", +1.0f);
 
-    void *gpudata = m_SSBO.mapBuffer();
-    void *cpudata = m_svo.nodegroups().data();
-    memcpy(cpudata, gpudata, m_svo.nodegroups().bytesize());
-    m_SSBO.unmapBuffer();
+    if (ren.getCamera().view() == last_view)
+    {
+        SVOprogram.set_int("un_moving", 0);
+    }
+    else
+    {
+        SVOprogram.set_int("un_moving", 1);
+    }
 
+    this->render(engine, m_framebuffers[idx]);
+
+    SVOprogram.unbind();
+
+    ren.blitFramebuffer(m_framebuffers[idx]);
+
+    last_viewpos = ren.getCamera().transform().position();
+    last_view = ren.getCamera().view();
+
+    idx = (idx + 1) % 2;
+
+    // void *gpudata = m_SSBO.mapBuffer();
+    // void *cpudata = m_svo.nodegroups().data();
+    // memcpy(cpudata, gpudata, m_svo.nodegroups().bytesize());
+    // m_SSBO.unmapBuffer();
 }
 
 

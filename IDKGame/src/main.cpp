@@ -43,10 +43,6 @@ int ENTRY(int argc, const char **argv)
     ren.modelManager().loadIDKtexpak("assets/textures/reflection.texpak", false);
     ren.getCamera().ylock(true);
 
-    // GLuint default_geometrypass = idk::gltools::compileProgram(
-    //     "shaders/deferred/", "geometrypass.vs", "geometrypass.fs"
-    // );
-
 
     // int terrain2_obj = engine.createGameObject();
     // int terrain2_model = ren.modelManager().loadOBJ("assets/models/", "man.obj", "man.mtl");

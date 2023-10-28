@@ -34,20 +34,62 @@ ImGui_Module::init( idk::Engine &engine )
 void
 ImGui_Module::f_settings_graphics( idk::Engine &engine )
 {
-    // if (ImGui::BeginChild("Settings_Graphics"))
-    // {
-    //     GLuint textureid = engine.rengine().m_scratchbuf3.output_textures[0];
+    idk::RenderEngine &ren = engine.rengine();
 
-    //     ImGui::Text("Depth Map");
-    //     ImGui::Image((void*)(intptr_t)textureid, ImVec2(512, 512));
-        
-    //     if(ImGui::Button("Cancel"))
-    //     {
-    //         m_menu_action = "";
-    //     }
+    if (ImGui::BeginChild("Settings_Graphics"))
+    {
+        ImGui::BeginChild("Grouping", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()));
 
-    //     ImGui::EndChild();
-    // }
+        std::vector<std::string> names = ren.programNames();
+
+        static int selected = 0;
+        int n = 0;
+
+        ImGuiStyle& style = ImGui::GetStyle();
+        float child_w = 0.5 * ImGui::GetContentRegionAvail().x;
+        ImGuiID child_id = ImGui::GetID((void*)(intptr_t)0);
+
+        ImGui::BeginChild(child_id, ImVec2(child_w, 0), true, 0);
+            for (std::string name: names)
+            {
+                idk::glShader &program = ren.getProgram(name);
+                auto &definitions = program.getDefinitions();
+
+                if (ImGui::Selectable(name.c_str(), selected == n))
+                {
+                    selected = n;
+                }
+                n += 1;
+            }
+        ImGui::EndChild();
+
+        ImGui::SameLine();
+
+        child_id = ImGui::GetID((void*)(intptr_t)1);
+        ImGui::BeginChild(child_id, ImVec2(child_w, 0), true, 0);
+            child_id = ImGui::GetID((void*)(intptr_t)2);
+            ImGui::BeginChild("Defintions", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()));
+
+                for (auto &[name, def]: ren.getProgram(names[selected]).getDefinitions())
+                {
+                    ImGui::InputText(name.c_str(), &def.value);
+                }
+            ImGui::EndChild();
+
+            if (ImGui::Button("Recompile"))
+            {
+                ren.getProgram(names[selected]).compile();
+            }
+        ImGui::EndChild();
+        ImGui::EndChild();
+
+        if (ImGui::Button("Close"))
+        {
+            m_menu_action = "";
+        }
+
+        ImGui::EndChild();
+    }
 }
 
 
@@ -188,41 +230,15 @@ ImGui_Module::stage_B( idk::Engine &engine )
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
 
-    // bool show = true;
-    // ImGui::ShowDemoWindow(&show);
+    bool show = true;
+    ImGui::ShowDemoWindow(&show);
     
     f_main_menu_bar();
 
-    // if (m_menu_action == "Settings_Graphics")
-    // {
-    //     f_settings_graphics(engine);
-    // }
-    // if (ImGui::Begin("Settings_Graphics"))
-    // {
-    //     GLuint textureid0 = engine.rengine().m_scratchbuf4.output_textures[0];
-    //     GLuint textureid = engine.rengine().m_scratchbuf3.output_textures[0];
-    //     GLuint textureid2 = engine.rengine().m_scratchbuf3_d2.output_textures[0];
-    //     GLuint textureid3 = engine.rengine().m_scratchbuf3_d4.output_textures[0];
-
-    //     ImGui::Text("scratch 3_d4");
-    //     ImGui::Image((void*)(intptr_t)textureid3, ImVec2(512, 512), ImVec2(0, 1), ImVec2(1, 0));
-        
-    //     ImGui::Text("scratch 3_d2");
-    //     ImGui::Image((void*)(intptr_t)textureid2, ImVec2(512, 512), ImVec2(0, 1), ImVec2(1, 0));
-
-    //     ImGui::Text("scratch 3");
-    //     ImGui::Image((void*)(intptr_t)textureid, ImVec2(512, 512), ImVec2(0, 1), ImVec2(1, 0));
-
-    //     ImGui::Text("scratch 4");
-    //     ImGui::Image((void*)(intptr_t)textureid0, ImVec2(512, 512), ImVec2(0, 1), ImVec2(1, 0));
-
-    //     if(ImGui::Button("Cancel"))
-    //     {
-    //         m_menu_action = "";
-    //     }
-
-    //     ImGui::End();
-    // }
+    if (m_menu_action == "Settings_Graphics")
+    {
+        f_settings_graphics(engine);
+    }
 
     if (m_menu_action == "Settings_Camera")
     {

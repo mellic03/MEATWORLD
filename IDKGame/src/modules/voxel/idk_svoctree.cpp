@@ -46,10 +46,18 @@ idk::SVOctree::nodegroup_new( int blocktype )
         node(id, i).children  = -1;
         node(id, i).blocktype = blocktype;
         node(id, i).mode = blocktype;
-        node(id, i).irradiance = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
     }
 
     return id;
+}
+
+
+void
+idk::SVOctree::nodegroup_destroy( int groupid, int octant )
+{
+    int children_id = node(groupid, octant).children;
+    m_nodegroups.destroy(children_id);
+    node(groupid, octant).children = -1;
 }
 
 
@@ -63,7 +71,6 @@ idk::SVOctree::nodegroup_from( int groupid, int octant )
     {
         node(id, i).children  = -1;
         node(id, i).blocktype = node(groupid, octant).blocktype;
-        node(id, i).irradiance = node(groupid, octant).irradiance;
     }
 
     return id;
@@ -127,25 +134,55 @@ int get_mode( idk::SVOctree::Nodes nodes )
 
 
 void
+idk::SVOctree::f_clear( int groupid, int octant )
+{
+    Node n = node(groupid, octant);
+    if (n.children == -1)
+    {
+        return;
+    }
+
+    Nodes childgroup = nodegroup(n.children);
+
+    for (int i=0; i<8; i++)
+    {
+        if (childgroup.nodes[i].children != -1)
+        {
+            f_clear(childgroup.nodes[i].children, i);
+            nodegroup_destroy(n.children, i);
+            // m_nodegroups.destroy(childgroup.nodes[i].children);
+        }
+    }
+
+    nodegroup_destroy(groupid, octant);
+    // m_nodegroups.destroy(n.children);
+}
+
+
+void
 idk::SVOctree::f_insert( int groupid, int blocktype, float blockspan, glm::vec3 pos, glm::vec3 center, int depth )
 {
     const float span = SPAN / pow(2, depth);
     const int octant = SVOctree::get_octant(pos, center);
 
-    // if (node(groupid, octant).blocktype == blocktype)
-    // {
-    //     return;
-    // }
-
     if (span <= blockspan)
     {
+        f_clear(groupid, octant);
         node(groupid, octant).blocktype = blocktype;
+        m_changes.insert(groupid);
+
         return;
     }
 
     if (node(groupid, octant).children == -1)
     {
+        if (node(groupid, octant).blocktype == blocktype)
+        {
+            return;
+        }
+
         node(groupid, octant).children = nodegroup_new(node(groupid, octant).blocktype);
+        m_changes.insert(groupid);
     }
 
 
@@ -167,9 +204,9 @@ idk::SVOctree::f_insert( int groupid, int blocktype, float blockspan, glm::vec3 
     else
     {
         int mode = get_mode(nodegroup(groupid));
-        node(groupid, octant).mode = mode;
     }
 
+    m_changes.insert(groupid);
 }
 
 

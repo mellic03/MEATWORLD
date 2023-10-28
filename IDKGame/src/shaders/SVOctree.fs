@@ -2,6 +2,7 @@
 
 layout (location = 0) out vec4 fsout_frag_color;
 layout (location = 1) out vec4 fsout_frag_depth;
+layout (location = 2) out vec4 fsout_frag_pos;
 
 in vec2 fsin_texcoords;
 
@@ -13,17 +14,21 @@ layout (std140, binding = 2) uniform UBO_camera_data
     vec3 un_viewpos;
 };
 
-uniform sampler2D un_texture_1;
-uniform sampler2D un_whitenoise;
+uniform sampler2D un_last_depth;
+uniform sampler2D un_last_position;
+uniform sampler2D un_current_position;
+uniform sampler3D un_whitenoise;
+uniform sampler2D un_bluenoise;
+uniform sampler2D un_last_frame;
 uniform float un_span;
 uniform float un_increment;
-
+uniform float un_w;
+uniform float un_h;
 
 
 struct OctNode
 {
     int   blocktype, childrenid, mode, pad2;
-    vec4  irradiance;
 };
 
 
@@ -47,13 +52,19 @@ layout (std430, binding = 3) buffer SVO_nodes
     OctNode svo_nodegroups[][8];
 };
 
-#define SPAN_DIST_RATIO 0.05
+#define GOLDEN_RATIO 1.618033988749
+#define EULER 2.718281828459
+
+#define SPAN_DIST_RATIO 0.001
+#define ROLLING_AVG_FRAMES 32
+#define MOVEMENT_BIAS 0.01
 #define BLOCK_BIAS 0.01
 
 #define BLOCK_GRASS 1
-#define BLOCK_DIRT  2
+#define BLOCK_DIRT 2
 #define BLOCK_STONE 3
-#define BLOCK_RED   4
+#define BLOCK_RED 4
+#define BLOCK_WHITE 7
 
 
 vec3 svo_blocktype_color( int blocktype )
@@ -63,6 +74,7 @@ vec3 svo_blocktype_color( int blocktype )
         case BLOCK_GRASS: return vec3(0.2, 1.0, 0.2);
         case BLOCK_DIRT:  return vec3(0.69, 0.50, 0.35);
         case BLOCK_STONE: return vec3(0.67, 0.69, 0.71);
+        case BLOCK_WHITE: return vec3(1.0, 1.0, 1.0);
         case 4:   return vec3(1.0, 0.2, 0.2);
         case 5:   return vec3(0.2, 1.0, 0.2);
         case 6:   return vec3(0.2, 0.2, 1.0);
@@ -74,9 +86,10 @@ float svo_blocktype_reflectiveness( int blocktype )
 {
     switch (blocktype)
     {
-        case BLOCK_GRASS: return 0.6;
-        case BLOCK_DIRT:  return 0.2;
-        case BLOCK_STONE: return 0.4;
+        case BLOCK_GRASS: return 0.9;
+        case BLOCK_DIRT:  return 0.7;
+        case BLOCK_STONE: return 0.8;
+        case BLOCK_WHITE: return 0.8;
         case 4:   return 0.0;
         case 5:   return 0.0;
         case 6:   return 0.0;
@@ -90,6 +103,7 @@ float svo_blocktype_emission( int blocktype )
         case BLOCK_GRASS: return 0.0;
         case BLOCK_DIRT:  return 0.0;
         case BLOCK_STONE: return 0.0;
+        case BLOCK_WHITE: return 5.0;
         case 4:   return 4.0;
         case 5:   return 4.0;
         case 6:   return 4.0;
@@ -298,59 +312,28 @@ vec3 randomSpherePoint(vec3 rand)
 
 vec3 randomHemispherePoint(vec3 rand, vec3 n)
 {
-    vec3 v = randomSpherePoint(rand);
-    return v * sign(dot(v, n));
-}
-
-
-
-vec3 trace_diffuse2( vec3 og_ray_pos, vec3 normal, OctNode_data og_data, float depth )
-{
-    vec3 result = vec3(0.0);
-    OctNode_data node_data = svo_get_node(og_ray_pos);
-
-    vec3 ray_pos = og_ray_pos;
-    vec3 seed = texture(un_whitenoise, un_increment+fsin_texcoords.xy).rgb;
-    vec3 ray_dir = randomHemispherePoint(seed, normal);
-
-    for (int i=0; i<32; i++)
-    {
-        vec4 next_step = svo_next_step(node_data, ray_pos, ray_dir);
-        float step_size = next_step.w;
-        ray_pos += step_size * ray_dir;
-
-        depth += step_size;
-        float min_span = SPAN_DIST_RATIO*depth;
-        node_data = svo_get_node2(ray_pos + BLOCK_BIAS*next_step.xyz, min_span);
-
-        if (node_data.blocktype > 0)
-        {
-            float dist = distance(og_data.center, node_data.center);
-
-            vec3 inirradiance = svo_nodegroups[node_data.groupid][node_data.octant].irradiance.xyz;
-            float emission = svo_blocktype_emission(node_data.blocktype);
-            float strength = svo_blocktype_reflectiveness(og_data.blocktype);
-            inirradiance += emission*inirradiance;
-            inirradiance *= strength;
-            inirradiance /= (1.0 + 0.2*dist + 0.0*dist*dist);
-
-            result += inirradiance;
-
-            break;
-        }
-    }
-
-    return result/1.0;
+    // vec3 v = randomSpherePoint(rand);
+    return normalize(rand * sign(dot(rand, n)));
 }
 
 
 vec3 trace_diffuse( vec3 ray_pos, vec3 normal, OctNode_data og_data, float depth )
 {
-    vec3 result = vec3(0.0);
-    OctNode_data node_data = svo_get_node(ray_pos);
+    float min_span = SPAN_DIST_RATIO*depth;
 
-    vec3 seed = texture(un_whitenoise, un_increment+fsin_texcoords.xy).rgb;
+    OctNode_data node_data = svo_get_node2(ray_pos, min_span);
+
+    vec3 uva = vec3(fsin_texcoords, un_increment);
+    uva.y /= (un_w / un_h);
+    // uva.x = float(int(uva.x) / 128);
+    // uva.y = float(int(uva.x) / 128);
+
+    vec3 seed = texture(un_whitenoise, uva).rgb - vec3(0.5);
+    // seed.x += sign(seed.x) * EULER * un_increment;
+    // seed.y += sign(seed.y) * GOLDEN_RATIO * un_increment;
+    // seed.z += sign(seed.z) * PI * un_increment;
     vec3 ray_dir = randomHemispherePoint(seed, normal);
+    // vec3 ray_dir = normalize(seed);
 
     for (int i=0; i<32; i++)
     {
@@ -359,29 +342,23 @@ vec3 trace_diffuse( vec3 ray_pos, vec3 normal, OctNode_data og_data, float depth
         ray_pos += step_size * ray_dir;
 
         depth += step_size;
-        float min_span = SPAN_DIST_RATIO*depth;
+        min_span = SPAN_DIST_RATIO*depth;
         node_data = svo_get_node2(ray_pos + BLOCK_BIAS*next_step.xyz, min_span);
 
         if (node_data.blocktype > 0)
         {
             float dist = distance(og_data.center, node_data.center);
 
-            vec3 inirradiance = svo_nodegroups[node_data.groupid][node_data.octant].irradiance.xyz;
             float emission = svo_blocktype_emission(node_data.blocktype);
             float strength = svo_blocktype_reflectiveness(og_data.blocktype);
-            inirradiance += emission*inirradiance;
-            inirradiance *= strength;
+            vec3 irradiance = emission * strength * svo_blocktype_color(node_data.blocktype);
+            irradiance /= (1.0 + 0.2*dist + 0.0*dist*dist);
 
-            inirradiance += trace_diffuse2(ray_pos - 0.001*next_step.xyz, -next_step.xyz, node_data, depth);
-            inirradiance /= (1.0 + 0.2*dist + 0.0*dist*dist);
-
-            result += inirradiance;
-
-            break;
+            return irradiance;
         }
     }
 
-    return result/1.0;
+    return vec3(0.0);
 }
 
 
@@ -418,22 +395,21 @@ float trace_shadow( vec3 ray_pos )
         {
             return 0.0;
         }
-
     }
 
     return 1.0;
 }
 
 
-vec4 trace( vec3 view_pos, vec3 ray_pos, vec3 ray_dir )
+vec4 trace( vec3 ray_pos, vec3 ray_dir )
 {
     vec3 inv_light_dir = -normalize(ubo_dirlights[0].direction.xyz);
-    // vec3 inv_light_dir = vec3(1.0, 2.0, 1.5);
 
     vec3 result = vec3(0.0, 0.0, 0.0);
     float depth = 0.0;
-
-    OctNode_data node_data = svo_get_node(ray_pos);
+    float min_span = SPAN_DIST_RATIO*depth;
+    
+    OctNode_data node_data = svo_get_node2(ray_pos, min_span);
 
     for (int i=0; i<64; i++)
     {
@@ -443,7 +419,7 @@ vec4 trace( vec3 view_pos, vec3 ray_pos, vec3 ray_dir )
         depth   += step_size;
 
 
-        float min_span = SPAN_DIST_RATIO*depth;
+        min_span = 0.0; //SPAN_DIST_RATIO*depth;
         node_data = svo_get_node2(ray_pos + BLOCK_BIAS*next_step.xyz, min_span);
 
         const vec3 color = svo_blocktype_color(node_data.blocktype);
@@ -455,51 +431,97 @@ vec4 trace( vec3 view_pos, vec3 ray_pos, vec3 ray_dir )
 
         if (blocktype > 0)
         {
-            vec3 normal = normalize(ray_pos - node_data.center);
-            vec3 normal_sign = sign(normal);
-            normal = abs(normal);
+            // vec3 normal = normalize(ray_pos - node_data.center);
+            // vec3 normal_sign = sign(normal);
+            // normal = abs(normal);
 
-            float max_element = max(normal.x, max(normal.y, normal.z));
-            normal = step(vec3(max_element), normal);
-            normal = normalize(normal * normal_sign);
+            // float max_element = max(normal.x, max(normal.y, normal.z));
+            // normal = step(vec3(max_element), normal);
+            // normal = normalize(normal * normal_sign);
 
-            float diff = dot(normalize(normal), normalize(inv_light_dir));
-            diff = (diff + 1.0) / 2.0;
+            // float diff = dot(normalize(normal), normalize(inv_light_dir));
+            // diff = (diff + 1.0) / 2.0;
 
-            float shadow   = trace_shadow(ray_pos - 0.001*next_step.xyz);
-            vec3  indirect = trace_diffuse(ray_pos - 0.001*next_step.xyz, -next_step.xyz, node_data, depth);
+            float shadow   = trace_shadow(ray_pos - BLOCK_BIAS*next_step.xyz);
+            vec3  indirect = trace_diffuse(ray_pos - BLOCK_BIAS*next_step.xyz, -next_step.xyz, node_data, depth);
             float emission = svo_blocktype_emission(blocktype);
 
             result = shadow*ubo_dirlights[0].diffuse.xyz*color + emission*color + indirect;
 
-            const float time = 256.0;
-            const float a = (time-1.0) / time;
-            const float b = 1.0 - a;
-
-            vec3 irradiance = svo_nodegroups[groupid][octant].irradiance.xyz;
-            svo_nodegroups[groupid][octant].irradiance.xyz = irradiance*a + result*b;
-
-            return vec4(irradiance, depth);
+            return vec4(result, depth);
         }
     }
 
     return vec4(result, 1000000.0);
 }
 
+uniform vec3 un_last_viewpos;
+uniform mat4 un_last_view;
 
-uniform float un_f_sign;
+vec2 stereographicSphereToPlane(vec3 cartPointOnSphere) 
+{
+    return vec2(
+        cartPointOnSphere.x / (1.0-cartPointOnSphere.y), 
+        cartPointOnSphere.z / (1.0-cartPointOnSphere.y));
+}
+
+
+uniform int un_moving;
 
 void main()
 {
-    vec3 frag_pos = un_f_sign * texture(un_texture_1, fsin_texcoords).xyz;
+    vec3 frag_pos = texture(un_current_position, fsin_texcoords).xyz;
 
+    vec3 ray_dir = normalize(frag_pos.xyz - un_viewpos);
     vec3 ray_pos = un_viewpos;
-    vec3 ray_dir = normalize(frag_pos - un_viewpos);
 
-    vec4 color_depth = trace(un_viewpos, ray_pos, ray_dir);
+    vec4 color_depth = trace(ray_pos, ray_dir);
     vec3 color = color_depth.rgb;
     float depth = color_depth.w;
 
+    ray_pos += depth*ray_dir;
+
+    // ---------------------------------------------------------------------------
+    vec4 p_last_pos = un_projection * un_view * vec4(texture(un_last_position, fsin_texcoords).rgb, 1.0);
+    p_last_pos.xy = (p_last_pos.xy / p_last_pos.w) * 0.5 + 0.5;
+    p_last_pos.xy *= vec2(un_w, un_h);
+    p_last_pos.xy = floor(p_last_pos.xy);
+    p_last_pos.xy /= vec2(un_w, un_h);
+
+    vec4 p_now_pos = un_projection * un_view * vec4(ray_pos, 1.0);
+    p_now_pos.xy = (p_now_pos.xy / p_now_pos.w) * 0.5 + 0.5;
+    p_now_pos.xy *= vec2(un_w, un_h);
+    p_now_pos.xy = floor(p_now_pos.xy);
+    p_now_pos.xy /= vec2(un_w, un_h);
+
+    vec2 movement = (p_last_pos.xy - p_now_pos.xy);
+    vec2 last_uv = fsin_texcoords - movement;
+
+    vec3 last_color = texture(un_last_frame, last_uv).rgb;
+    // ---------------------------------------------------------------------------
+
+    float last_depth = texture(un_last_depth, fsin_texcoords).r;
+
+    if (abs(depth - last_depth) > 0.5)
+    {
+        last_color = vec3(0.0);
+    }
+
+    if (fsin_texcoords.x < 0.001 || fsin_texcoords.x > 0.999)
+    {
+        last_color = vec3(0.0);
+    }
+    if (fsin_texcoords.y < 0.001 || fsin_texcoords.y > 0.999)
+    {
+        last_color = vec3(0.0);
+    }
+
+    const float a = (ROLLING_AVG_FRAMES-1.0) / ROLLING_AVG_FRAMES;
+    const float b = 1.0 - a;
+    color = a*last_color + b*color;
+
+
     fsout_frag_color = vec4(color, 1.0);
     fsout_frag_depth = vec4(vec3(depth), 1.0);
+    fsout_frag_pos   = vec4(ray_pos, 1.0);
 }
