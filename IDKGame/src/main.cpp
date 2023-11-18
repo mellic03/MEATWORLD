@@ -66,8 +66,6 @@ int ENTRY(int argc, const char **argv)
     // engine.aengine().listenerPosition(&transCS.getTransform(player_obj));
 
     int dirlight_id = ren.lightSystem().createLightsource(idk::lightsource::DIR);
-    ren.lightSystem().createLightsource(idk::lightsource::DIR);
-    ren.lightSystem().createLightsource(idk::lightsource::DIR);
 
 
     while (engine.running())

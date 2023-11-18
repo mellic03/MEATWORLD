@@ -46,10 +46,11 @@ ImGui_Module::f_settings_graphics( idk::Engine &engine )
         int n = 0;
 
         ImGuiStyle& style = ImGui::GetStyle();
-        float child_w = 0.5 * ImGui::GetContentRegionAvail().x;
+        float left_w = 0.25 * ImGui::GetContentRegionAvail().x;
+        float right_w = ImGui::GetContentRegionAvail().x - left_w;
         ImGuiID child_id = ImGui::GetID((void*)(intptr_t)0);
 
-        ImGui::BeginChild(child_id, ImVec2(child_w, 0), true, 0);
+        ImGui::BeginChild(child_id, ImVec2(left_w, 0), true, 0);
             for (std::string name: names)
             {
                 idk::glShader &program = ren.getProgram(name);
@@ -66,7 +67,7 @@ ImGui_Module::f_settings_graphics( idk::Engine &engine )
         ImGui::SameLine();
 
         child_id = ImGui::GetID((void*)(intptr_t)1);
-        ImGui::BeginChild(child_id, ImVec2(child_w, 0), true, 0);
+        ImGui::BeginChild(child_id, ImVec2(right_w, 0), true, 0);
             child_id = ImGui::GetID((void*)(intptr_t)2);
             ImGui::BeginChild("Defintions", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()));
 
@@ -140,6 +141,83 @@ ImGui_Module::f_settings_camera( idk::Engine &engine )
 }
 
 
+
+void
+ImGui_Module::f_settings_pointlight( idk::Engine &engine )
+{
+    idk::RenderEngine &ren = engine.rengine();
+
+
+    if (ImGui::BeginChild("Settings_Pointlight"))
+    {
+        ImGui::BeginChild("REE", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()));
+
+        static int selected = 0;
+        int n = 0;
+
+        ImGuiStyle& style = ImGui::GetStyle();
+        float left_w = 0.25 * ImGui::GetContentRegionAvail().x;
+        float right_w = ImGui::GetContentRegionAvail().x - left_w;
+        ImGuiID child_id = ImGui::GetID((void*)(intptr_t)0);
+
+        ImGui::BeginChild(child_id, ImVec2(left_w, 0), true, 0);
+            for (int i=0; i<ren.lightSystem().pointlights().size(); i++)
+            {
+                if (ImGui::Selectable(std::to_string(i).c_str(), selected == n))
+                {
+                    selected = n;
+                }
+                n += 1;
+            }
+
+            if (ImGui::Button("Add"))
+            {
+                ren.lightSystem().createLightsource(idk::lightsource::POINT);
+            }
+        ImGui::EndChild();
+
+        ImGui::SameLine();
+
+        child_id = ImGui::GetID((void*)(intptr_t)1);
+
+        ImGui::BeginChild(child_id, ImVec2(right_w, 0), true, 0);
+
+            child_id = ImGui::GetID((void*)(intptr_t)2);
+    
+            ImGui::BeginChild("REEEE", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()));
+                auto &light = ren.lightSystem().pointlights()[selected];
+
+
+                ImGui::ColorEdit3("Ambient", &light.ambient[0]);
+                ImGui::ColorEdit3("Diffuse", &light.diffuse[0], ImGuiColorEditFlags_HDR);
+                ImGui::DragFloat3("Position", &light.position[0], 0.1f);
+
+                if (ImGui::Button("Cancel"))
+                {
+                    m_menu_action = "";
+                }
+
+            ImGui::EndChild();
+
+        if (ImGui::Button("Remove"))
+        {
+            ren.lightSystem().destroyLightsource(idk::lightsource::POINT, selected);
+            selected = 0;
+        }
+        ImGui::EndChild();
+        ImGui::EndChild();
+
+        if (ImGui::Button("Close"))
+        {
+            m_menu_action = "";
+        }
+
+        ImGui::EndChild();
+    }
+}
+
+
+
 void
 ImGui_Module::f_settings_dirlight( idk::Engine &engine )
 {
@@ -154,10 +232,11 @@ ImGui_Module::f_settings_dirlight( idk::Engine &engine )
         int n = 0;
 
         ImGuiStyle& style = ImGui::GetStyle();
-        float child_w = 0.5 * ImGui::GetContentRegionAvail().x;
+        float left_w = 0.25 * ImGui::GetContentRegionAvail().x;
+        float right_w = ImGui::GetContentRegionAvail().x - left_w;
         ImGuiID child_id = ImGui::GetID((void*)(intptr_t)0);
 
-        ImGui::BeginChild(child_id, ImVec2(child_w, 0), true, 0);
+        ImGui::BeginChild(child_id, ImVec2(left_w, 0), true, 0);
             for (int i=0; i<ren.lightSystem().dirlights().size(); i++)
             {
                 if (ImGui::Selectable(std::to_string(i).c_str(), selected == n))
@@ -177,7 +256,7 @@ ImGui_Module::f_settings_dirlight( idk::Engine &engine )
 
         child_id = ImGui::GetID((void*)(intptr_t)1);
 
-        ImGui::BeginChild(child_id, ImVec2(child_w, 0), true, 0);
+        ImGui::BeginChild(child_id, ImVec2(right_w, 0), true, 0);
 
             child_id = ImGui::GetID((void*)(intptr_t)2);
     
@@ -263,6 +342,9 @@ ImGui_Module::f_main_menu_bar()
             if (ImGui::MenuItem("Dirlight", ""))
                 m_menu_action = "Settings_Dirlight";
 
+            if (ImGui::MenuItem("Pointlight", ""))
+                m_menu_action = "Settings_Pointlight";
+
             ImGui::EndMenu();
         }
 
@@ -316,6 +398,11 @@ ImGui_Module::stage_B( idk::Engine &engine )
     else if (m_menu_action == "Settings_Dirlight")
     {
         f_settings_dirlight(engine);
+    }
+
+    else if (m_menu_action == "Settings_Pointlight")
+    {
+        f_settings_pointlight(engine);
     }
 
     ImGui::Render();
