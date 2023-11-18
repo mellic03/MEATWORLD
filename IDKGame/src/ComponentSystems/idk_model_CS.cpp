@@ -19,6 +19,7 @@ Model_CS::stage_A(idk::Engine &engine)
     std::vector<int> obj_ids = engine.gameObjects_byComponent(m_id);
     for (int obj_id: obj_ids)
     {
+        ren.drawShadowCaster(_model_ids[obj_id], tCS.getTransform(obj_id));
         ren.drawModel(_shader_ids[obj_id], _model_ids[obj_id], tCS.getTransform(obj_id));
     }
 }

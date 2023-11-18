@@ -5,7 +5,6 @@ project(IDKcomponentsystems)
 
 file(GLOB SOURCES
     "./*.cpp"
-    "./idk_lightsource_CS/*.cpp"
     "./idk_character_controller_CS/*.cpp"
 )
 

@@ -23,7 +23,7 @@ add_subdirectory(IDKGameEngine/src/)
 # --------------------------------------------
 
 add_subdirectory(IDKGame/src/ComponentSystems/)
-add_subdirectory(IDKGame/src/modules/)
+add_subdirectory(IDKGame/src/Modules/)
 
 
 project(game)

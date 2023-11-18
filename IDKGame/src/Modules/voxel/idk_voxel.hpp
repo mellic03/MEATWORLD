@@ -11,9 +11,11 @@ private:
     idk::glFramebuffer  m_framebuffers[2];
 
     GLuint              m_whitenoise;
-    GLuint              m_bluenoise;
     const std::string   m_shader_name = "SVOctree";
     idk::glSSBO         m_SSBO;
+
+
+    idk::SVOctree       voxelize    ( idk::Engine &, int model_id );
 
     void                render_quad ( idk::Engine & );
     void                render      ( idk::Engine &, idk::glFramebuffer );
