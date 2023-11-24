@@ -21,21 +21,21 @@ Camera_CS::stage_A( idk::Engine &engine )
 
 
 void
-Camera_CS::onAssignment( int obj_id, idk::Engine &engine )
+Camera_CS::onObjectAssignment( int obj_id, idk::Engine &engine )
 {
     _current_cammed_object = obj_id;
 }
 
 
 void
-Camera_CS::onGameObjectCreation( int obj_id, idk::Engine &engine )
+Camera_CS::onObjectCreation( int obj_id, idk::Engine &engine )
 {
 
 }
 
 
 void
-Camera_CS::onGameObjectDeletion( int obj_id, idk::Engine &engine )
+Camera_CS::onObjectDeletion( int obj_id, idk::Engine &engine )
 {
     if (obj_id == _current_cammed_object)
         _current_cammed_object = -1;
@@ -43,7 +43,7 @@ Camera_CS::onGameObjectDeletion( int obj_id, idk::Engine &engine )
 
 
 void
-Camera_CS::onGameObjectCopy( int src_obj_id, int dest_obj_id, idk::Engine &engine )
+Camera_CS::onObjectCopy( int src_obj_id, int dest_obj_id, idk::Engine &engine )
 {
 
 }

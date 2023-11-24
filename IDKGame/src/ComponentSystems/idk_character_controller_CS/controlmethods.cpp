@@ -64,6 +64,10 @@ controlmethods::player( int obj_id, idk::Engine &engine, CharacterController &co
         roll_sway -= speed * SWAY_SPEED_LOOK * dmouse.x;
     }
 
+    // transform = idk::Transform(camera.transform().modelMatrix());
+
+    transform.translate(engine.rengine().getCamera(0).transform().position() - transform.position());
+
     camera.roll(roll_sway);
 }
 

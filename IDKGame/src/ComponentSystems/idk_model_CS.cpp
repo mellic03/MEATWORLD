@@ -19,14 +19,16 @@ Model_CS::stage_A(idk::Engine &engine)
     std::vector<int> obj_ids = engine.gameObjects_byComponent(m_id);
     for (int obj_id: obj_ids)
     {
-        ren.drawShadowCaster(_model_ids[obj_id], tCS.getTransform(obj_id));
-        ren.drawModel(_shader_ids[obj_id], _model_ids[obj_id], tCS.getTransform(obj_id));
+        glm::mat4 model_mat = tCS.getModelMatrix(obj_id);
+
+        ren.drawShadowCaster(_model_ids[obj_id], model_mat);
+        ren.drawModel(_shader_ids[obj_id], _model_ids[obj_id], model_mat);
     }
 }
 
 
 void
-Model_CS::onGameObjectCreation( int obj_id, idk::Engine &engine )
+Model_CS::onObjectCreation( int obj_id, idk::Engine &engine )
 {
     if (obj_id >= _model_ids.size())
     {
@@ -41,7 +43,7 @@ Model_CS::onGameObjectCreation( int obj_id, idk::Engine &engine )
 
 
 void
-Model_CS::onGameObjectDeletion( int obj_id, idk::Engine &engine )
+Model_CS::onObjectDeletion( int obj_id, idk::Engine &engine )
 {
     _model_ids[obj_id] = -1;
 }
@@ -49,7 +51,7 @@ Model_CS::onGameObjectDeletion( int obj_id, idk::Engine &engine )
 
 
 void
-Model_CS::onGameObjectCopy( int src_obj_id, int dest_obj_id, idk::Engine &engine )
+Model_CS::onObjectCopy( int src_obj_id, int dest_obj_id, idk::Engine &engine )
 {
     _model_ids[dest_obj_id] = _model_ids[src_obj_id];
     _shader_ids[dest_obj_id] = _shader_ids[src_obj_id];

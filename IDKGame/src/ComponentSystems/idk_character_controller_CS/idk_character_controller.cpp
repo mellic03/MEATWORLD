@@ -16,7 +16,7 @@ CharacterController_CS::init( idk::Engine &engine )
 
 
 void
-CharacterController_CS::onAssignment( int obj_id, idk::Engine &engine )
+CharacterController_CS::onObjectAssignment( int obj_id, idk::Engine &engine )
 {
     CharacterController controller;
     controller.obj_id = obj_id;
@@ -37,7 +37,7 @@ CharacterController_CS::stage_B( idk::Engine &engine )
 
 
 void
-CharacterController_CS::onGameObjectCreation( int obj_id, idk::Engine &engine )
+CharacterController_CS::onObjectCreation( int obj_id, idk::Engine &engine )
 {
     if (obj_id >= (int)_controller_ids.size())
     {
@@ -52,7 +52,7 @@ CharacterController_CS::onGameObjectCreation( int obj_id, idk::Engine &engine )
 
 
 void
-CharacterController_CS::onGameObjectDeletion( int obj_id, idk::Engine &engine )
+CharacterController_CS::onObjectDeletion( int obj_id, idk::Engine &engine )
 {
     _controllers.destroy(_controller_ids[obj_id]);
     _controller_ids[obj_id] = -1;
@@ -60,7 +60,7 @@ CharacterController_CS::onGameObjectDeletion( int obj_id, idk::Engine &engine )
 
 
 void
-CharacterController_CS::onGameObjectCopy( int src_obj_id, int dest_obj_id, idk::Engine &engine )
+CharacterController_CS::onObjectCopy( int src_obj_id, int dest_obj_id, idk::Engine &engine )
 {
     _controller_ids[dest_obj_id] = _controllers.create();
 }

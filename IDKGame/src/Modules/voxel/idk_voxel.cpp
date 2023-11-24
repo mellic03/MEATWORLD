@@ -44,8 +44,6 @@ idk_Voxel::init( idk::Engine &engine )
     // angel_model = ren.modelManager().loadOBJ("assets/models/", "angel.obj", "angel.mtl");
 
 
-
-
     m_whitenoise = idk::noisegen3D::white(512, 512, 64);
 
     idk::ColorAttachmentConfig color_config = {
@@ -335,7 +333,7 @@ idk_Voxel::stage_A( idk::Engine &engine )
     SVOprogram.unbind();
 
 
-    this->voxelize(engine, angel_model);
+    // this->voxelize(engine, angel_model);
 
 
     // idk::glShader &gaussian = ren.getProgram("gaussian");

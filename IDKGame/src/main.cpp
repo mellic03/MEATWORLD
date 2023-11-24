@@ -19,6 +19,7 @@ int ENTRY(int argc, const char **argv)
     const int TRANSFORM  = engine.registerCS<Transform_CS>("transform");
     const int MODEL      = engine.registerCS<Model_CS>("model");
     const int GRABBABLE  = engine.registerCS<Grabbable_CS>("grabbable");
+    const int CHARACTER  = engine.registerCS<idkg::Character_CS>("character");
     const int CHARCONTROL= engine.registerCS<CharacterController_CS>("charactercontrol");
     const int CAMERA     = engine.registerCS<Camera_CS>("camera");
 
@@ -31,32 +32,42 @@ int ENTRY(int argc, const char **argv)
 
     engine.registerModule<ImGui_Module>("imgui");
 
-
-    ren.modelManager().loadTextures("assets/textures/diffuse/", true);
-    ren.modelManager().loadTextures("assets/textures/specular/", false);
-    ren.modelManager().loadTextures("assets/textures/reflection/", false);
-
-
-    int player_obj = engine.createGameObject();
-    engine.giveComponents(player_obj, TRANSFORM, CAMERA, CHARCONTROL);
-    charCS.controlMethod(player_obj, controlmethods::player);
-
-    engine.rengine().getCamera().translate(glm::vec3(0.0f, 5.0f, 5.0f));
     engine.rengine().getCamera().elevation(2.0f);
     ren.getCamera().ylock(true);
 
+    int cam2 = ren.createCamera();
+    int cam3 = ren.createCamera();
 
-    int platform_obj = engine.createGameObject();
-    int platform_model = ren.modelManager().loadOBJ("assets/models/", "hall.obj", "hall.mtl");
-    engine.giveComponents(platform_obj, TRANSFORM, MODEL);
-    modelCS.useModel(platform_obj, platform_model, 0);
+    ren.modelManager().loadTextures("assets/textures/albedo/",      true);
+    ren.modelManager().loadTextures("assets/textures/metallic/",    false);
+    ren.modelManager().loadTextures("assets/textures/roughness/",   false);
+    ren.modelManager().loadTextures("assets/textures/ao/",          false);
+    ren.modelManager().loadTextures("assets/textures/specular/",    false);
+    ren.modelManager().loadTextures("assets/textures/reflection/",  false);
 
 
-    int angel_obj = engine.createGameObject();
-    int angel_model = ren.modelManager().loadOBJ("assets/models/", "angel.obj", "angel.mtl");
-    engine.giveComponents(angel_obj, TRANSFORM, MODEL);
-    modelCS.useModel(angel_obj, angel_model, 0);
+    int player_obj = engine.createGameObject();
+    int player_model = ren.modelManager().loadOBJ("assets/models/", "man.obj", "man.mtl");
+    engine.giveComponents(player_obj, TRANSFORM, MODEL, CAMERA, CHARCONTROL);
+    modelCS.useModel(player_obj, player_model, 0);
+    charCS.controlMethod(player_obj, controlmethods::player);
+    transCS.getTransform(player_obj).scale(glm::vec3(0.25f));
+    transCS.getTransform(player_obj).translate(glm::vec3(0.0f, -1.0f, 0.0f));
 
+
+
+
+    int terrain_obj = engine.createGameObject();
+    int terrain_model = ren.modelManager().loadOBJ("assets/models/", "base.obj", "base.mtl");
+    engine.giveComponents(terrain_obj, TRANSFORM, MODEL);
+    modelCS.useModel(terrain_obj, terrain_model, 0);
+    transCS.getTransform(terrain_obj).translate(glm::vec3(0.0f, -5.0f, 0.0f));
+
+
+    int baby_obj = engine.createGameObject();
+    int baby_model = ren.modelManager().loadOBJ("assets/models/", "baby.obj", "baby.mtl");
+    engine.giveComponents(baby_obj, TRANSFORM, MODEL);
+    modelCS.useModel(baby_obj, baby_model, 0);
 
     // int soundobj = engine.createGameObject();
     // engine.giveComponent(soundobj, TRANSFORM);
@@ -65,13 +76,27 @@ int ENTRY(int argc, const char **argv)
     // engine.aengine().playSound(emitter);
     // engine.aengine().listenerPosition(&transCS.getTransform(player_obj));
 
-    int dirlight_id = ren.lightSystem().createLightsource(idk::lightsource::DIR);
+
+    ren.lightSystem().createLightsource(idk::lightsource::POINT);
 
 
     while (engine.running())
     {
         engine.beginFrame();
 
+
+        if (engine.eventManager().keylog().keyDown(idk::Keycode::F))
+        {
+            ren.useCamera(0);
+        }
+
+        else if (engine.eventManager().keylog().keyDown(idk::Keycode::G))
+        {
+            ren.useCamera(1);
+        }
+
+
+        // transCS.getTransform(baby_obj).rotateY(0.00025f);
 
 
         engine.endFrame();

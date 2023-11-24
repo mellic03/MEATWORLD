@@ -102,7 +102,7 @@ ImGui_Module::f_settings_camera( idk::Engine &engine )
         idk::Camera &cam = engine.rengine().getCamera();
 
         static glm::vec3 offset(0.0f);
-        ImGui::SliderFloat3("Offset", &offset[0], -2.0f, 2.0f, "%.3f");
+        ImGui::SliderFloat3("Offset", &offset[0], -6.0f, 6.0f, "%.3f");
         cam.offset(offset);
 
 
@@ -228,7 +228,7 @@ ImGui_Module::f_settings_dirlight( idk::Engine &engine )
     {
         ImGui::BeginChild("REE", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()));
 
-        static int selected = 0;
+        static int selected = -1;
         int n = 0;
 
         ImGuiStyle& style = ImGui::GetStyle();
@@ -259,27 +259,31 @@ ImGui_Module::f_settings_dirlight( idk::Engine &engine )
         ImGui::BeginChild(child_id, ImVec2(right_w, 0), true, 0);
 
             child_id = ImGui::GetID((void*)(intptr_t)2);
-    
-            ImGui::BeginChild("REEEE", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()));
-                auto &dirlight = ren.lightSystem().dirlights()[selected];
 
-                ImGui::Image(
-                    (void*)(intptr_t)(ren.lightSystem().shadowmaps()[selected].attachments[0]),
-                    ImVec2(256, 256),
-                    ImVec2(0, 1),
-                    ImVec2(1, 0)
-                );
+            if (selected >= 0)
+            {
+                ImGui::BeginChild("REEEE", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()));
 
-                ImGui::ColorEdit3("Ambient", &dirlight.ambient[0]);
-                ImGui::ColorEdit3("Diffuse", &dirlight.diffuse[0]);
-                ImGui::SliderFloat3("Direction", &dirlight.direction[0], -1.0f, 1.0f, "%.2f");
+                    auto &dirlight = ren.lightSystem().dirlights()[selected];
 
-                if (ImGui::Button("Cancel"))
-                {
-                    m_menu_action = "";
-                }
+                    ImGui::Image(
+                        (void*)(intptr_t)(ren.lightSystem().shadowmaps()[selected].attachments[0]),
+                        ImVec2(256, 256),
+                        ImVec2(0, 1),
+                        ImVec2(1, 0)
+                    );
 
-            ImGui::EndChild();
+                    ImGui::ColorEdit3("Ambient", &dirlight.ambient[0]);
+                    ImGui::ColorEdit3("Diffuse", &dirlight.diffuse[0]);
+                    ImGui::SliderFloat3("Direction", &dirlight.direction[0], -1.0f, 1.0f, "%.2f");
+
+                    if (ImGui::Button("Cancel"))
+                    {
+                        m_menu_action = "";
+                    }
+
+                ImGui::EndChild();
+            }
 
         if (ImGui::Button("Remove"))
         {

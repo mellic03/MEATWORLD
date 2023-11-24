@@ -15,9 +15,9 @@ public:
     void        stage_B( idk::Engine & );
     void        stage_C( idk::Engine & )    {  };
 
-    void        onAssignment( int obj_id, idk::Engine & ) {  };
-    void        onGameObjectCreation( int obj_id, idk::Engine & ) {  };
-    void        onGameObjectDeletion( int obj_id, idk::Engine & ) {  };
-    void        onGameObjectCopy( int src_obj_id, int dest_obj_id, idk::Engine & ) {  };
+    void        onObjectAssignment( int obj_id, idk::Engine & ) {  };
+    void        onObjectCreation( int obj_id, idk::Engine & ) {  };
+    void        onObjectDeletion( int obj_id, idk::Engine & ) {  };
+    void        onObjectCopy( int src_obj_id, int dest_obj_id, idk::Engine & ) {  };
 };
 
