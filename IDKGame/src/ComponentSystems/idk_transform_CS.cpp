@@ -56,6 +56,19 @@ Transform_CS::translate( int obj_id, glm::vec3 v )
     m_transforms.get(m_transform_IDs[obj_id]).translate(v);
 }
 
+void 
+Transform_CS::scale( int obj_id, glm::vec3 s )
+{
+    #ifdef IDK_DEBUG
+        if (m_transform_IDs[obj_id] == -1)
+        {
+            std::cout << "m_transform_IDs[" << obj_id << "] == -1" << std::endl;
+            exit(1);
+        }
+    #endif
+
+    m_transforms.get(m_transform_IDs[obj_id]).scale(s);
+}
 
 
 

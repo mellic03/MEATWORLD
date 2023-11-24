@@ -44,15 +44,15 @@ target_link_libraries(
 
 
 
-project(texconvert)
+# project(texconvert)
 
-add_executable(
-    ${PROJECT_NAME} "IDKGameEngine/src/IDKtools/texconvert.cpp"
-)
+# add_executable(
+#     ${PROJECT_NAME} "IDKGameEngine/src/IDKtools/texconvert.cpp"
+# )
 
-target_link_libraries(
-    ${PROJECT_NAME} PUBLIC
-    IDKengine
-    IDKcomponentsystems
-    IDKmodules
-)
+# target_link_libraries(
+#     ${PROJECT_NAME} PUBLIC
+#     IDKengine
+#     IDKcomponentsystems
+#     IDKmodules
+# )

@@ -7,7 +7,7 @@ rm -R ./output/assets
 mkdir ./build ./output ./output/assets ./output/IDKGE ./output/IDKGE/IDKtools
 cd ./build
 cmake -G Ninja ..
-ninja
+ninja -j 6
 cd ..
 
 

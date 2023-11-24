@@ -34,16 +34,13 @@ int ENTRY(int argc, const char **argv)
 
     engine.rengine().getCamera().elevation(2.0f);
     ren.getCamera().ylock(true);
-
     int cam2 = ren.createCamera();
-    int cam3 = ren.createCamera();
 
-    ren.modelManager().loadTextures("assets/textures/albedo/",      true);
-    ren.modelManager().loadTextures("assets/textures/metallic/",    false);
-    ren.modelManager().loadTextures("assets/textures/roughness/",   false);
-    ren.modelManager().loadTextures("assets/textures/ao/",          false);
-    ren.modelManager().loadTextures("assets/textures/specular/",    false);
-    ren.modelManager().loadTextures("assets/textures/reflection/",  false);
+
+    ren.modelManager().loadTextures("assets/textures/albedo/",    true);
+    ren.modelManager().loadTextures("assets/textures/metallic/",  false);
+    ren.modelManager().loadTextures("assets/textures/roughness/", false);
+    ren.modelManager().loadTextures("assets/textures/ao/",        false);
 
 
     int player_obj = engine.createGameObject();
@@ -52,16 +49,14 @@ int ENTRY(int argc, const char **argv)
     modelCS.useModel(player_obj, player_model, 0);
     charCS.controlMethod(player_obj, controlmethods::player);
     transCS.getTransform(player_obj).scale(glm::vec3(0.25f));
-    transCS.getTransform(player_obj).translate(glm::vec3(0.0f, -1.0f, 0.0f));
-
-
+    transCS.translate(player_obj, glm::vec3(0.0f, -1.0f, 0.0f));
 
 
     int terrain_obj = engine.createGameObject();
     int terrain_model = ren.modelManager().loadOBJ("assets/models/", "base.obj", "base.mtl");
     engine.giveComponents(terrain_obj, TRANSFORM, MODEL);
     modelCS.useModel(terrain_obj, terrain_model, 0);
-    transCS.getTransform(terrain_obj).translate(glm::vec3(0.0f, -5.0f, 0.0f));
+    transCS.translate(terrain_obj, glm::vec3(0.0f, -5.0f, 0.0f));
 
 
     int baby_obj = engine.createGameObject();
@@ -77,13 +72,12 @@ int ENTRY(int argc, const char **argv)
     // engine.aengine().listenerPosition(&transCS.getTransform(player_obj));
 
 
-    ren.lightSystem().createLightsource(idk::lightsource::POINT);
+    ren.lightSystem().createDirlight();
 
 
     while (engine.running())
     {
         engine.beginFrame();
-
 
         if (engine.eventManager().keylog().keyDown(idk::Keycode::F))
         {
@@ -94,10 +88,6 @@ int ENTRY(int argc, const char **argv)
         {
             ren.useCamera(1);
         }
-
-
-        // transCS.getTransform(baby_obj).rotateY(0.00025f);
-
 
         engine.endFrame();
     }

@@ -172,7 +172,7 @@ ImGui_Module::f_settings_pointlight( idk::Engine &engine )
 
             if (ImGui::Button("Add"))
             {
-                ren.lightSystem().createLightsource(idk::lightsource::POINT);
+                ren.lightSystem().createPointlight();
             }
         ImGui::EndChild();
 
@@ -187,7 +187,6 @@ ImGui_Module::f_settings_pointlight( idk::Engine &engine )
             ImGui::BeginChild("REEEE", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()));
                 auto &light = ren.lightSystem().pointlights()[selected];
 
-
                 ImGui::ColorEdit3("Ambient", &light.ambient[0]);
                 ImGui::ColorEdit3("Diffuse", &light.diffuse[0], ImGuiColorEditFlags_HDR);
                 ImGui::DragFloat3("Position", &light.position[0], 0.1f);
@@ -201,7 +200,7 @@ ImGui_Module::f_settings_pointlight( idk::Engine &engine )
 
         if (ImGui::Button("Remove"))
         {
-            ren.lightSystem().destroyLightsource(idk::lightsource::POINT, selected);
+            ren.lightSystem().destroyPointlight(selected);
             selected = 0;
         }
         ImGui::EndChild();
@@ -248,7 +247,7 @@ ImGui_Module::f_settings_dirlight( idk::Engine &engine )
 
             if (ImGui::Button("Add"))
             {
-                ren.lightSystem().createLightsource(idk::lightsource::DIR);
+                ren.lightSystem().createDirlight();
             }
         ImGui::EndChild();
 
@@ -287,7 +286,7 @@ ImGui_Module::f_settings_dirlight( idk::Engine &engine )
 
         if (ImGui::Button("Remove"))
         {
-            ren.lightSystem().destroyLightsource(idk::lightsource::DIR, selected);
+            ren.lightSystem().destroyDirlight(selected);
             selected = 0;
         }
         ImGui::EndChild();

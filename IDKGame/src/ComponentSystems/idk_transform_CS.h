@@ -22,7 +22,8 @@ public:
     void        onObjectCopy( int src_obj_id, int dest_obj_id, idk::Engine & );
 
     idk::Transform &    getTransform( int obj_id ) { return m_transforms.get(m_transform_IDs[obj_id]); };
-    void                translate( int obj_id, glm::vec3 v );
+    void                translate ( int obj_id, glm::vec3 v );
+    void                scale     ( int obj_id, glm::vec3 s );
 
 
     void                setParent   ( int parent_id, int child_id );
