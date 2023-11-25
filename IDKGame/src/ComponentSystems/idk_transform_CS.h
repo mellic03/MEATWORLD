@@ -23,6 +23,9 @@ public:
 
     idk::Transform &    getTransform( int obj_id ) { return m_transforms.get(m_transform_IDs[obj_id]); };
     void                translate ( int obj_id, glm::vec3 v );
+    void                rotateX   ( int obj_id, float r     );
+    void                rotateY   ( int obj_id, float r     );
+    void                rotateZ   ( int obj_id, float r     );
     void                scale     ( int obj_id, glm::vec3 s );
 
 

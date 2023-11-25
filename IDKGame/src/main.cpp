@@ -48,21 +48,21 @@ int ENTRY(int argc, const char **argv)
     engine.giveComponents(player_obj, TRANSFORM, MODEL, CAMERA, CHARCONTROL);
     modelCS.useModel(player_obj, player_model, 0);
     charCS.controlMethod(player_obj, controlmethods::player);
-    transCS.getTransform(player_obj).scale(glm::vec3(0.25f));
+    transCS.getTransform(player_obj).scale(glm::vec3(0.0f));
     transCS.translate(player_obj, glm::vec3(0.0f, -1.0f, 0.0f));
 
 
     int terrain_obj = engine.createGameObject();
-    int terrain_model = ren.modelManager().loadOBJ("assets/models/", "base.obj", "base.mtl");
+    int terrain_model = ren.modelManager().loadOBJ("assets/models/", "hall.obj", "hall.mtl");
     engine.giveComponents(terrain_obj, TRANSFORM, MODEL);
     modelCS.useModel(terrain_obj, terrain_model, 0);
-    transCS.translate(terrain_obj, glm::vec3(0.0f, -5.0f, 0.0f));
 
 
-    int baby_obj = engine.createGameObject();
-    int baby_model = ren.modelManager().loadOBJ("assets/models/", "baby.obj", "baby.mtl");
-    engine.giveComponents(baby_obj, TRANSFORM, MODEL);
-    modelCS.useModel(baby_obj, baby_model, 0);
+    int sphere_obj = engine.createGameObject();
+    int sphere_model = ren.modelManager().loadOBJ("assets/models/", "sphere.obj", "sphere.mtl");
+    engine.giveComponents(sphere_obj, TRANSFORM, MODEL);
+    modelCS.useModel(sphere_obj, sphere_model, 0);
+    transCS.translate(sphere_obj, glm::vec3(0.0f, 2.0f, 0.0f));
 
     // int soundobj = engine.createGameObject();
     // engine.giveComponent(soundobj, TRANSFORM);
@@ -72,8 +72,9 @@ int ENTRY(int argc, const char **argv)
     // engine.aengine().listenerPosition(&transCS.getTransform(player_obj));
 
 
-    ren.lightSystem().createDirlight();
-
+    int point_id = ren.lightSystem().createPointlight();
+    idk::Pointlight &light = ren.lightSystem().pointlights()[point_id];
+    light.position = glm::vec4(2.0f, 3.0f, 2.0f, 1.0f);
 
     while (engine.running())
     {
@@ -88,6 +89,11 @@ int ENTRY(int argc, const char **argv)
         {
             ren.useCamera(1);
         }
+
+
+        // transCS.rotateY(sphere_obj, engine.deltaTime() * 1.0f); 
+
+        ren.drawPointlight(light);
 
         engine.endFrame();
     }

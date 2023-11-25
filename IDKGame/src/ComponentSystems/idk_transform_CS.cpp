@@ -56,6 +56,28 @@ Transform_CS::translate( int obj_id, glm::vec3 v )
     m_transforms.get(m_transform_IDs[obj_id]).translate(v);
 }
 
+
+void
+Transform_CS::rotateX( int obj_id, float r )
+{
+    m_transforms.get(m_transform_IDs[obj_id]).rotateX(r);
+}
+
+
+void
+Transform_CS::rotateY( int obj_id, float r )
+{
+    m_transforms.get(m_transform_IDs[obj_id]).rotateY(r);
+}
+
+
+void
+Transform_CS::rotateZ( int obj_id, float r )
+{
+    m_transforms.get(m_transform_IDs[obj_id]).rotateZ(r);
+}
+
+
 void 
 Transform_CS::scale( int obj_id, glm::vec3 s )
 {

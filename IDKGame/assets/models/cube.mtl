@@ -1,22 +1,17 @@
-# Blender 3.6.0 MTL File: 'None'
+# Blender 3.6.5 MTL File: 'None'
 # www.blender.org
 
 newmtl Material.001
-Ns 16.000000
-Ka 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd /home/michael/Desktop/code/C++/IDK/assets/textures/container.png
-map_Ks /home/michael/Desktop/code/C++/IDK/assets/textures/container-specular.png
-
-newmtl material.003
-Ns 250.000000
-Ka 1.000000 1.000000 1.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.450000
-d 1.000000
-illum 2
-map_Kd /home/michael/Desktop/code/C++/IDK/assets/textures/container.png
-map_Ks /home/michael/Desktop/code/C++/IDK/assets/textures/container-specular.png
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/albedo/darkgrey.png
+map_Pm /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/metallic/test.png
+map_Pr /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/roughness/test.png

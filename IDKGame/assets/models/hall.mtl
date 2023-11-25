@@ -13,8 +13,9 @@ Pc 0.000000
 Pcr 0.030000
 aniso 0.000000
 anisor 0.000000
-map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/diffuse/brick2.png
-map_Ks /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/specular/marble2-specular.png
+map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/albedo/brick2.png
+map_Pr /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/roughness/brick2.png
+map_Pm /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/metallic/zero.png
 
 newmtl marble.004
 Ke 0.000000 0.000000 0.000000
@@ -27,9 +28,9 @@ Pc 0.000000
 Pcr 0.030000
 aniso 0.000000
 anisor 0.000000
-map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/diffuse/marble2.png
-map_Pm /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/reflection/full.png
-map_Ks /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/specular/imperfections.png
+map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/albedo/marble2.png
+map_Pr /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/roughness/marble2.png
+map_Pm /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/metallic/zero.png
 
 newmtl marble.005
 Ke 0.000000 0.000000 0.000000
@@ -43,8 +44,9 @@ Pc 0.000000
 Pcr 0.030000
 aniso 0.000000
 anisor 0.000000
-map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/diffuse/marble.png
-map_Ks /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/specular/marble2-specular.png
+map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/albedo/marble.png
+map_Pr /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/roughness/imperfections.png
+map_Pm /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/metallic/zero.png
 
 newmtl peelars
 Ke 0.000000 0.000000 0.000000
@@ -58,8 +60,9 @@ Pc 0.000000
 Pcr 0.030000
 aniso 0.000000
 anisor 0.000000
-map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/diffuse/marble2.png
-map_Ks /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/specular/imperfections.png
+map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/albedo/marble2.png
+map_Pr /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/roughness/marble2.png
+map_Pm /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/metallic/zero.png
 
 newmtl pillars
 Kd 0.800000 0.800000 0.800000
@@ -88,5 +91,6 @@ Pc 0.000000
 Pcr 0.030000
 aniso 0.000000
 anisor 0.000000
-map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/diffuse/wood2.png
-map_Ks /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/specular/marble2-specular.png
+map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/albedo/wood2.png
+map_Pr /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/roughness/wood2.png
+map_Pm /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/metallic/zero.png

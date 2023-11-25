@@ -1,4 +1,6 @@
-#include "idk_imgui.h"
+#include "idk_imgui.hpp"
+#include "idk_imgui_extra.hpp"
+
 
 SDL_Window *m2_SDL_window;
 SDL_GLContext m2_SDL_GL_Context;
@@ -189,7 +191,12 @@ ImGui_Module::f_settings_pointlight( idk::Engine &engine )
 
                 ImGui::ColorEdit3("Ambient", &light.ambient[0]);
                 ImGui::ColorEdit3("Diffuse", &light.diffuse[0], ImGuiColorEditFlags_HDR);
-                ImGui::DragFloat3("Position", &light.position[0], 0.1f);
+
+                ImGui::DragFloat("Constant",  &light.attenuation[0], 0.1f, 0.0f, 1.0f);
+                ImGui::DragFloat("Linear",    &light.attenuation[1], 0.1f, 0.0f, 1.0f);
+                ImGui::DragFloat("Quadratic", &light.attenuation[2], 0.1f, 0.0f, 1.0f);
+
+                idkgui::dragVec3("Position", &light.position[0], 0.0f, 0.0f, 0.1f, "%0.2f", 0.0f);
 
                 if (ImGui::Button("Cancel"))
                 {
