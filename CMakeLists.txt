@@ -41,6 +41,8 @@ target_link_libraries(
 
 
 
+# MapIBL
+# ----------------------------------------------------------------------------------------------
 project (diffuseIBL)
 
 add_executable(
@@ -54,8 +56,6 @@ target_link_libraries(
 
 
 project (specularIBL)
-add_compile_options("-g")
-add_definitions(-DIDK_DEBUG)
 
 add_executable(
     ${PROJECT_NAME} "IDKGameEngine/src/IDKtools/specularIBL.cpp"
@@ -65,17 +65,5 @@ target_link_libraries(
     ${PROJECT_NAME} PUBLIC
     IDKengine
 )
+# ----------------------------------------------------------------------------------------------
 
-
-# project(texconvert)
-
-# add_executable(
-#     ${PROJECT_NAME} "IDKGameEngine/src/IDKtools/texconvert.cpp"
-# )
-
-# target_link_libraries(
-#     ${PROJECT_NAME} PUBLIC
-#     IDKengine
-#     IDKcomponentsystems
-#     IDKmodules
-# )

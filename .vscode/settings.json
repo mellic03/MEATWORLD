@@ -112,9 +112,7 @@
     "C_Cpp.default.includePath": [
         "${default}",
         "${workspaceFolder}/IDKGameEngine/src/",
-        "/usr/local/include/bullet/",
-        "/usr/include/opencv4/",
-        "/usr/include/opencv4/opencv2/"
+        "${workspaceFolder}/IDKGameEngine/external/include/"
     ],
 
     "C_Cpp.default.cppStandard": "gnu++23"
