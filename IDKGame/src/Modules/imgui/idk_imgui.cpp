@@ -1,6 +1,8 @@
 #include "idk_imgui.hpp"
 #include "idk_imgui_extra.hpp"
 
+#include "../../ComponentSystems/IDKcomponentsystems.h"
+
 
 SDL_Window *m2_SDL_window;
 SDL_GLContext m2_SDL_GL_Context;
@@ -107,31 +109,30 @@ ImGui_Module::f_settings_camera( idk::Engine &engine )
         ImGui::SliderFloat3("Offset", &offset[0], -6.0f, 6.0f, "%.3f");
         cam.offset(offset);
 
-
-        ImGui::SliderFloat("Strength", &engine.rengine().m_abbr_str, 0.0f, 0.01f, "%.4f");
-        ImGui::SliderFloat2("R",  &engine.rengine().m_r_abbr.x,  -1.0f, 1.0f, "%.3f");
+        ImGui::SliderFloat("Strength", &cam.m_abr_str, 0.0f, 0.1f, "%.4f");
+        ImGui::SliderFloat2("R",  &cam.m_r_abr.x,  -1.0f, 1.0f, "%.0f");
         ImGui::SameLine();
         if (ImGui::Button("RReset"))
-            engine.rengine().m_r_abbr = glm::vec2(0.0f);
+            cam.m_r_abr = glm::vec2(0.0f);
 
-        ImGui::SliderFloat2("G",  &engine.rengine().m_g_abbr.x,  -1.0f, 1.0f, "%.3f");
+        ImGui::SliderFloat2("G",  &cam.m_g_abr.x,  -1.0f, 1.0f, "%.1f");
         ImGui::SameLine();
         if (ImGui::Button("GReset"))
-            engine.rengine().m_g_abbr = glm::vec2(0.0f);
+            cam.m_g_abr = glm::vec2(0.0f);
 
-        ImGui::SliderFloat2("B",  &engine.rengine().m_b_abbr.x,  -1.0f, 1.0f, "%.3f");
+        ImGui::SliderFloat2("B",  &cam.m_b_abr.x,  -1.0f, 1.0f, "%.1f");
         ImGui::SameLine();
         if (ImGui::Button("BReset"))
-            engine.rengine().m_b_abbr = glm::vec2(0.0f);
+            cam.m_b_abr = glm::vec2(0.0f);
 
+        ImGui::Spacing();
 
-        static float bloom = 0.0001f;
-        ImGui::SliderFloat("Bloom", &bloom, 0.0f, 0.005f, "%.5f");
-        engine.rengine().setBloomIntensity(bloom);
+        ImGui::SliderFloat("Bloom", &cam.m_bloom_gamma.x, 0.0f, 1.0f, "%.2f");
+        ImGui::SliderFloat("Gamma", &cam.m_bloom_gamma.y, 0.0f, 4.0f, "%.2f");
+        ImGui::Spacing();
 
-        ImGui::SliderFloat("Exposure", &engine.rengine().m_exposure, 0.0f, 2.0f, "%.4f");
-        ImGui::SliderFloat("Gamma", &engine.rengine().m_gamma, 0.0f, 4.0f, "%.4f");
-
+        ImGui::SliderFloat("Adjust Rate",  &cam.m_bloom_gamma.z,  15.0f,  1024.0f, "%1.0f");
+        ImGui::Spacing();
 
         if (ImGui::Button("Cancel"))
         {
@@ -189,7 +190,7 @@ ImGui_Module::f_settings_pointlight( idk::Engine &engine )
             ImGui::BeginChild("REEEE", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()));
                 auto &light = ren.lightSystem().pointlights()[selected];
 
-                ImGui::ColorEdit3("Ambient", &light.ambient[0]);
+                ImGui::ColorEdit3("Ambient", &light.ambient[0], ImGuiColorEditFlags_HDR);
                 ImGui::ColorEdit3("Diffuse", &light.diffuse[0], ImGuiColorEditFlags_HDR);
 
                 ImGui::DragFloat("Constant",  &light.attenuation[0], 0.1f, 0.0f, 1.0f);
@@ -222,6 +223,139 @@ ImGui_Module::f_settings_pointlight( idk::Engine &engine )
     }
 }
 
+
+
+void
+ImGui_Module::f_settings_skybox( idk::Engine &engine )
+{
+    idk::RenderEngine &ren = engine.rengine();
+
+    if (ImGui::BeginChild("Settings_Skybox"))
+    {
+        static int selected = 0;
+        ren.current_skybox = selected;
+
+        ImGuiStyle& style = ImGui::GetStyle();
+        float left_w = 0.25 * ImGui::GetContentRegionAvail().x;
+        float right_w = ImGui::GetContentRegionAvail().x - left_w;
+        ImGuiID child_id = ImGui::GetID((void*)(intptr_t)52);
+
+        for (int i=0; i<ren.skyboxes.size(); i++)
+        {
+            if (ImGui::Selectable(std::to_string(i).c_str(), selected == i))
+            {
+                selected = i;
+            }
+        }
+
+        if (ImGui::Button("Cancel"))
+        {
+            m_menu_action = "";
+        }
+
+        ImGui::EndChild();
+    }
+
+}
+
+
+
+void
+ImGui_Module::f_settings_objects( idk::Engine &engine )
+{
+    idk::RenderEngine &ren = engine.rengine();
+
+    if (ImGui::BeginChild("Settings_Objects"))
+    {
+        const std::set<int> &obj_ids = engine.gameObjects();
+
+        static int selected = 0;
+
+        ImGuiStyle& style = ImGui::GetStyle();
+        float left_w = 0.2 * ImGui::GetContentRegionAvail().x;
+        float right_w = ImGui::GetContentRegionAvail().x - left_w;
+
+        ImGui::BeginChild("obj_select", ImVec2(left_w, 0), true, 0);
+        for (int id: obj_ids)
+        {
+            if (ImGui::Selectable(std::to_string(id).c_str(), selected == id))
+            {
+                selected = id;
+            }
+        }
+        ImGui::EndChild();
+
+        ImGui::SameLine();
+
+        ImGui::BeginChild("obj_edit", ImVec2(right_w, 0), true, 0);
+        {
+            auto &tCS = engine.getCS<Transform_CS>("transform");
+            auto &mCS = engine.getCS<Model_CS>("model");
+
+            if (engine.hasComponent(selected, "transform"))
+            {
+                glm::vec3 pos = tCS.getTransform(selected).position();
+                idkgui::dragVec3("position", &pos[0], 0.0f, 0.0f, 0.1f, "%.1f", 0.0f);
+                tCS.translate(selected, pos - tCS.getTransform(selected).position());
+
+
+                glm::vec3 scale = tCS.getTransform(selected).scale();
+                idkgui::dragVec3("scale", &scale[0], 0.0f, 0.0f, 0.1f, "%.1f", 0.0f);
+                tCS.scale(selected, scale);
+            }
+
+            if (engine.hasComponent(selected, "model"))
+            {
+                idk::Model &model = mCS.getModel(selected);
+            
+                for (size_t i=0; i<model.meshes.size(); i++)
+                {
+                    idk::Mesh &mesh = model.meshes[i];
+                    idk::Material &material = ren.modelManager().getMaterials().get(mesh.material_id);
+
+                    ImGui::Text("Material: %s", material.name.c_str());
+
+                    ImGui::DragFloat(("normal" + std::to_string(i)).c_str(), &material.normal_strength, 0.01f, 0.0f, 1.0f);
+                    ImGui::DragFloat(("rough"  + std::to_string(i)).c_str(), &material.roughness_strength, 0.01f, 0.0f, 2.0f);
+
+                    ImGui::DragFloat(("metal"  + std::to_string(i)).c_str(), &material.metallic_strength, 0.01f, 0.0f, 2.0f);
+
+                    ImGui::Text("%s", idk::Material::reflectance_str(material.reflectance).c_str());
+                    ImGui::SameLine();
+                    ImGui::DragInt(
+                        ("reflectance"  + std::to_string(i)).c_str(),
+                        &material.reflectance, 1.0f, 0, 4
+                    );
+
+                    ImGui::DragFloat(
+                        ("displacement"  + std::to_string(i)).c_str(),
+                        &material.displacement_strength, 0.01f, 0.0f, 1.0f
+                    );
+
+
+                    ImGui::Dummy({0, 0});
+                }
+
+            }
+
+            if (ImGui::Button("copy"))
+            {
+                engine.createGameObject(selected);
+            }
+
+            ImGui::EndChild();
+        }
+
+
+        if (ImGui::Button("Cancel"))
+        {
+            m_menu_action = "";
+        }
+
+        ImGui::EndChild();
+    }
+
+}
 
 
 void
@@ -281,6 +415,7 @@ ImGui_Module::f_settings_dirlight( idk::Engine &engine )
 
                     ImGui::ColorEdit3("Ambient", &dirlight.ambient[0]);
                     ImGui::ColorEdit3("Diffuse", &dirlight.diffuse[0]);
+                    ImGui::DragFloat("Intensity",  &dirlight.diffuse.w, 0.1f, 0.0f, 1.0f);
                     ImGui::SliderFloat3("Direction", &dirlight.direction[0], -1.0f, 1.0f, "%.2f");
 
                     if (ImGui::Button("Cancel"))
@@ -349,6 +484,12 @@ ImGui_Module::f_main_menu_bar()
             if (ImGui::MenuItem("Camera", ""))
                 m_menu_action = "Settings_Camera";
 
+            if (ImGui::MenuItem("Skybox", ""))
+                m_menu_action = "Settings_Skybox";
+
+            if (ImGui::MenuItem("Objects", ""))
+                m_menu_action = "Settings_Objects";
+
             if (ImGui::MenuItem("Dirlight", ""))
                 m_menu_action = "Settings_Dirlight";
 
@@ -398,6 +539,16 @@ ImGui_Module::stage_B( idk::Engine &engine )
     else if (m_menu_action == "Settings_Dirlight")
     {
         f_settings_dirlight(engine);
+    }
+
+    else if (m_menu_action == "Settings_Skybox")
+    {
+        f_settings_skybox(engine);
+    }
+
+    else if (m_menu_action == "Settings_Objects")
+    {
+        f_settings_objects(engine);
     }
 
     else if (m_menu_action == "Settings_Camera")

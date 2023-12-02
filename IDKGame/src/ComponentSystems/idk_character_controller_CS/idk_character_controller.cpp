@@ -27,12 +27,11 @@ CharacterController_CS::onObjectAssignment( int obj_id, idk::Engine &engine )
 void
 CharacterController_CS::stage_B( idk::Engine &engine )
 {
-    _controllers.for_each(
-        [&engine](CharacterController &controller)
-        {
-            controller.controlMethod(controller.obj_id, engine, controller);
-        }
-    );
+    for (CharacterController &controller: _controllers)
+    {
+        controller.controlMethod(controller.obj_id, engine, controller);
+        
+    }
 }
 
 
@@ -62,5 +61,5 @@ CharacterController_CS::onObjectDeletion( int obj_id, idk::Engine &engine )
 void
 CharacterController_CS::onObjectCopy( int src_obj_id, int dest_obj_id, idk::Engine &engine )
 {
-    _controller_ids[dest_obj_id] = _controllers.create();
+    // _controller_ids[dest_obj_id] = _controllers.create();
 }

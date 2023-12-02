@@ -4,7 +4,7 @@
 rm -R ./output/assets
 
 # Build project
-mkdir ./build ./output ./output/assets ./output/IDKGE ./output/IDKGE/IDKtools
+mkdir ./build ./output ./output/assets ./output/IDKGE
 cd ./build
 cmake -G Ninja ..
 ninja -j 6
@@ -17,14 +17,18 @@ cp -R IDKGame/assets ./output/.
 cp -R ./IDKGameEngine/shaders ./output/IDKGE/.
 
 
-rm -R ./output/assets/textures
-mkdir ./output/assets/textures
-
-cp -R IDKGame/assets output*
+mkdir ./output/IDKGE/IDKtools
 
 
-# cp ./build/texconvert ./output/IDKGE/IDKtools/texconvert
-# ./build/texconvert ./IDKGame/assets/textures/diffuse  ./output/assets/textures/diffuse.texpak
-# ./build/texconvert ./IDKGame/assets/textures/specular ./output/assets/textures/specular.texpak
-# ./build/texconvert ./IDKGame/assets/textures/normal   ./output/assets/textures/normal.texpak
-# ./build/texconvert ./IDKGame/assets/textures/reflection ./output/assets/textures/reflection.texpak
+# mapIBL
+mkdir ./output/IDKGE/IDKtools/MapIBL
+mkdir ./output/IDKGE/IDKtools/MapIBL/input
+mkdir ./output/IDKGE/IDKtools/MapIBL/output
+
+cp -R ./IDKGameEngine/shaders/IDKtools/DiffuseIBL/. ./output/IDKGE/IDKtools/MapIBL/.
+cp -R ./IDKGameEngine/shaders/IDKtools/SpecularIBL/. ./output/IDKGE/IDKtools/MapIBL/.
+
+cp ./IDKGameEngine/src/IDKtools/mapIBL.sh ./output/IDKGE/IDKtools/MapIBL/.
+
+cp ./build/diffuseIBL ./output/IDKGE/IDKtools/MapIBL/diffuseIBL
+cp ./build/specularIBL ./output/IDKGE/IDKtools/MapIBL/specularIBL

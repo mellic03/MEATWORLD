@@ -9,6 +9,6 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/diffuse/asphalt.png
-map_Pr /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/roughness/imperfections.png
-map_Pm /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/metallic/half.png
+map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/albedo/spotted-rust_albedo.jpg
+map_Pm /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/metallic/spotted-rust_metallic.jpg
+map_Pr /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/roughness/smudges.jpg

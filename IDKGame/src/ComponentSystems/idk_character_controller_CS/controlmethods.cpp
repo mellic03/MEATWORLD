@@ -35,7 +35,7 @@ controlmethods::player( int obj_id, idk::Engine &engine, CharacterController &co
         engine.shutdown();
     }
 
-    constexpr float MOVESPEED = 4.0f;
+    constexpr float MOVESPEED = 6.0f;
 
     if (keylog.keyDown(idk::Keycode::A))
         camera.translate(MOVESPEED*dtime*glm::vec3(-1.0f, 0.0f, 0.0f));

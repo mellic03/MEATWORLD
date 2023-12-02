@@ -15,6 +15,8 @@ private:
 
     void        f_settings_pointlight( idk::Engine &engine );
     void        f_settings_dirlight( idk::Engine &engine );
+    void        f_settings_skybox( idk::Engine &engine );
+    void        f_settings_objects( idk::Engine &engine );
     void        f_settings_camera( idk::Engine &engine );
     void        f_settings_graphics( idk::Engine &engine );
     void        f_main_menu_bar();

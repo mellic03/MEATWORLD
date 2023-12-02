@@ -38,6 +38,7 @@ Transform_CS::onObjectDeletion( int obj_id, idk::Engine &engine )
 void
 Transform_CS::onObjectCopy( int src_obj_id, int dest_obj_id, idk::Engine &engine )
 {
+    engine.giveComponent(dest_obj_id, this->m_id);
     m_transform_IDs[dest_obj_id] = m_transforms.create();
 }
 

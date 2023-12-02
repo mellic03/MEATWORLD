@@ -46,7 +46,7 @@ idk_Voxel::init( idk::Engine &engine )
 
     m_whitenoise = idk::noisegen3D::white(512, 512, 64);
 
-    idk::ColorAttachmentConfig color_config = {
+    idk::glColorConfig color_config = {
         .internalformat = GL_RGBA32F,
         .minfilter      = GL_LINEAR,
         .magfilter      = GL_LINEAR,

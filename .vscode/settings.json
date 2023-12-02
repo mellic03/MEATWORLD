@@ -105,7 +105,8 @@
         "__std_stream": "cpp",
         "shared_mutex": "cpp",
         "hash_map": "cpp",
-        "any": "cpp"
+        "any": "cpp",
+        "hash_set": "cpp"
     },
     "cmake.configureOnOpen": false,
     "C_Cpp.default.includePath": [
