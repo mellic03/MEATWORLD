@@ -39,31 +39,3 @@ target_link_libraries(
     IDKmodules
 )
 
-
-
-# MapIBL
-# ----------------------------------------------------------------------------------------------
-project (diffuseIBL)
-
-add_executable(
-    ${PROJECT_NAME} "IDKGameEngine/src/IDKtools/diffuseIBL.cpp"
-)
-
-target_link_libraries(
-    ${PROJECT_NAME} PUBLIC
-    IDKengine
-)
-
-
-project (specularIBL)
-
-add_executable(
-    ${PROJECT_NAME} "IDKGameEngine/src/IDKtools/specularIBL.cpp"
-)
-
-target_link_libraries(
-    ${PROJECT_NAME} PUBLIC
-    IDKengine
-)
-# ----------------------------------------------------------------------------------------------
-

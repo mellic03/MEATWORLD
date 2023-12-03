@@ -50,7 +50,7 @@ int ENTRY(int argc, const char **argv)
 
 
     int trash_obj = engine.createGameObject();
-    int trash_model = ren.modelManager().loadOBJ("assets/models/", "ship.obj", "ship.mtl");
+    int trash_model = ren.modelManager().loadOBJ("assets/models/", "hall.obj", "hall.mtl");
     engine.giveComponents(trash_obj, TRANSFORM, MODEL);
     modelCS.useModel(trash_obj, trash_model, 0);
     idk::Model &model = ren.modelManager().getModel(trash_model);
