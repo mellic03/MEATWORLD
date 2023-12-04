@@ -1,7 +1,7 @@
 #include "idk_imgui.hpp"
 #include "idk_imgui_extra.hpp"
 
-#include "../../ComponentSystems/IDKcomponentsystems.h"
+#include "../../ComponentSystems/IDKcomponentsystems.hpp"
 
 
 SDL_Window *m2_SDL_window;

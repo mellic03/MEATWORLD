@@ -1,40 +1,52 @@
 cmake_minimum_required(VERSION 3.9)
 
-set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
-set(CMAKE_DISABLE_SOURCE_CHANGES  ON)
-
-set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 set(CMAKE_BUILD_PARALLEL_LEVEL 8)
 set(CMAKE_CXX_FLAGS "-std=c++17 -Wuninitialized -Winit-self -Wmaybe-uninitialized -Werror -fsanitize=undefined -fdiagnostics-color=always -lstdc++fs")
-add_compile_options("-g" "-s" "-fno-ident" "-fno-asynchronous-unwind-tables" "-I/usr/include/opencv4/")
-
-add_definitions(-DCMAKE_EXPORT_COMPILE_COMMANDS=ON)
+add_compile_options("-g" "-fno-ident" "-fno-asynchronous-unwind-tables")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 
 # Debugging
 # --------------------------------------------
 add_definitions(-DIDK_DEBUG)
 # --------------------------------------------
+project(game)
 
-# IDKEngine source directory
-# --------------------------------------------
-set(idkengine_source_dir "IDKGameEngine/src/")
-add_subdirectory(IDKGameEngine/src/)
-# --------------------------------------------
+
+include_directories(${CMAKE_SOURCE_DIR}/external/include)
 
 add_subdirectory(IDKGame/src/ComponentSystems/)
 add_subdirectory(IDKGame/src/Modules/)
 
 
-project(game)
+set(OpenGL_GL_PREFERENCE GLVND)
 
-add_executable(
-    ${PROJECT_NAME} "IDKGame/src/main.cpp"
-)
+find_package(GLEW REQUIRED)
+find_package(OpenGL REQUIRED)
+find_package(SDL2 REQUIRED)
+find_package(SDL2_image REQUIRED)
+find_package(SDL2_mixer REQUIRED)
+
+include_directories(${GLEW_INCLUDE_DIRS})
+include_directories(${OPENGL_INCLUDE_DIRS})
+include_directories(${SDL2_INCLUDE_DIRS})
+include_directories(${SDL2_image_INCLUDE_DIRS})
+include_directories(${SDL2_mixer_INCLUDE_DIRS})
+include_directories(${CMAKE_SOURCE_DIR})
+
+
+add_executable(${PROJECT_NAME} "IDKGame/src/main.cpp")
+
+set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-rpath=./IDKGE/shipping/")
 
 target_link_libraries(
-    ${PROJECT_NAME} PUBLIC
-    IDKengine
+    ${PROJECT_NAME} PRIVATE
+    GLEW
+    SDL2
+    SDL2_image
+    SDL2_mixer
+    ${OPENGL_LIBRARIES}
+    ${CMAKE_SOURCE_DIR}/external/lib/libIDKengine.so
     IDKcomponentsystems
     IDKmodules
 )

@@ -13,11 +13,11 @@ Pc 0.000000
 Pcr 0.030000
 aniso 0.000000
 anisor 0.000000
-map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/albedo/rustic_stone_wall_02_diff_1k.png
-map_Bump -bm 1.000000 /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/normal/rustic_stone_wall_02_nor_gl_1k.png
-map_Ke /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/displacement/rustic_stone_wall_02_disp_1k.png
-map_Pr /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/roughness/rustic_stone_wall_02_rough_1k.png
-map_Ao /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/ao/rustic_stone_wall_02_ao_1k.png
+map_Kd /home/michael/Desktop/code/C++/IDK/IDKGame/IDKGame/assets/textures/albedo/rustic_stone_wall_02_diff_1k.jpg
+map_Bump -bm 1.000000 /home/michael/Desktop/code/C++/IDK/IDKGame/IDKGame/assets/textures/normal/rustic_stone_wall_02_nor_gl_1k.jpg
+map_Ke /home/michael/Desktop/code/C++/IDK/IDKGame/IDKGame/assets/textures/displacement/rustic_stone_wall_02_disp_1k.jpg
+map_Pr /home/michael/Desktop/code/C++/IDK/IDKGame/IDKGame/assets/textures/roughness/rustic_stone_wall_02_rough_1k.jpg
+map_Ao /home/michael/Desktop/code/C++/IDK/IDKGame/IDKGame/assets/textures/ao/rustic_stone_wall_02_ao_1k.jpg
 
 newmtl grass
 Ks 0.000000 0.000000 0.000000
@@ -31,6 +31,6 @@ Pc 0.000000
 Pcr 0.030000
 aniso 0.000000
 anisor 0.000000
-map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/albedo/Rock051_1K-PNG_Color.png
-map_Pr /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/roughness/Rock051_1K-PNG_Roughness.png
-map_Bump -bm 1.000000 /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/normal/Rock051_1K-PNG_NormalGL.png
+map_Kd /home/michael/Desktop/code/C++/IDK/IDKGame/IDKGame/assets/textures/albedo/Rock051_1K-PNG_Color.jpg
+map_Pr /home/michael/Desktop/code/C++/IDK/IDKGame/IDKGame/assets/textures/roughness/Rock051_1K-PNG_Roughness.jpg
+map_Bump -bm 1.000000 /home/michael/Desktop/code/C++/IDK/IDKGame/IDKGame/assets/textures/normal/Rock051_1K-PNG_NormalGL.jpg

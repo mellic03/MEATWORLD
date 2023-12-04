@@ -5,9 +5,9 @@
 #endif
 
 #include <iostream>
-#include "IDKengine.h"
-#include "ComponentSystems/IDKcomponentsystems.h"
-#include "Modules/idk_modules.h"
+#include "IDKengine/IDKengine.hpp"
+#include "ComponentSystems/IDKcomponentsystems.hpp"
+#include "Modules/idk_modules.hpp"
 
 
 
@@ -61,7 +61,7 @@ int ENTRY(int argc, const char **argv)
 
 
     int hall_obj = engine.createGameObject();
-    int hall_model = ren.modelManager().loadOBJ("assets/models/", "gun.obj", "gun.mtl");
+    int hall_model = ren.modelManager().loadOBJ("assets/models/", "cart.obj", "cart.mtl");
     engine.giveComponents(hall_obj, TRANSFORM, MODEL);
     modelCS.useModel(hall_obj, hall_model, 0);
     transCS.translate(hall_obj, glm::vec3(20.0f, 0.0f, 0.0f));

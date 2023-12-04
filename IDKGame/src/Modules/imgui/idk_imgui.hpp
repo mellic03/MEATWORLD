@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IDKengine.h"
+#include "IDKengine/IDKengine.hpp"
 #include "imgui-1.89.7/imgui.h"
 #include "imgui-1.89.7/imgui_impl_sdl2.h"
 #include "imgui-1.89.7/imgui_impl_opengl3.h"

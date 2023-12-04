@@ -8,8 +8,7 @@ file(GLOB SOURCES
     "./idk_character_controller_CS/*.cpp"
 )
 
-add_library(${PROJECT_NAME} STATIC ${SOURCES})
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/${idkengine_source_dir})
+add_library(${PROJECT_NAME} OBJECT ${SOURCES})
 
 target_link_libraries(
     ${PROJECT_NAME} PUBLIC

@@ -23,7 +23,7 @@ controlmethods::player( int obj_id, idk::Engine &engine, CharacterController &co
     if (keylog.keyTapped(idk::Keycode::C))
         engine.eventManager().mouseCapture(!engine.eventManager().mouseCaptured());
 
-    float speed = 24.32f;
+    float speed = 5.32f;
 
     if (keylog.keyDown(idk::Keycode::LSHIFT))
         speed = 64.0f;

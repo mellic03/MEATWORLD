@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IDKengine.h"
+#include "IDKengine/IDKengine.hpp"
 #include "idk_svoctree.hpp"
 
 class idk_Voxel: public idk::Module

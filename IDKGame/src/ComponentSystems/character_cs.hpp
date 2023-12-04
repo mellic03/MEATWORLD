@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "IDKengine.h"
+#include "IDKengine/IDKengine.hpp"
 
 
 namespace idkg { class Character_CS; }

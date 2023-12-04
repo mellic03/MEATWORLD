@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IDKengine.h"
+#include "IDKengine/IDKengine.hpp"
 
 
 namespace idkg { class PhysicsBody_CS; }
