@@ -1,0 +1,12 @@
+19284
+7
+assets/textures/metal_trash_can_diff_1k.jpg
+assets/textures/metal_trash_can_rust_nor_gl_1k.jpg
+assets/textures/metal_trash_can_rust_metal_1k_jpg-metal_trash_can_rust_rough_1k_jpg.png
+dummy
+22596
+7
+assets/textures/metal_trash_can_rust_diff_1k.jpg
+assets/textures/metal_trash_can_rust_nor_gl_1k.jpg
+assets/textures/metal_trash_can_rust_metal_1k_jpg-metal_trash_can_rust_rough_1k_jpg.png
+dummy

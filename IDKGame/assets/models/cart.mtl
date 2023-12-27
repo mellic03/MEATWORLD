@@ -12,10 +12,10 @@ Pc 0.000000
 Pcr 0.030000
 aniso 0.000000
 anisor 0.000000
-map_Kd assets/cart/textures/CoffeeCart_01_cart_diff_2k.png
-map_Pm assets/cart/textures/CoffeeCart_01_cart_metallic_2k.png
-map_Pr assets/cart/textures/CoffeeCart_01_cart_roughness_2k.png
-map_Bump -bm 1.000000 assets/cart/textures/CoffeeCart_01_cart_nor_gl_2k.png
+map_Kd /home/michael/Desktop/code/C++/IDK/IDKGame/IDKGame/assets/cart/textures/CoffeeCart_01_cart_diff_2k.png
+map_Pm /home/michael/Desktop/code/C++/IDK/IDKGame/IDKGame/assets/cart/textures/CoffeeCart_01_cart_metallic_2k.png
+map_Pr /home/michael/Desktop/code/C++/IDK/IDKGame/IDKGame/assets/cart/textures/CoffeeCart_01_cart_roughness_2k.png
+map_Bump -bm 1.000000 /home/michael/Desktop/code/C++/IDK/IDKGame/IDKGame/assets/cart/textures/CoffeeCart_01_cart_nor_gl_2k.png
 
 newmtl CoffeeCart_01_mugs
 Kd 0.800000 0.800000 0.800000
@@ -43,7 +43,7 @@ Pc 0.000000
 Pcr 0.030000
 aniso 0.000000
 anisor 0.000000
-map_Kd assets/cart/textures/CoffeeCart_01_props_diff_2k.png
-map_Pm assets/cart/textures/CoffeeCart_01_props_metallic_2k.png
-map_Pr assets/cart/textures/CoffeeCart_01_props_roughness_2k.png
-map_Bump -bm 1.000000 assets/cart/textures/CoffeeCart_01_props_nor_gl_2k.png
+map_Kd /home/michael/Desktop/code/C++/IDK/IDKGame/IDKGame/assets/cart/textures/CoffeeCart_01_props_diff_2k.png
+map_Pm /home/michael/Desktop/code/C++/IDK/IDKGame/IDKGame/assets/cart/textures/CoffeeCart_01_props_metallic_2k.png
+map_Pr /home/michael/Desktop/code/C++/IDK/IDKGame/IDKGame/assets/cart/textures/CoffeeCart_01_props_roughness_2k.png
+map_Bump -bm 1.000000 /home/michael/Desktop/code/C++/IDK/IDKGame/IDKGame/assets/cart/textures/CoffeeCart_01_props_nor_gl_2k.png

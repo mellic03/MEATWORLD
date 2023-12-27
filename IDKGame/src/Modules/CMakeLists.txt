@@ -4,8 +4,11 @@ project(IDKmodules)
 
 
 file(GLOB SOURCES
-    "./imgui/*.cpp"
-    "./imgui/imgui-1.89.7/*.cpp"
+    "./EditorUI/*.cpp"
+    "./EditorUI/menubar/*.cpp"
+    "./EditorUI/tabs/*.cpp"
+    "./EditorUI/common/*.cpp"
+    "./EditorUI/common/imgui-1.89.7/*.cpp"
     "./voxel/*.cpp"
 )
 

@@ -5,7 +5,8 @@ project(IDKcomponentsystems)
 
 file(GLOB SOURCES
     "./*.cpp"
-    "./idk_character_controller_CS/*.cpp"
+    "./playercontroller_cs/*.cpp"
+    "./terrain_cs/*.cpp"
 )
 
 add_library(${PROJECT_NAME} OBJECT ${SOURCES})

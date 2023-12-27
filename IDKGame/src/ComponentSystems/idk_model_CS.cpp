@@ -1,4 +1,4 @@
-#include "idk_model_CS.h"
+#include "idk_model_CS.hpp"
 #include "idk_transform_CS.h"
 
 
@@ -13,59 +13,75 @@ Model_CS::init(idk::Engine &engine)
 void
 Model_CS::stage_A(idk::Engine &engine)
 {
-    Transform_CS &tCS = engine.getCS<Transform_CS>("transform");
+    Transform_CS &tCS = engine.getCS<Transform_CS>();
     idk::RenderEngine &ren = engine.rengine();
 
-
-    const std::set<int> &obj_ids = engine.gameObjects_byComponent(m_id);
-
-    for (int obj_id: obj_ids)
+    for (auto &[obj_id, model_id, animator_id]: m_object_model_ids)
     {
-        glm::mat4 model_mat = tCS.getModelMatrix(obj_id);
+        glm::mat4 transform = tCS.getModelMatrix(obj_id);
+        ren.drawModel(model_id, animator_id, transform);
 
         if (m_shadowcasts[obj_id])
         {
-            ren.drawShadowCaster(_model_ids[obj_id], model_mat);
+            ren.drawShadowCaster(model_id, animator_id, transform);
         }
-
-        ren.drawModel(_shader_ids[obj_id], _model_ids[obj_id], model_mat);
     }
+
 }
 
+
 void
-Model_CS::useModel( int obj_id, int model_id, GLuint shader_id )
+Model_CS::useModel( int obj_id, int model_id )
 {
-    _model_ids[obj_id] = model_id;
-    _shader_ids[obj_id] = shader_id;
-};
+    int animator_id = engineptr->rengine().modelSystem().getModel(model_id).animator_id;
+
+    m_keys[obj_id] = m_object_model_ids.create({obj_id, model_id, animator_id});
+}
+
+
+int
+Model_CS::getModelID( int obj_id )
+{
+    int key      = m_keys[obj_id];
+    int model_id = std::get<1>(m_object_model_ids.get(key));
+
+    return model_id;
+}
+
 
 idk::Model &
 Model_CS::getModel( int obj_id )
 {
-    return engineptr->rengine().modelManager().getModel(_model_ids[obj_id]);
+    int model_id = getModelID(obj_id);
+    return engineptr->rengine().modelSystem().getModel(model_id);
 }
 
 
-
-void
-Model_CS::onObjectCreation( int obj_id, idk::Engine &engine )
+int
+Model_CS::getAnimatorID( int obj_id )
 {
-    if (obj_id >= _model_ids.size())
-    {
-        _model_ids.resize(obj_id+1, -1);
-        _shader_ids.resize(obj_id+1, -1);
-    }
-    else
-    {
-        _model_ids[obj_id] = -1;
-    }
+    int model_id = getModelID(obj_id);
+    return engineptr->rengine().modelSystem().getAnimatorID(model_id);
 }
+
+
+idk::Animator &
+Model_CS::getAnimator( int obj_id)
+{
+    int animator_id = getAnimatorID(obj_id);
+    return engineptr->rengine().modelSystem().getAnimator(animator_id);
+}
+
 
 
 void
 Model_CS::onObjectDeletion( int obj_id, idk::Engine &engine )
 {
-    _model_ids[obj_id] = -1;
+    std::cout << "Deleting object " << obj_id << " with Model_CS component\n";
+
+    int &key = m_keys[obj_id];
+    m_object_model_ids.destroy(key);
+    key = -1;
 }
 
 
@@ -74,8 +90,11 @@ void
 Model_CS::onObjectCopy( int src_obj_id, int dest_obj_id, idk::Engine &engine )
 {
     engine.giveComponent(dest_obj_id, this->m_id);
-    _model_ids[dest_obj_id] = _model_ids[src_obj_id];
-    _shader_ids[dest_obj_id] = _shader_ids[src_obj_id];
+
+    int key      = m_keys[src_obj_id];
+    int model_id = std::get<1>(m_object_model_ids.get(key));
+
+    m_keys[dest_obj_id] = m_object_model_ids.create({dest_obj_id, model_id, -1});
 }
 
 

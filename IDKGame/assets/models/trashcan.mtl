@@ -12,10 +12,10 @@ Pc 0.000000
 Pcr 0.030000
 aniso 0.000000
 anisor 0.000000
-map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/albedo/metal_trash_can_diff_1k.jpg
-map_Pm /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/ao/metal_trash_can_rust_metal_1k.jpg
-map_Pr /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/ao/metal_trash_can_rust_rough_1k.jpg
-map_Bump -bm 1.000000 /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/ao/metal_trash_can_rust_nor_gl_1k.jpg
+map_Kd /home/michael/Desktop/code/C++/IDK/IDKGame/IDKGame/assets/textures/albedo/metal_trash_can_diff_1k.jpg
+map_Pm /home/michael/Desktop/code/C++/IDK/IDKGame/IDKGame/assets/textures/ao/metal_trash_can_rust_metal_1k.jpg
+map_Pr /home/michael/Desktop/code/C++/IDK/IDKGame/IDKGame/assets/textures/ao/metal_trash_can_rust_rough_1k.jpg
+map_Bump -bm 1.000000 /home/michael/Desktop/code/C++/IDK/IDKGame/IDKGame/assets/textures/ao/metal_trash_can_rust_nor_gl_1k.jpg
 
 newmtl metal_trash_can_rust
 Ks 0.500000 0.500000 0.500000
@@ -28,7 +28,7 @@ Pc 0.000000
 Pcr 0.030000
 aniso 0.000000
 anisor 0.000000
-map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/albedo/metal_trash_can_rust_diff_1k.jpg
-map_Pm /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/ao/metal_trash_can_rust_metal_1k.jpg
-map_Pr /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/ao/metal_trash_can_rust_rough_1k.jpg
-map_Bump -bm 1.000000 /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/ao/metal_trash_can_rust_nor_gl_1k.jpg
+map_Kd /home/michael/Desktop/code/C++/IDK/IDKGame/IDKGame/assets/textures/albedo/metal_trash_can_rust_diff_1k.jpg
+map_Pm /home/michael/Desktop/code/C++/IDK/IDKGame/IDKGame/assets/textures/ao/metal_trash_can_rust_metal_1k.jpg
+map_Pr /home/michael/Desktop/code/C++/IDK/IDKGame/IDKGame/assets/textures/ao/metal_trash_can_rust_rough_1k.jpg
+map_Bump -bm 1.000000 /home/michael/Desktop/code/C++/IDK/IDKGame/IDKGame/assets/textures/ao/metal_trash_can_rust_nor_gl_1k.jpg

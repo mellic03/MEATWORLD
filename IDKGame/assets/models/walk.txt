@@ -1,0 +1,13 @@
+animated
+62520
+7
+assets/textures/Rubber004_1K-JPG_Color.jpg
+assets/textures/Rubber004_1K-JPG_NormalGL.jpg
+assets/textures/Rubber004_1K-JPG_Roughness.png
+dummy
+103440
+15
+assets/textures/green_metal_rust_diff_2k.jpg
+assets/textures/green_metal_rust_nor_gl_2k.jpg
+assets/textures/green_metal_rust_arm_2k.jpg
+assets/textures/green_metal_rust_arm_2k.jpg

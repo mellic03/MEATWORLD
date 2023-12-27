@@ -7,32 +7,19 @@
 mkdir -p ./build
 cd ./build
 cmake -G Ninja ..
-ninja -j 6
+ninja -j 12
 cd ..
 
 
 
-mkdir output
+mkdir -p output/assets/
 cp ./build/game output/game
 cp -R IDKGame/src/shaders output/.
-cp -R IDKGame/assets ./output/.
 
-cp -R external/IDKGE ./output/.
-# cp -R ./IDKGameEngine/shaders ./output/IDKGE/.
+cp -R IDKGame/assets/audio     output/assets/.
+cp -R IDKGame/assets/cubemaps  output/assets/.
+cp -R IDKGame/assets/fonts     output/assets/.
+cp -R IDKGame/assets/icons     output/assets/.
+cp -R IDKGame/assets/models    output/assets/.
+cp -R IDKGame/assets/textures  output/assets/.
 
-
-# mkdir ./output/IDKGE/IDKtools
-
-
-# # mapIBL
-# mkdir ./output/IDKGE/IDKtools/MapIBL
-# mkdir ./output/IDKGE/IDKtools/MapIBL/input
-# mkdir ./output/IDKGE/IDKtools/MapIBL/output
-
-# cp -R ./IDKGameEngine/shaders/IDKtools/DiffuseIBL/. ./output/IDKGE/IDKtools/MapIBL/.
-# cp -R ./IDKGameEngine/shaders/IDKtools/SpecularIBL/. ./output/IDKGE/IDKtools/MapIBL/.
-
-# cp ./IDKGameEngine/src/IDKtools/mapIBL.sh ./output/IDKGE/IDKtools/MapIBL/.
-
-# cp ./build/diffuseIBL ./output/IDKGE/IDKtools/MapIBL/diffuseIBL
-# cp ./build/specularIBL ./output/IDKGE/IDKtools/MapIBL/specularIBL

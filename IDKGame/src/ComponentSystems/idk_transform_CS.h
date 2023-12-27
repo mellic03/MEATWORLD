@@ -1,14 +1,13 @@
 #pragma once
 
-#include "IDK_builtin_CS_common.h"
+#include <IDKengine/IDKengine.hpp>
 
 
 class Transform_CS: public idk::ComponentSystem
 {
 private:
-    idk::Allocator<idk::Transform>      m_transforms;
-    std::vector<int>                    m_transform_IDs;
-    std::vector<int>                    m_parent_IDs;
+    idk::Allocator<std::tuple<int, int, idk::Transform>>  m_transforms;
+    std::map<int, int>  m_keys;
 
 public:
     void        init    ( idk::Engine & ) {  };
@@ -21,7 +20,8 @@ public:
     void        onObjectDeletion( int obj_id, idk::Engine & );
     void        onObjectCopy( int src_obj_id, int dest_obj_id, idk::Engine & );
 
-    idk::Transform &    getTransform( int obj_id ) { return m_transforms.get(m_transform_IDs[obj_id]); };
+    idk::Transform &    getTransform( int obj_id );
+
     void                translate ( int obj_id, glm::vec3 v );
     void                rotateX   ( int obj_id, float r     );
     void                rotateY   ( int obj_id, float r     );

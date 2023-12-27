@@ -13,8 +13,16 @@ add_definitions(-DIDK_DEBUG)
 project(game)
 
 
-include_directories(${CMAKE_SOURCE_DIR}/external/include)
 
+include_directories(${CMAKE_SOURCE_DIR}/external/include/)
+include_directories(${CMAKE_SOURCE_DIR}/external/include/libidk/IDKcontainers)
+include_directories(${CMAKE_SOURCE_DIR}/IDKGame/src/)
+include_directories(${CMAKE_SOURCE_DIR}/../IDKGameEngine/build/include)
+
+
+
+add_subdirectory(external/sources/imgui-1.90/)
+add_subdirectory(external/sources/imgui-docking/)
 add_subdirectory(IDKGame/src/ComponentSystems/)
 add_subdirectory(IDKGame/src/Modules/)
 
@@ -37,7 +45,7 @@ include_directories(${CMAKE_SOURCE_DIR})
 
 add_executable(${PROJECT_NAME} "IDKGame/src/main.cpp")
 
-set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-rpath=./IDKGE/shipping/")
+# set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-rpath=./../../IDKGameEngine/build.lib/,-rpath=IDKGE/shipping/")
 
 target_link_libraries(
     ${PROJECT_NAME} PRIVATE
@@ -46,7 +54,9 @@ target_link_libraries(
     SDL2_image
     SDL2_mixer
     ${OPENGL_LIBRARIES}
-    ${CMAKE_SOURCE_DIR}/external/lib/libIDKengine.so
+    ${CMAKE_SOURCE_DIR}/../IDKGameEngine/build/lib/libIDKengine.so
+    # ImGui_190
+    ImGui_docking
     IDKcomponentsystems
     IDKmodules
 )

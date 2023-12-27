@@ -111,7 +111,11 @@
     "cmake.configureOnOpen": false,
     "C_Cpp.default.includePath": [
         "${default}",
+        "${workspaceFolder}/IDKGame/src/",
+        "${workspaceFolder}/../IDKGameEngine/build/include/",
+        "${workspaceFolder}/external/",
         "${workspaceFolder}/external/include/",
+        "${workspaceFolder}/external/include/libidk/IDKcontainers/",
     ],
 
     "C_Cpp.default.cppStandard": "gnu++23",
