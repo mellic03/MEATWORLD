@@ -10,7 +10,6 @@ class idkg::Terrain_CS: public idk::ComponentSystem
 private:
     idk::Allocator<std::array<int, 3>>   m_object_model_ids;
     std::map<int, int>                   m_keys;
-    idk::Engine *engineptr;
 
 public:
     void            init( idk::Engine & );
@@ -24,7 +23,9 @@ public:
     void            onObjectCopy( int src_obj_id, int dest_obj_id, idk::Engine & );
 
     void            useModel( int obj_id, int model_id );
-    void            generateGrass( int obj_id, int terrain_model_id, int grass_model_id );
+    void            generateGrass( int obj_id, int terrain_id, GLuint heightmap, int grass_model_id );
+
+    idk::Model &    getModel( int obj_id );
 
 };
 

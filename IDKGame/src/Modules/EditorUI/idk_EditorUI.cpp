@@ -6,8 +6,6 @@
 void
 EditorUI_Module::init( idk::Engine &engine )
 {
-    engineptr = &engine;
-
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -20,8 +18,8 @@ EditorUI_Module::init( idk::Engine &engine )
     ImGui::StyleColorsLight();
 
     ImGui_ImplSDL2_InitForOpenGL(
-        engine.rengine().SDLWindow(),
-        engine.rengine().SDLGLContext()
+        idk::RenderEngine::get().SDLWindow(),
+        idk::RenderEngine::get().SDLGLContext()
     );
 
     ImGui_ImplOpenGL3_Init("#version 440");

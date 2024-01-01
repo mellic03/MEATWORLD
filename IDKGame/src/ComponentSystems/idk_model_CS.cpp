@@ -6,7 +6,6 @@ void
 Model_CS::init(idk::Engine &engine)
 {
     addDependencies("transform");
-    engineptr = &engine;
 }
 
 
@@ -14,7 +13,7 @@ void
 Model_CS::stage_A(idk::Engine &engine)
 {
     Transform_CS &tCS = engine.getCS<Transform_CS>();
-    idk::RenderEngine &ren = engine.rengine();
+    idk::RenderEngine &ren = idk::RenderEngine::get();
 
     for (auto &[obj_id, model_id, animator_id]: m_object_model_ids)
     {
@@ -33,7 +32,7 @@ Model_CS::stage_A(idk::Engine &engine)
 void
 Model_CS::useModel( int obj_id, int model_id )
 {
-    int animator_id = engineptr->rengine().modelSystem().getModel(model_id).animator_id;
+    int animator_id = idk::RenderEngine::get().modelSystem().getModel(model_id).animator_id;
 
     m_keys[obj_id] = m_object_model_ids.create({obj_id, model_id, animator_id});
 }
@@ -53,7 +52,7 @@ idk::Model &
 Model_CS::getModel( int obj_id )
 {
     int model_id = getModelID(obj_id);
-    return engineptr->rengine().modelSystem().getModel(model_id);
+    return idk::RenderEngine::get().modelSystem().getModel(model_id);
 }
 
 
@@ -61,7 +60,7 @@ int
 Model_CS::getAnimatorID( int obj_id )
 {
     int model_id = getModelID(obj_id);
-    return engineptr->rengine().modelSystem().getAnimatorID(model_id);
+    return idk::RenderEngine::get().modelSystem().getAnimatorID(model_id);
 }
 
 
@@ -69,7 +68,7 @@ idk::Animator &
 Model_CS::getAnimator( int obj_id)
 {
     int animator_id = getAnimatorID(obj_id);
-    return engineptr->rengine().modelSystem().getAnimator(animator_id);
+    return idk::RenderEngine::get().modelSystem().getAnimator(animator_id);
 }
 
 

@@ -19,8 +19,8 @@
 //     ImGui::StyleColorsDark();
 
 //     ImGui_ImplSDL2_InitForOpenGL(
-//         engine.rengine().SDLWindow(),
-//         engine.rengine().SDLGLContext()
+//         idk::RenderEngine::get().SDLWindow(),
+//         idk::RenderEngine::get().SDLGLContext()
 //     );
 
 //     ImGui_ImplOpenGL3_Init("#version 440");
@@ -38,7 +38,7 @@
 // void
 // EditorUI_Module::f_settings_graphics( idk::Engine &engine )
 // {
-//     idk::RenderEngine &ren = engine.rengine();
+//     idk::RenderEngine &ren = idk::RenderEngine::get();
 
 //     if (ImGui::BeginChild("Settings_Graphics"))
 //     {
@@ -106,7 +106,7 @@
 // {
 //     if (ImGui::BeginChild("Settings_Camera"))
 //     {
-//         idk::Camera &cam = engine.rengine().getCamera();
+//         idk::Camera &cam = idk::RenderEngine::get().getCamera();
 
 //         // static glm::vec3 offset(0.5f, 1.0f, 1.0f);
 //         // idkgui::dragVec3("Offset", &offset[0], -2.0f, 2.0f, 0.1f, "%.1f", 0.0f);
@@ -153,7 +153,7 @@
 // void
 // EditorUI_Module::f_settings_pointlight( idk::Engine &engine )
 // {
-//     idk::RenderEngine &ren = engine.rengine();
+//     idk::RenderEngine &ren = idk::RenderEngine::get();
 
 
 //     if (ImGui::BeginChild("Settings_Pointlight"))
@@ -233,7 +233,7 @@
 // void
 // EditorUI_Module::f_settings_skybox( idk::Engine &engine )
 // {
-//     idk::RenderEngine &ren = engine.rengine();
+//     idk::RenderEngine &ren = idk::RenderEngine::get();
 
 //     if (ImGui::BeginChild("Settings_Skybox"))
 //     {
@@ -268,7 +268,7 @@
 // void
 // EditorUI_Module::f_settings_objects( idk::Engine &engine )
 // {
-//     idk::RenderEngine &ren = engine.rengine();
+//     idk::RenderEngine &ren = idk::RenderEngine::get();
 
 //     if (ImGui::BeginChild("Settings_Objects"))
 //     {
@@ -383,7 +383,7 @@
 // void
 // EditorUI_Module::f_settings_dirlight( idk::Engine &engine )
 // {
-//     idk::RenderEngine &ren = engine.rengine();
+//     idk::RenderEngine &ren = idk::RenderEngine::get();
 
 
 //     if (ImGui::BeginChild("Settings_Dirlight"))

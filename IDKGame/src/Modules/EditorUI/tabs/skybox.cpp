@@ -5,7 +5,7 @@
 void
 EditorTab::skybox( idk::Engine &engine )
 {
-    idk::RenderEngine &ren = engine.rengine();
+    idk::RenderEngine &ren = idk::RenderEngine::get();
 
     ImGui::Begin("Skybox");
     {

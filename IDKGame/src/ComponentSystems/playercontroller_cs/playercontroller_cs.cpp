@@ -24,7 +24,7 @@ idkg::PlayerController_CS::onObjectAssignment( int obj_id, idk::Engine &engine )
 {
     m_controller_ids[obj_id] = m_controllers.create(CharacterController(obj_id));
 
-    idk::RenderEngine &ren = engine.rengine();
+    idk::RenderEngine &ren = idk::RenderEngine::get();
     ren.getCamera().setOffset(glm::vec3(0.4f, 1.3f, 1.0f));
 
     engine.eventManager().onMouseWheel(

@@ -8,7 +8,6 @@ namespace idkg { class Camera_CS; };
 class idkg::Camera_CS: public idk::ComponentSystem
 {
 private:
-    idk::Engine *engineptr;
     std::map<int, int> m_camera_ids;
 
 public:

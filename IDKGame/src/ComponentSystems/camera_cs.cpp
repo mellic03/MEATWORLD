@@ -6,7 +6,6 @@ void
 idkg::Camera_CS::init( idk::Engine &engine )
 {
     addDependencies("transform");
-    engineptr = &engine;
 }
 
 
@@ -14,7 +13,7 @@ void
 idkg::Camera_CS::stage_A( idk::Engine &engine )
 {
     Transform_CS &tCS = engine.getCS<Transform_CS>();
-    idk::RenderEngine &ren = engine.rengine();
+    idk::RenderEngine &ren = idk::RenderEngine::get();
 
     for (auto &[obj_id, camera_id]: m_camera_ids)
     {
@@ -38,7 +37,7 @@ idk::Camera &
 idkg::Camera_CS::getCamera( int obj_id )
 {
     int id = m_camera_ids[obj_id];
-    return engineptr->rengine().getCamera(id);
+    return idk::RenderEngine::get().getCamera(id);
 }
 
 
@@ -54,7 +53,7 @@ idkg::Camera_CS::getCameraID( int obj_id )
 void
 idkg::Camera_CS::onObjectAssignment( int obj_id, idk::Engine &engine )
 {
-    m_camera_ids[obj_id] = engine.rengine().createCamera();
+    m_camera_ids[obj_id] = idk::RenderEngine::get().createCamera();
 }
 
 
@@ -68,7 +67,8 @@ idkg::Camera_CS::onObjectCreation( int obj_id, idk::Engine &engine )
 void
 idkg::Camera_CS::onObjectDeletion( int obj_id, idk::Engine &engine )
 {
-
+    std::cout << "[Camera_CS] deleting obj_id: " << obj_id << "\n";
+    m_camera_ids[obj_id] = -1;
 }
 
 

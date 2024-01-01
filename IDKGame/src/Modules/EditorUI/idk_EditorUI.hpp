@@ -10,9 +10,6 @@
 class EditorUI_Module: public idk::Module
 {
 private:
-
-    idk::Engine *engineptr = nullptr;
-
     static constexpr int NUM_FONTS = 4;
 
     const std::array<int, NUM_FONTS> FONT_SIZES = { 14, 16, 18, 20 };

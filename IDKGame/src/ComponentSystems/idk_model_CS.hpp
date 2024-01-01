@@ -9,7 +9,6 @@ private:
     idk::Allocator<std::tuple<int, int, int>>   m_object_model_ids;
     std::map<int, int>      m_keys;
     std::map<int, bool>     m_shadowcasts;
-    idk::Engine             *engineptr;
 
 public:
     void            init( idk::Engine & );

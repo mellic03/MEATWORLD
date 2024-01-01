@@ -11,7 +11,7 @@
 // idk::SVOctree
 // idk_Voxel::voxelize( idk::Engine &engine, int model_id )
 // {
-//     // idk::RenderEngine &ren = engine.rengine();
+//     // idk::RenderEngine &ren = idk::RenderEngine::get();
 
 //     // idk::glShader &program = ren.getProgram("voxelize");
 //     // idk::Transform transform(glm::mat4(1.0f));
@@ -36,7 +36,7 @@
 // void
 // idk_Voxel::init( idk::Engine &engine )
 // {
-//     idk::RenderEngine &ren = engine.rengine();
+//     idk::RenderEngine &ren = idk::RenderEngine::get();
 //     ren.createProgram(m_shader_name, "shaders/", "screenquad.vs", "SVOctree.fs");
 
 
@@ -130,7 +130,7 @@
 // void
 // idk_Voxel::render_quad( idk::Engine &engine )
 // {
-//     idk::RenderEngine &ren = engine.rengine();
+//     idk::RenderEngine &ren = idk::RenderEngine::get();
 
 //     glm::mat4 modelmat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -0.5f * ren.getCamera().farPlane()));
 //     modelmat = glm::scale(modelmat, glm::vec3(300.0f, 300.0f, 1.0f));
@@ -148,7 +148,7 @@
 // void
 // idk_Voxel::render( idk::Engine &engine, idk::glFramebuffer framebuffer )
 // {
-//     idk::RenderEngine &ren = engine.rengine();
+//     idk::RenderEngine &ren = idk::RenderEngine::get();
 
 //     framebuffer.bind();
 //     framebuffer.clear(GL_DEPTH_BUFFER_BIT);
@@ -167,7 +167,7 @@
 
 // void idk_Voxel::place( idk::Engine &engine, int blocktype, int ksize, float span )
 // {
-//     auto &cam = engine.rengine().getCamera();
+//     auto &cam = idk::RenderEngine::get().getCamera();
 //     glm::vec3 dir = glm::normalize(cam.front());
 
 //     glm::vec3 pos = cam.position();
@@ -239,7 +239,7 @@
 // void
 // idk_Voxel::stage_A( idk::Engine &engine )
 // {
-//     idk::RenderEngine &ren = engine.rengine();
+//     idk::RenderEngine &ren = idk::RenderEngine::get();
 
 //     static int blocktype = 0;
 //     static int ksize = 8;

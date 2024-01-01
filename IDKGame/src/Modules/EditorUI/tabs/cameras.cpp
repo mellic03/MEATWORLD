@@ -34,7 +34,7 @@ static void callback( idk::Camera &cam )
 void
 EditorTab::cameras( idk::Engine &engine )
 {
-    auto &cameras = engine.rengine().getCameras();
+    auto &cameras = idk::RenderEngine::get().getCameras();
 
     ImGui::Begin("Cameras");
     EditorUI::selection_splitWindow2(cameras, callback);

@@ -26,19 +26,18 @@ tab_inspect_CS( Model_CS &CS, int object_id )
         ImGui::Text(IDK_ICON_EYE " Mesh %d", mesh.material_id);
         ImGui::Text(IDK_ICON_PERSON " Mesh %d", mesh.material_id);
         ImGui::Text(IDK_ICON_EYE_CLOSED " Mesh %d", mesh.material_id);
-        // auto &material = engineptr
-        // mesh.material_id
+
     }
-
-
-    // EditorUI::dragVec3(
-    //     "Position",
-    //     CS.getTransform(object_id).position_ptr(),
-    //     0.0f, 0.0f, 0.01f, "%.2f", 0.0f
-    // );
-
 }
 
+static void
+tab_inspect_CS( idkg::Terrain_CS &CS, int object_id )
+{
+    auto &model   = CS.getModel(object_id);
+    auto &terrain = idk::RenderEngine::get().modelSystem().getModel_Terrain(model.terrain_id);
+
+    ImGui::DragFloat("Height scale", &terrain.height_scale);
+}
 
 
 
@@ -50,7 +49,7 @@ tab_inspect_component( idk::Engine &engine, int object_id, idk::ComponentSystem 
         return;
     }
 
-    int id = CS->id();
+    int id = CS->ID();
 
     std::string label = CS->name() + " component";
     ImGui::BeginChild(label.c_str());
@@ -64,6 +63,11 @@ tab_inspect_component( idk::Engine &engine, int object_id, idk::ComponentSystem 
     if (CS == &engine.getCS<Model_CS>())
     {
         tab_inspect_CS(*dynamic_cast<Model_CS *>(CS), object_id);
+    }
+
+    if (CS == &engine.getCS<idkg::Terrain_CS>())
+    {
+        tab_inspect_CS(*dynamic_cast<idkg::Terrain_CS *>(CS), object_id);
     }
 
     ImGui::EndChild();
@@ -110,7 +114,7 @@ EditorUI_Module::_tab_inspect( idk::Engine &engine, int object_id )
         for (auto &CS: engine.getComponentSystems())
         {
             const std::string &name = CS->name();
-            const int CS_id = CS->id();
+            const int CS_id = CS->ID();
 
             if (engine.hasComponent(object_id, CS_id))
             {

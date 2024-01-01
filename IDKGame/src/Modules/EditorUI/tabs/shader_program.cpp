@@ -29,7 +29,7 @@ tab_shader_program_edit( const std::string &name, idk::glShader &program )
 void
 EditorTab::shader_programs( idk::Engine &engine )
 {
-    auto &programs = engine.rengine().getPrograms();
+    auto &programs = idk::RenderEngine::get().getPrograms();
 
     ImGui::Begin("Shader Programs");
     {
