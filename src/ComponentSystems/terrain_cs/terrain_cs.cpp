@@ -1,6 +1,5 @@
 #include "terrain_cs.hpp"
-#include "../idk_transform_CS.h"
-#include "../idk_model_CS.hpp"
+#include <IDKBuiltinCS/IDKBuiltinCS.hpp>
 
 
 int chunked_id = -1;
@@ -51,7 +50,7 @@ idkg::Terrain_CS::stage_A( idk::EngineAPI &api )
     auto &engine = api.getEngine();
     auto &ren    = api.getRenderer();
 
-    Transform_CS &tCS = engine.getCS<Transform_CS>();
+    idk::Transform_CS &tCS = engine.getCS<idk::Transform_CS>();
 
     // if (chunked_id != -1)
     // {

@@ -1,5 +1,5 @@
 #include "playercontroller_cs.hpp"
-#include "../idk_model_CS.hpp"
+// #include <IDKBuiltinCS/IDKBuiltinCS.hpp>
 
 static idk::RenderEngine *renptr;
 

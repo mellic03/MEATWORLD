@@ -1,7 +1,6 @@
 #include "playercontroller_cs.hpp"
-#include "../idk_transform_CS.h"
-#include "../camera_cs.hpp"
-#include "../idk_model_CS.hpp"
+#include <IDKBuiltinCS/IDKBuiltinCS.hpp>
+
 
 static constexpr float SWAY_SPEED_LOOK   = 5.002f;
 static constexpr float SWAY_SPEED_MOVE   = 5.01f;
@@ -26,12 +25,12 @@ void idkg::CharacterController::update( idk::EngineAPI &api )
 
     int obj_id = m_obj_id;
 
-    Transform_CS    &tCS   = engine.getCS<Transform_CS>();
-    idkg::Camera_CS &camCS = engine.getCS<idkg::Camera_CS>();
-    Model_CS        &mCS   = engine.getCS<Model_CS>();
+    idk::Transform_CS &tCS   = engine.getCS<idk::Transform_CS>();
+    idk::Camera_CS    &camCS = engine.getCS<idk::Camera_CS>();
+    idk::Model_CS     &mCS   = engine.getCS<idk::Model_CS>();
 
     idk::Camera     &camera    = camCS.getCamera(ren, obj_id);
-    idk::Transform  &transform = tCS.getTransform(obj_id);
+    // idk::Transform  &transform = tCS.getTransform(obj_id);
     idk::Keylog     &keylog    = engine.eventManager().keylog();
     
     float dtime = engine.deltaTime();
@@ -75,7 +74,7 @@ void idkg::CharacterController::update( idk::EngineAPI &api )
     bearing.x += 250.0f * delta.x;
     bearing.z += 250.0f * delta.z;
     bearing = glm::normalize(bearing);
-    transform.pointTowards(bearing + transform.position());
+    // transform.pointTowards(bearing + transform.position());
 
     velocity.y += delta.y;
     velocity *= 0.95f;
@@ -89,9 +88,10 @@ void idkg::CharacterController::update( idk::EngineAPI &api )
 
     glm::vec3 motion = m_animator.getMotion(alpha, bearing, mCS.getAnimator(ren, m_obj_id));
 
+    tCS.translate(obj_id, motion);
 
-    transform.translate(motion);
-    transform.translate(glm::vec3(0.0f, velocity.y, 0.0f));
+    // transform.translate(motion);
+    // transform.translate(glm::vec3(0.0f, velocity.y, 0.0f));
 
 
     if (engine.eventManager().mouseCaptured())
