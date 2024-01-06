@@ -13,7 +13,7 @@ IDK_EXPORT_API
             game = new IDKGame("Game Template");
         }
 
-        return reinterpret_cast<idk::Game *>(game);
+        return dynamic_cast<idk::Game *>(game);
     }
 )
 

@@ -17,8 +17,6 @@ IDKGame::registerModules( idk::EngineAPI &api )
 {
     auto &engine = api.getEngine();
 
-    // engine.registerModule<EditorUI_Module>("imgui");
-
     engine.registerCS<idkg::PlayerController_CS>("Control");
     engine.registerCS<idkg::Terrain_CS>("Terrain");
 }
@@ -91,11 +89,11 @@ IDKGame::setup( idk::EngineAPI &api )
     modelCS.setShadowcast(area_obj, true);
 
 
-    // int cart_obj = engine.createGameObject("cart 1");
-    // int cart_model = ren.modelSystem().loadModel("assets/models/", "cart");
-    // engine.giveComponents(cart_obj, MODEL);
-    // modelCS.useModel(ren, cart_obj, cart_model);
-    // modelCS.setShadowcast(cart_obj, true);
+    int cart_obj = engine.createGameObject("cart 1");
+    int cart_model = ren.modelSystem().loadModel("assets/models/", "cart");
+    engine.giveComponents(cart_obj, MODEL);
+    modelCS.useModel(ren, cart_obj, cart_model);
+    modelCS.setShadowcast(cart_obj, true);
 
     // cart_obj = engine.createGameObject("cart 2");
     // engine.giveComponents(cart_obj, MODEL);
@@ -120,28 +118,28 @@ IDKGame::mainloop( idk::EngineAPI &api )
     auto &ren    = api.getRenderer();
 
 
-    if (engine.eventManager().fileDropped())
-    {
-        std::string filepath = engine.eventManager().fileDroppedPath();
-                    filepath = std::filesystem::relative(filepath);
+    // if (engine.eventManager().fileDropped())
+    // {
+    //     std::string filepath = engine.eventManager().fileDroppedPath();
+    //                 filepath = std::filesystem::relative(filepath);
 
-        size_t i = filepath.length() - 1;
-        for (i=filepath.length()-1; i>=0; i--)
-        {
-            if (filepath[i] == '/')
-            {
-                break;
-            }
-        }
+    //     size_t i = filepath.length() - 1;
+    //     for (i=filepath.length()-1; i>=0; i--)
+    //     {
+    //         if (filepath[i] == '/')
+    //         {
+    //             break;
+    //         }
+    //     }
 
-        std::string name = filepath.substr(i+1);
+    //     std::string name = filepath.substr(i+1);
         
-        int obj_id   = engine.createGameObject(name);
-        int model_id = ren.modelSystem().loadModel(filepath + "/", name);
+    //     int obj_id   = engine.createGameObject(name);
+    //     int model_id = ren.modelSystem().loadModel(filepath + "/", name);
 
-        engine.giveComponent<idk::Model_CS>(obj_id);
-        engine.getCS<idk::Model_CS>().useModel(ren, obj_id, model_id);
-    }
+    //     engine.giveComponent<idk::Model_CS>(obj_id);
+    //     engine.getCS<idk::Model_CS>().useModel(ren, obj_id, model_id);
+    // }
 
 
     auto &transCS = engine.getCS<idk::Transform_CS>();

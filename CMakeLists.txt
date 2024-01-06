@@ -30,14 +30,11 @@ target_link_libraries(
     ${PROJECT_NAME} PUBLIC
 
     libidk
-    IDKRenderEngine
+    IDKGraphics
     IDKGameEngine
 
-    # IDKEditorUI
     IDKcomponentsystems
-    # IDKmodules
-    # ImGui
-    # ImGuizmo
-    # ImNodes
+
+    IDKBuiltin
 )
 
