@@ -1,5 +1,6 @@
 #include "playercontroller_cs.hpp"
 #include <IDKBuiltinCS/IDKBuiltinCS.hpp>
+#include <IDKEvents/IDKEvents.hpp>
 
 
 static constexpr float SWAY_SPEED_LOOK   = 5.002f;
@@ -19,8 +20,14 @@ glm::vec3 velocity(0.0f);
 
 void idkg::CharacterController::update( idk::EngineAPI &api )
 {
-    auto &engine = api.getEngine();
-    auto &ren    = api.getRenderer();
+    auto &engine   = api.getEngine();
+    auto &ren      = api.getRenderer();
+    auto &eventsys = api.getEventSys();
+
+    if (eventsys.mouseCaptured() == false)
+    {
+        return;
+    }
 
 
     int obj_id = m_obj_id;
@@ -29,15 +36,10 @@ void idkg::CharacterController::update( idk::EngineAPI &api )
     idk::Camera_CS    &camCS = engine.getCS<idk::Camera_CS>();
     idk::Model_CS     &mCS   = engine.getCS<idk::Model_CS>();
 
-    idk::Camera     &camera    = camCS.getCamera(ren, obj_id);
-    // idk::Transform  &transform = tCS.getTransform(obj_id);
-    idk::Keylog     &keylog    = engine.eventManager().keylog();
+    idk::Camera     &camera = camCS.getCamera(obj_id);
+    idk::Keylog     &keylog = eventsys.keylog();
     
     float dtime = engine.deltaTime();
-
-    if (keylog.keyTapped(idk::Keycode::C))
-        engine.eventManager().mouseCapture(!engine.eventManager().mouseCaptured());
-
     float speed = MOVESPEED*dtime;
 
     if (keylog.keyDown(idk::Keycode::LSHIFT))
@@ -49,12 +51,6 @@ void idkg::CharacterController::update( idk::EngineAPI &api )
     {
         speed *= WALK_MULTIPLIER;
     }
-
-    if (keylog.keyDown(idk::Keycode::ESCAPE))
-    {
-        engine.shutdown();
-    }
-
 
     // Translate gameobject with WASD keys
     // -----------------------------------------------------------------------------------------
@@ -94,9 +90,9 @@ void idkg::CharacterController::update( idk::EngineAPI &api )
     // transform.translate(glm::vec3(0.0f, velocity.y, 0.0f));
 
 
-    if (engine.eventManager().mouseCaptured())
+    if (eventsys.mouseCaptured())
     {
-        glm::vec2 dmouse = 0.001f * engine.eventManager().mouseDelta();
+        glm::vec2 dmouse = 0.001f * eventsys.mouseDelta();
         camera.pitch(-dmouse.y);
         camera.yaw(-dmouse.x);
     }

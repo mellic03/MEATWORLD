@@ -13,7 +13,7 @@ public:
 
     IDKGame( const std::string &name ): Game(name) {  };
 
-    virtual void config() final;
+    virtual void config          (                  ) final;
     virtual void registerModules ( idk::EngineAPI & ) final;
     virtual void setup           ( idk::EngineAPI & ) final;
     virtual void mainloop        ( idk::EngineAPI & ) final;

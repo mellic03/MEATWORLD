@@ -1,6 +1,7 @@
 #include "IDKGame.hpp"
 
 #include <IDKBuiltinCS/IDKBuiltinCS.hpp>
+#include <IDKEvents/IDKEvents.hpp>
 
 #include "ComponentSystems/componentsystems.hpp"
 #include <iostream>
@@ -9,7 +10,7 @@
 void
 IDKGame::config()
 {
-    std::cout << "IDKGame config!\n";
+
 }
 
 
@@ -28,35 +29,30 @@ int player_obj, terrain_model;
 void
 IDKGame::setup( idk::EngineAPI &api )
 {
-    auto &engine = api.getEngine();
-    auto &ren    = api.getRenderer();
-
-    idk::ModelSystem  &MS  = ren.modelSystem();
-    ren.getCamera().ylock(true);
+    auto &engine   = api.getEngine();
+    auto &eventsys = api.getEventSys();
+    auto &ren      = api.getRenderer();
+    auto &MS       = ren.modelSystem();
 
     // Modules
     // -----------------------------------------------------------------------------------------
     const int MODEL      = engine.getCS<idk::Model_CS>().ID();
     const int CAMERA     = engine.getCS<idk::Camera_CS>().ID();
-
     const int PCONTROL   = engine.getCS<idkg::PlayerController_CS>().ID();
     const int TERRAIN    = engine.getCS<idkg::Terrain_CS>().ID();
-
 
     auto &transCS   = engine.getCS<idk::Transform_CS>();
     auto &modelCS   = engine.getCS<idk::Model_CS>();
     auto &camCS     = engine.getCS<idk::Camera_CS>();
-
     auto &terrainCS = engine.getCS<idkg::Terrain_CS>();
     // -----------------------------------------------------------------------------------------
 
-    int skybox = ren.loadSkybox("assets/cubemaps/skybox1/");
-    ren.current_skybox = skybox;
+    ren.useSkybox(ren.loadSkybox("assets/cubemaps/skybox1/"));
 
 
     player_obj = engine.createGameObject("player");
     int player_model = ren.modelSystem().loadModel("assets/models/", "walk");
-    engine.giveComponents(player_obj, MODEL, PCONTROL);
+    engine.giveComponents(player_obj, MODEL, CAMERA, PCONTROL);
     modelCS.useModel(ren, player_obj, player_model);
     modelCS.setShadowcast(player_obj, true);
     transCS.translate(player_obj, glm::vec3(0.0f, 2.0f, -5.0f));
@@ -93,10 +89,19 @@ IDKGame::setup( idk::EngineAPI &api )
     modelCS.useModel(ren, cart_obj, cart_model);
     modelCS.setShadowcast(cart_obj, true);
 
-    // cart_obj = engine.createGameObject("cart 2");
-    // engine.giveComponents(cart_obj, MODEL);
-    // modelCS.useModel(ren, cart_obj, cart_model);
-    // modelCS.setShadowcast(cart_obj, true);
+    engine.copyGameObject(cart_obj);
+
+
+
+    eventsys.onKeyTapped(
+        idk::Keycode::ESCAPE,
+        [&eventsys]()
+        {
+            bool captured = eventsys.mouseCaptured();
+            eventsys.mouseCapture(!captured);
+        }
+    );
+
 
 
     int dir_id = ren.lightSystem().createDirlight(idk::LightFlag::SHADOWMAP);
@@ -112,13 +117,14 @@ IDKGame::setup( idk::EngineAPI &api )
 void
 IDKGame::mainloop( idk::EngineAPI &api )
 {
-    auto &engine = api.getEngine();
-    auto &ren    = api.getRenderer();
+    auto &engine   = api.getEngine();
+    auto &ren      = api.getRenderer();
+    auto &eventsys = api.getEventSys();
 
 
-    // if (engine.eventManager().fileDropped())
+    // if (engine.eventSystem().fileDropped())
     // {
-    //     std::string filepath = engine.eventManager().fileDroppedPath();
+    //     std::string filepath = engine.eventSystem().fileDroppedPath();
     //                 filepath = std::filesystem::relative(filepath);
 
     //     size_t i = filepath.length() - 1;

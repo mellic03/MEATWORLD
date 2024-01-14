@@ -9,7 +9,7 @@ add_subdirectory(src/ComponentSystems/)
 
 
 file(GLOB SOURCES
-    "src/*.cpp"
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
 )
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
@@ -35,3 +35,9 @@ target_link_libraries(
     IDKcomponentsystems
 )
 
+
+
+FILE(
+    COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets/
+    DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets/
+)
