@@ -1,4 +1,5 @@
 #include "IDKGame.hpp"
+
 #include <IDKBuiltinCS/IDKBuiltinCS.hpp>
 
 #include "ComponentSystems/componentsystems.hpp"
@@ -20,7 +21,6 @@ IDKGame::registerModules( idk::EngineAPI &api )
     engine.registerCS<idkg::PlayerController_CS>("Control");
     engine.registerCS<idkg::Terrain_CS>("Terrain");
 }
-
 
 
 int player_obj, terrain_model;
@@ -50,10 +50,8 @@ IDKGame::setup( idk::EngineAPI &api )
     auto &terrainCS = engine.getCS<idkg::Terrain_CS>();
     // -----------------------------------------------------------------------------------------
 
-    // ren.loadSkybox("assets/cubemaps/skybox5/");
-    // ren.loadSkybox("assets/cubemaps/skybox1/");
-    ren.loadSkybox("assets/cubemaps/skybox2/");
-    // ren.loadSkybox("assets/cubemaps/skybox3/");
+    int skybox = ren.loadSkybox("assets/cubemaps/skybox1/");
+    ren.current_skybox = skybox;
 
 
     player_obj = engine.createGameObject("player");
@@ -142,14 +140,14 @@ IDKGame::mainloop( idk::EngineAPI &api )
     // }
 
 
-    auto &transCS = engine.getCS<idk::Transform_CS>();
+    // auto &transCS = engine.getCS<idk::Transform_CS>();
 
-    glm::vec3 &pos = transCS.getPosition(player_obj);
+    // glm::vec3 &pos = transCS.getPosition(player_obj);
 
-    float height = ren.modelSystem().queryTerrainHeight(
-        terrain_model, glm::mat4(1.0f), pos.x, pos.z
-    );
+    // float height = ren.modelSystem().queryTerrainHeight(
+    //     terrain_model, glm::mat4(1.0f), pos.x, pos.z
+    // );
 
-    pos.y = height;
+    // pos.y = height;
 }
 

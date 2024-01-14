@@ -10,7 +10,7 @@ IDK_EXPORT_API
     
         if (game == nullptr)
         {
-            game = new IDKGame("Game Template");
+            game = new IDKGame("Felony Domestic Assault & Battery");
         }
 
         return dynamic_cast<idk::Game *>(game);
