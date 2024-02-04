@@ -5,13 +5,19 @@
 #include <string>
 
 
-class IDKGame: public idk::Game
+class IDKGame: public idk::Module
 {
 private:
 
 public:
 
-    IDKGame( const std::string &name ): Game(name) {  };
+    virtual void    init    ( idk::EngineAPI &api ) { registerModules(api); setup(api); };
+    virtual void    deinit  (                     ) {  };
+
+    virtual void    stage_A ( idk::EngineAPI &api ) { mainloop(api); };
+    virtual void    stage_B ( idk::EngineAPI &api ) {  };
+    virtual void    stage_C ( idk::EngineAPI &api ) {  };
+
 
     virtual void config          (                  ) final;
     virtual void registerModules ( idk::EngineAPI & ) final;

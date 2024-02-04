@@ -1,7 +1,0 @@
-animated
-180
-0
-dummy
-dummy
-dummy
-dummy

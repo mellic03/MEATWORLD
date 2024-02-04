@@ -19,100 +19,85 @@ IDKGame::registerModules( idk::EngineAPI &api )
 {
     auto &engine = api.getEngine();
 
-    engine.registerCS<idkg::PlayerController_CS>("Control");
-    engine.registerCS<idkg::Terrain_CS>("Terrain");
+    // engine.registerCS<idkg::PlayerController_CS>("Control");
+    // engine.registerCS<idkg::Terrain_CS>("Terrain");
 }
 
 
-int player_obj, terrain_model;
+static void ecs_GiveComponents( idecs::ECS &ecs, int obj_id, int model=-1 )
+{
+    ecs.giveComponent<idk::IconCmp>(obj_id);
+    ecs.giveComponent<idk::TransformCmp>(obj_id);
+
+    if (model != -1)
+    {
+        idk::ModelSys::assignModel(obj_id, model);
+        // ecs.giveComponent<idk::ModelCmp>(obj_id);
+        // auto &cmp = ecs.getComponent<idk::ModelCmp>(obj_id);
+        // cmp.obj_id = obj_id;
+        // cmp.model_id = model;
+    }
+}
+
+
+int player_obj, cam_obj, terrain_model;
 
 void
 IDKGame::setup( idk::EngineAPI &api )
 {
     auto &engine   = api.getEngine();
+    auto &ecs      = api.getECS();
     auto &eventsys = api.getEventSys();
     auto &ren      = api.getRenderer();
     auto &MS       = ren.modelSystem();
 
-    // Modules
-    // -----------------------------------------------------------------------------------------
-    const int MODEL      = engine.getCS<idk::Model_CS>().ID();
-    const int CAMERA     = engine.getCS<idk::Camera_CS>().ID();
-    const int PCONTROL   = engine.getCS<idkg::PlayerController_CS>().ID();
-    const int TERRAIN    = engine.getCS<idkg::Terrain_CS>().ID();
-
-    auto &transCS   = engine.getCS<idk::Transform_CS>();
-    auto &modelCS   = engine.getCS<idk::Model_CS>();
-    auto &camCS     = engine.getCS<idk::Camera_CS>();
-    auto &terrainCS = engine.getCS<idkg::Terrain_CS>();
-    // -----------------------------------------------------------------------------------------
-
-    ren.useSkybox(ren.loadSkybox("assets/cubemaps/skybox1/"));
+    ecs.getSystem<idk::ScriptSys>().loadScripts("assets/scripts/");
+    ren.useSkybox(ren.loadSkybox("assets/cubemaps/skybox3/"));
 
 
-    player_obj = engine.createGameObject("player");
-    int player_model = ren.modelSystem().loadModel("assets/models/", "walk");
-    engine.giveComponents(player_obj, MODEL, CAMERA, PCONTROL);
-    modelCS.useModel(ren, player_obj, player_model);
-    modelCS.setShadowcast(player_obj, true);
-    transCS.translate(player_obj, glm::vec3(0.0f, 2.0f, -5.0f));
+    // player_obj = ecs.createGameObject("player");
+    // ecs_GiveComponents(ecs, player_obj);
+
+    // cam_obj = ecs.createGameObject("camera");
+    // ecs_GiveComponents(ecs, cam_obj);
+    // ecs.giveComponent<idk::CameraCmp>(cam_obj);
+    // ecs.getComponent<idk::CameraCmp>(cam_obj).obj_id = cam_obj;
+    // ecs.getComponent<idk::CameraCmp>(cam_obj).cam_id = 0;
+
+    // int area_obj = ecs.createGameObject("area");
+    // int area_model = ren.modelSystem().loadModel("assets/models/", "area");
+    // ecs_GiveComponents(ecs, area_obj, area_model);
+
+    // int cart_obj = ecs.createGameObject("cart 1");
+    // int cart_model = ren.modelSystem().loadModel("assets/models/", "cart");
+    // ecs_GiveComponents(ecs, cart_obj, cart_model);
+
+    // int city_obj = ecs.createGameObject("city");
+    // int city_model = ren.modelSystem().loadModel("assets/models/", "city");
+    // ecs_GiveComponents(ecs, city_obj, city_model);
+
+    // int cube_obj = ecs.createGameObject("cube");
+    // int cube_model = MS.loadModel("assets/models/", "unit-cube");
+    // ecs_GiveComponents(ecs, cube_obj, cube_model);
 
 
-    int grass_obj     = engine.createGameObject("grass");
-    int grass_model   = ren.modelSystem().loadModel("assets/models/", "grass");
-    engine.giveComponents(grass_obj, MODEL, TERRAIN);
-    modelCS.useModel(ren, grass_obj, grass_model);
-
-    int terrain_obj   = engine.createGameObject("terrain");
-    GLuint heightmap  = MS.loadTexture("assets/heightmaps/terrain3.png", true);
-
-    terrain_model = MS.loadTerrainHeightmap(heightmap);
-    int material_A = MS.loadMaterial("assets/textures/", "Rock051_1K-PNG_Color.jpg", "", "");
-    int material_B = MS.loadMaterial("assets/textures/", "grass2.jpg", "", "");
-    MS.loadTerrainMaterials(terrain_model, material_A, material_B);
-
-    engine.giveComponents(terrain_obj, MODEL, TERRAIN);
-    terrainCS.useModel(terrain_obj, terrain_model);
-    terrainCS.generateGrass(terrain_obj, terrain_model, heightmap, grass_model);
-
-
-    int area_obj = engine.createGameObject("area");
-    int area_model = ren.modelSystem().loadModel("assets/models/", "area");
-    engine.giveComponents(area_obj, MODEL);
-    modelCS.useModel(ren, area_obj, area_model);
-    modelCS.setShadowcast(area_obj, true);
-
-
-    int cart_obj = engine.createGameObject("cart 1");
-    int cart_model = ren.modelSystem().loadModel("assets/models/", "cart");
-    engine.giveComponents(cart_obj, MODEL);
-    modelCS.useModel(ren, cart_obj, cart_model);
-    modelCS.setShadowcast(cart_obj, true);
-
-    engine.copyGameObject(cart_obj);
-
-
-
-    eventsys.onKeyTapped(
-        idk::Keycode::ESCAPE,
-        [&eventsys]()
-        {
-            bool captured = eventsys.mouseCaptured();
-            eventsys.mouseCapture(!captured);
-        }
-    );
-
-
+    // MS.loadModel("assets/models/", "pipe-cross");
+    // MS.loadModel("assets/models/", "pipe-elbow");
+    // MS.loadModel("assets/models/", "a-wall");
+    // MS.loadModel("assets/models/", "a-wall-corner");
+    // MS.loadModel("assets/models/", "a-wall-door");
+    // MS.loadModel("assets/models/", "a-ground");
+    // MS.loadModel("assets/models/", "a-ramp-single");
+    // MS.loadModel("assets/models/", "a-ramp-double");
 
     int dir_id = ren.lightSystem().createDirlight(idk::LightFlag::SHADOWMAP);
     idk::Dirlight &light = ren.lightSystem().dirlights()[dir_id];
-    light.ambient = glm::vec4(0.8f);
-    light.diffuse.w = 1.0f;
-    light.direction = glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f);
+    light.ambient = glm::vec4(0.1f);
+    light.diffuse = glm::vec4(1.0f);
+    light.direction = glm::vec4(-1.0f, -1.0f, -1.0f, 0.0f);
 }
 
 
-#include <filesystem>
 
 void
 IDKGame::mainloop( idk::EngineAPI &api )
@@ -121,39 +106,5 @@ IDKGame::mainloop( idk::EngineAPI &api )
     auto &ren      = api.getRenderer();
     auto &eventsys = api.getEventSys();
 
-
-    // if (engine.eventSystem().fileDropped())
-    // {
-    //     std::string filepath = engine.eventSystem().fileDroppedPath();
-    //                 filepath = std::filesystem::relative(filepath);
-
-    //     size_t i = filepath.length() - 1;
-    //     for (i=filepath.length()-1; i>=0; i--)
-    //     {
-    //         if (filepath[i] == '/')
-    //         {
-    //             break;
-    //         }
-    //     }
-
-    //     std::string name = filepath.substr(i+1);
-        
-    //     int obj_id   = engine.createGameObject(name);
-    //     int model_id = ren.modelSystem().loadModel(filepath + "/", name);
-
-    //     engine.giveComponent<idk::Model_CS>(obj_id);
-    //     engine.getCS<idk::Model_CS>().useModel(ren, obj_id, model_id);
-    // }
-
-
-    // auto &transCS = engine.getCS<idk::Transform_CS>();
-
-    // glm::vec3 &pos = transCS.getPosition(player_obj);
-
-    // float height = ren.modelSystem().queryTerrainHeight(
-    //     terrain_model, glm::mat4(1.0f), pos.x, pos.z
-    // );
-
-    // pos.y = height;
 }
 

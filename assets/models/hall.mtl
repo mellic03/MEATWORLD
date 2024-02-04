@@ -13,11 +13,11 @@ Pc 0.000000
 Pcr 0.030000
 aniso 0.000000
 anisor 0.000000
-map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/albedo/rustic_stone_wall_02_diff_1k.jpg
-map_Bump -bm 1.000000 /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/normal/rustic_stone_wall_02_nor_gl_1k.jpg
-map_Ke /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/displacement/rustic_stone_wall_02_disp_1k.jpg
-map_Pr /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/roughness/rustic_stone_wall_02_rough_1k.jpg
-map_Ao /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/ao/rustic_stone_wall_02_ao_1k.jpg
+map_Kd /home/michael/Desktop/code/C++/IDK/IDKGameEngine-Complete/IDKGame/assets/textures/albedo/rustic_stone_wall_02_diff_1k.jpg
+map_Bump -bm 1.000000 /home/michael/Desktop/code/C++/IDK/IDKGameEngine-Complete/IDKGame/assets/textures/normal/rustic_stone_wall_02_nor_gl_1k.jpg
+map_Ke /home/michael/Desktop/code/C++/IDK/IDKGameEngine-Complete/IDKGame/assets/textures/displacement/rustic_stone_wall_02_disp_1k.jpg
+map_Pr /home/michael/Desktop/code/C++/IDK/IDKGameEngine-Complete/IDKGame/assets/textures/roughness/rustic_stone_wall_02_rough_1k.jpg
+map_Ao /home/michael/Desktop/code/C++/IDK/IDKGameEngine-Complete/IDKGame/assets/textures/ao/rustic_stone_wall_02_ao_1k.jpg
 
 newmtl marble.004
 Ks 0.000000 0.000000 0.000000
@@ -32,7 +32,7 @@ Pc 0.000000
 Pcr 0.030000
 aniso 0.000000
 anisor 0.000000
-map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/albedo/marble2.jpg
+map_Kd /home/michael/Desktop/code/C++/IDK/IDKGameEngine-Complete/IDKGame/assets/textures/albedo/marble2.jpg
 
 newmtl marble.005
 Ks 0.000000 0.000000 0.000000
@@ -47,7 +47,7 @@ Pc 0.000000
 Pcr 0.030000
 aniso 0.000000
 anisor 0.000000
-map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/albedo/marble.jpg
+map_Kd /home/michael/Desktop/code/C++/IDK/IDKGameEngine-Complete/IDKGame/assets/textures/albedo/marble.jpg
 
 newmtl peelars
 Ks 0.000000 0.000000 0.000000
@@ -62,7 +62,7 @@ Pc 0.000000
 Pcr 0.030000
 aniso 0.000000
 anisor 0.000000
-map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/albedo/marble2.jpg
+map_Kd /home/michael/Desktop/code/C++/IDK/IDKGameEngine-Complete/IDKGame/assets/textures/albedo/marble2.jpg
 
 newmtl wood2.002
 Ks 0.000000 0.000000 0.000000
@@ -77,4 +77,4 @@ Pc 0.000000
 Pcr 0.030000
 aniso 0.000000
 anisor 0.000000
-map_Kd /home/michael/Desktop/code/C++/IDKGame/IDKGame/assets/textures/albedo/wood.jpg
+map_Kd /home/michael/Desktop/code/C++/IDK/IDKGameEngine-Complete/IDKGame/assets/textures/albedo/wood.jpg

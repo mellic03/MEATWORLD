@@ -17,7 +17,6 @@ add_library(${PROJECT_NAME} SHARED ${SOURCES})
 set_target_properties(
     ${PROJECT_NAME} PROPERTIES
     POSITION_INDEPENDENT_CODE ON
-    CXX_STANDARD 17
 )
 
 target_include_directories(
@@ -31,6 +30,8 @@ target_link_libraries(
     libidk
     IDKGraphics
     IDKGameEngine
+
+    IDKBuiltinCS
 
     IDKcomponentsystems
 )

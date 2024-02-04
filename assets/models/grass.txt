@@ -1,6 +1,0 @@
-24
-5
-assets/textures/grass.png
-dummy
-assets/textures/grass-rough.png
-dummy

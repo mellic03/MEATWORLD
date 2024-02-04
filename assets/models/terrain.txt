@@ -1,6 +1,0 @@
-98304
-3
-assets/textures/grass2.jpg
-assets/textures/Rock051_1K-PNG_Color.jpg
-dummy
-dummy
