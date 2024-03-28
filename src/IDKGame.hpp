@@ -2,16 +2,12 @@
 #include <libidk/idk_module.hpp>
 #include <libidk/idk_game.hpp>
 
-#include "./civillian.hpp"
-
 #include <string>
 
 
 class IDKGame: public idk::Module
 {
 private:
-    idk::Allocator<idkg::Civillian> m_civillians;
-
 
 public:
 
