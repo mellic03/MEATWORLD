@@ -10,6 +10,7 @@ add_subdirectory(src/ComponentSystems/)
 
 file(GLOB SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/character/*.cpp
 )
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})

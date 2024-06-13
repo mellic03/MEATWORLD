@@ -2,5 +2,5 @@
 #include <libidk/idk_export.hpp>
 
 
-IDK_EXPORT_MODULE(IDKGame);
+IDK_EXPORT_GAME(IDKGame);
 

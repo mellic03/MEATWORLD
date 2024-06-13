@@ -3,6 +3,11 @@
 #include <IDKEvents/IDKEvents.hpp>
 #include <IDKGameEngine/IDKGameEngine.hpp>
 
+#include "character/character.hpp"
+#include <IDKGraphics/UI/idk_ui.hpp>
+
+#include <libidk/idk_log.hpp>
+
 #include <iostream>
 
 
@@ -20,27 +25,23 @@ IDKGame::registerModules( idk::EngineAPI &api )
 }
 
 
-int model;
-
 
 void
 IDKGame::setup( idk::EngineAPI &api )
 {
     auto &engine   = api.getEngine();
+    auto &ecs      = api.getECS();
     auto &eventsys = api.getEventSys();
     auto &ren      = api.getRenderer();
 
-    ren.useSkybox(ren.loadSkybox("assets/cubemaps/skybox1/"));
-    model = ren.loadModel("assets/models/cave.idkvi");
+    eventsys.onDropFile(".idksc", [&ecs](const char *filepath)
+    {
+        ecs.readFile(filepath);
+    });
 
+    ren.useSkybox(ren.loadSkybox("assets/cubemaps/skybox5/"));
 
-    int light_id = ren.createDirlight();
-    IDK_Dirlight &light = ren.getDirlight(light_id);
-
-    light.ambient   = glm::vec4(0.0f);
-    light.diffuse   = glm::vec4(1.0f);
-    light.direction = glm::vec4(-1.0f, -1.0f, -1.0f, 0.0f);
-
+    ren.pushRenderOverlay("assets/meatworld.png", 0.5f, 2.0f, 0.5f);
 }
 
 
@@ -51,7 +52,23 @@ IDKGame::mainloop( idk::EngineAPI &api )
     auto &ren      = api.getRenderer();
     auto &eventsys = api.getEventSys();
 
-    ren.drawModel(model, glm::mat4(1.0f));
+    idkui::TextManager::text(10, 10) << "IDKGameEngine demo scene";
 
+
+    if (eventsys.keylog().keyTapped(idk::Keycode::SPACE))
+    {
+        ren.skipRenderOverlay();
+    }
+
+    std::cout << "WOOP: " << idk::TransformSys::getPositionWorldspace(0).x << "\n";
+
+}
+
+
+
+void
+IDKGame::shutdown()
+{
+    LOG_INFO() << "IDKGame::shutdown";
 }
 

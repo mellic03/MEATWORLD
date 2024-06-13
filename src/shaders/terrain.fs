@@ -7,7 +7,7 @@
 #include "include/util.glsl"
 
 layout (location = 0) out vec4 fsout_albedo;
-layout (location = 1) out vec3 fsout_normal;
+layout (location = 1) out uvec3 fsout_normal;
 layout (location = 2) out vec4 fsout_pbr;
 
 in vec3 fsin_fragpos;
