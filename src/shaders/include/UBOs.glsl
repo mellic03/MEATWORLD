@@ -7,6 +7,12 @@ struct IDK_Camera
     vec4 image_plane;
     float exposure, gamma, shutter, bloom;
 
+    vec2 chromatic_r;
+    vec2 chromatic_g;
+    vec2 chromatic_b;
+    vec2 chromatic_pad;
+    vec4 chromatic_strength;
+
     vec4 prev_position;
     mat4 prev_V, prev_P, prev_PV;
 };
@@ -14,6 +20,7 @@ struct IDK_Camera
 
 struct IDK_Dirlight
 {
+    mat4 transform;
     vec4 direction;
     vec4 ambient;
     vec4 diffuse;

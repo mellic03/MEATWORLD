@@ -11,6 +11,7 @@ add_subdirectory(src/ComponentSystems/)
 file(GLOB SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/character/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/systems/*.cpp
 )
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
@@ -24,7 +25,6 @@ target_include_directories(
     ${PROJECT_NAME} PUBLIC
 )
 
-
 target_link_libraries(
     ${PROJECT_NAME} PUBLIC
 
@@ -33,7 +33,6 @@ target_link_libraries(
     IDKGameEngine
 
     IDKBuiltinCS
-
     IDKcomponentsystems
 )
 

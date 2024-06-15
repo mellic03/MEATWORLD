@@ -166,27 +166,27 @@ float sampleDepthMap( int layer, vec3 uv, float bias )
 
 
 
-float sampleDepthMap_2( sampler2DShadow depth_map, vec3 uv, float bias )
-{
-    vec2 texelSize = 0.5 / textureSize(depth_map, 0).xy;
+// float sampleDepthMap_2( sampler2DShadow depth_map, vec3 uv, float bias )
+// {
+//     vec2 texelSize = 0.5 / textureSize(depth_map, 0).xy;
 
-    float shadow = 0.0;
+//     float shadow = 0.0;
 
-    for(int x = -KERNEL_HW; x <= KERNEL_HW; ++x)
-    {
-        for(int y = -KERNEL_HW; y <= KERNEL_HW; ++y)
-        {
-            vec2 sample_uv    = uv.xy + vec2(x, y) * texelSize;
-            // vec2 sample_uv    = uv.xy;
-            vec3 sample_coord = vec3(sample_uv, uv.z - bias);
+//     for(int x = -KERNEL_HW; x <= KERNEL_HW; ++x)
+//     {
+//         for(int y = -KERNEL_HW; y <= KERNEL_HW; ++y)
+//         {
+//             vec2 sample_uv    = uv.xy + vec2(x, y) * texelSize;
+//             // vec2 sample_uv    = uv.xy;
+//             vec3 sample_coord = vec3(sample_uv, uv.z - bias);
 
-            shadow += texture(depth_map, sample_coord); 
-        }
-    }
+//             shadow += texture(depth_map, sample_coord); 
+//         }
+//     }
 
-    // return shadow;
-    return shadow / ((2*KERNEL_HW+1)*(2*KERNEL_HW+1));
-}
+//     // return shadow;
+//     return shadow / ((2*KERNEL_HW+1)*(2*KERNEL_HW+1));
+// }
 
 
 

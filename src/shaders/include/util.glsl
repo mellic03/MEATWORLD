@@ -22,7 +22,6 @@ vec3 IDK_UVToWorld( vec2 uv, mat4 view_matrix )
 
 vec3 IDK_TexelToWorld( ivec2 texel, mat4 view_matrix )
 {
-
     return vec3(0.0);
 }
 
@@ -52,13 +51,15 @@ vec3 IDK_WorldFromDepth( sampler2D depth, vec2 texcoords, mat4 P, mat4 V )
 
 vec3 IDK_PackNormal( vec3 N )
 {
-    return (N * 0.5 + 0.5);
+    return N;
+    // return (N * 0.5 + 0.5);
 }
 
 
 vec3 IDK_UnpackNormal( vec3 N )
 {
-    return normalize(N * 2.0 - 1.0);
+    return normalize(N);
+    // return normalize(N * 2.0 - 1.0);
 }
 
 
