@@ -1,4 +1,4 @@
-#include "IDKGame.hpp"
+#include "game.hpp"
 
 #include <IDKEvents/IDKEvents.hpp>
 #include <IDKGameEngine/IDKGameEngine.hpp>
@@ -12,14 +12,7 @@
 
 
 void
-IDKGame::config()
-{
-
-}
-
-
-void
-IDKGame::registerModules( idk::EngineAPI &api )
+MeatWorldGame::registerModules( idk::EngineAPI &api )
 {
     auto &engine = api.getEngine();
 
@@ -33,7 +26,7 @@ IDKGame::registerModules( idk::EngineAPI &api )
 
 
 void
-IDKGame::setup( idk::EngineAPI &api )
+MeatWorldGame::init( idk::EngineAPI &api )
 {
     auto &engine   = api.getEngine();
     
@@ -51,13 +44,13 @@ IDKGame::setup( idk::EngineAPI &api )
 
 
 void
-IDKGame::mainloop( idk::EngineAPI &api )
+MeatWorldGame::mainloop( idk::EngineAPI &api )
 {
     auto &engine   = api.getEngine();
     auto &ren      = api.getRenderer();
     auto &eventsys = api.getEventSys();
 
-    idkui::TextManager::text(10, 10) << "IDKGameEngine demo scene";
+    idkui::TextManager::text(10, 10) << "MEATWORLD v0.1.0";
 
     if (eventsys.keylog().keyTapped(idk::Keycode::SPACE))
     {
@@ -71,8 +64,8 @@ IDKGame::mainloop( idk::EngineAPI &api )
 
 
 void
-IDKGame::shutdown()
+MeatWorldGame::shutdown()
 {
-    LOG_INFO() << "IDKGame::shutdown";
+    LOG_INFO() << "MeatWorldGame::shutdown";
 }
 
