@@ -12,6 +12,7 @@
 #include "systems/sys-player.hpp"
 #include "menu/menu.hpp"
 #include "meatnet/meatnet.hpp"
+#include "meatnet/meatnet.hpp"
 
 #include <iostream>
 
@@ -33,10 +34,16 @@ MeatWorldGame::registerModules( idk::EngineAPI &api )
 
 int root_panel;
 idkui2::LayoutManager *LM;
-Meatnet *meatnet = nullptr;
+// Meatnet *meatnet = nullptr;
+// MeatnetBuffer meatnet_buffers[4];
+
+meatnet::Host   *meatnet_host   = nullptr;
+meatnet::Client *meatnet_client = nullptr;
+
 
 int player;
-int players[4];
+std::vector<int> players = std::vector<int>(meatnet::MAX_PLAYERS, -1);
+
 
 void
 MeatWorldGame::setup( idk::EngineAPI &api )
@@ -69,13 +76,18 @@ MeatWorldGame::setup( idk::EngineAPI &api )
         player = (*(ECS2::getComponentArray<PlayerControllerCmp>().begin())).obj_id;
     }
 
-
-    for (int i=0; i<4; i++)
+    for (int i=0; i<players.size(); i++)
     {
-        // players[i] = idk::ECS2::createGameObject("Player " + std::to_string(i), false);
-        // idk::ECS2::giveComponent<idk::OLPlayerControllerCmp>(players[i]);
-        // idk::ECS2::gameObjectPersistent(players[i], false);
+        players[i] = idk::ECS2::createGameObject("Player " + std::to_string(i), false);
+        idk::ECS2::gameObjectPersistent(players[i], false);
+
+        idk::ECS2::giveComponent<idk::OLPlayerControllerCmp>(players[i]);
+        idk::ECS2::giveComponent<idk::TransformCmp>(players[i]);
+        TransformSys::setPositionLocalspace(players[i], glm::vec3(0.0f, 0.85f, 2.0f*i));
     }
+
+
+
 
     idkui2::ElementStyle style1 = {
         .fg = glm::vec4(1.0f),
@@ -122,14 +134,14 @@ MeatWorldGame::setup( idk::EngineAPI &api )
     // -----------------------------------------------------------------------------------------
     LM->createButton("Multiplayer-Panel", "Host", style2, [=]()
     {
-        meatnet = new Meatnet;
-        meatnet->server_init(4200);
+        meatnet_host = new meatnet::Host;
+        meatnet_host->connect(4200, [](){});
     });
 
     LM->createButton("Multiplayer-Panel", "Connect", style2, [=]()
     {
-        meatnet = new Meatnet;
-        meatnet->client_init("127.0.0.1", 4200);
+        meatnet_client = new meatnet::Client;
+        meatnet_client->connect("Michael" + std::to_string(rand()%1000), "127.0.0.1", 4200, [](){});
     });
 
     LM->createButton("Multiplayer-Panel", "Return", style2, [=]()
@@ -169,26 +181,17 @@ MeatWorldGame::mainloop( idk::EngineAPI &api )
     }
 
 
-    if (meatnet)
+    if (meatnet_host)
     {
-        if (meatnet->is_client())
-        {
-            idkui::TextManager::text(10, 30) << "Connected as client";
-            meatnet->writePosition(1, idk::TransformSys::getPositionWorldspace(2));
-        }
-
-        if (meatnet->is_server())
-        {
-            idkui::TextManager::text(10, 30) << "Connected as server";
-
-            for (int i=0; i<Meatnet::NUM_PLAYERS; i++)
-            {
-                glm::vec3 position = meatnet->readPosition(i);
-                idk::TransformSys::setPositionWorldspace(players[i], position);
-            }
-        }
+        idkui::TextManager::text(10, 30) << "Connected as host";
+        meatnet_host->update(api, players);
     }
 
+    if (meatnet_client)
+    {
+        idkui::TextManager::text(10, 30) << "Connected as client";
+        meatnet_client->update(api, player, players);
+    }
 
     {
         LM->update(api, dt);
@@ -216,10 +219,10 @@ MeatWorldGame::shutdown()
 {
     LOG_INFO() << "MeatWorldGame::shutdown";
 
-    if (meatnet)
-    {
-        meatnet->shutdown();
-    }
+    // if (meatnet)
+    // {
+    //     meatnet->shutdown();
+    // }
 
     // idk::ui::shutdown();
 }

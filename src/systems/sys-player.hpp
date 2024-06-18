@@ -52,6 +52,8 @@ struct idk::PlayerControllerCmp
     float run_speed  = 1.0f;
     float jump_force = 1.0f;
 
+    LegController *m_controller = nullptr;
+
     void    update( idk::EngineAPI& );
     void    input( idk::EngineAPI& );
 
@@ -70,6 +72,9 @@ struct idk::OLPlayerControllerCmp
     int hinge_obj = -1;
     int cam_obj   = -1;
     int model_obj = -1;
+    int emitter_obj = -1;
+
+    bool shooting = false;
 
     float walk_speed = 1.0f;
     float run_speed  = 1.0f;
@@ -82,7 +87,7 @@ struct idk::OLPlayerControllerCmp
 
     size_t  serialize( std::ofstream &stream ) const { return 0; };
     size_t  deserialize( std::ifstream &stream ) { return 0; };
-    static void onObjectAssignment( idk::EngineAPI &api, int obj_id ) {  };
+    static void onObjectAssignment( idk::EngineAPI &api, int obj_id );
     static void onObjectDeassignment( idk::EngineAPI &api, int obj_id ) {  };
     static void onObjectCopy( int src_obj, int dst_obj ) {  };
 };

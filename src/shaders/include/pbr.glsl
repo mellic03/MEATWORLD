@@ -2,7 +2,7 @@
 #define PBR_EPSILON 0.001
 
 
-#define PBR_DOT(u, v) max(dot(u, v), 0.0)
+#define PBR_DOT(u, v) max(dot(u, v), 0.01)
 // #define PBR_DOT(u, v) dot(u, v) * 0.5 + 0.5
 
 

@@ -66,9 +66,9 @@ struct IDK_Atmosphere
 
 #define idk_renderdata_MAX_CAMERAS     4
 #define idk_renderdata_MAX_DIRLIGHTS   1
-#define idk_renderdata_MAX_POINTLIGHTS 256
-#define idk_renderdata_MAX_SPOTLIGHTS  32
-#define idk_renderdata_MAX_ATMOSPHERES 16
+#define idk_renderdata_MAX_POINTLIGHTS 16
+#define idk_renderdata_MAX_SPOTLIGHTS  8
+#define idk_renderdata_MAX_ATMOSPHERES 2
 
 struct IDK_UBORenderData
 {

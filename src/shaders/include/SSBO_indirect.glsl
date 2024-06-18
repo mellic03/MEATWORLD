@@ -1,8 +1,8 @@
 
 #define idk_indirect_draw_TEXTURES_PER_MATERIAL 5
 
-#define idk_indirect_draw_MAX_TEXTURES  2048
-#define idk_indirect_draw_MAX_TRANSFORMS 2048
+#define idk_indirect_draw_MAX_TEXTURES  1024
+#define idk_indirect_draw_MAX_TRANSFORMS 1024
 #define idk_indirect_draw_MAX_DRAW_CALLS 512
 
 

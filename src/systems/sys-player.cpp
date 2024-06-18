@@ -2,6 +2,8 @@
 
 #include <IDKBuiltinCS/sys-transform.hpp>
 #include <IDKBuiltinCS/sys-physics.hpp>
+#include <IDKBuiltinCS/sys-model.hpp>
+#include <IDKBuiltinCS/sys-particle.hpp>
 
 #include <IDKEvents/IDKEvents.hpp>
 #include <IDKGraphics/UI/idk_ui.hpp>
@@ -19,10 +21,7 @@ private:
     int m_lh, m_lk, m_lf, m_rh, m_rk, m_rf;
     int m_right;
 
-    float distAB = 0.6f;
-    float distBC = 0.75f;
-
-    bool m_left = true;
+    bool  m_left = true;
 
     glm::vec3 pos, lhpos, lkpos, lfpos, rhpos, rkpos, rfpos;
     glm::vec3 ltarget, rtarget;
@@ -31,6 +30,9 @@ private:
 
 
 public:
+    float distAB = 0.6f;
+    float distBC = 0.75f;
+    float m_desired = 0.75f*(distAB+distBC);
 
     LegController( int player )
     {
@@ -93,7 +95,7 @@ public:
             if (dist1 > (distAB+distBC))
             {
                 ltarget = lhpos;
-                ltarget.y -= 0.75f*(distAB+distBC);
+                ltarget.y -= m_desired;
             }
 
             else if (distxz > 0.5f)
@@ -120,7 +122,7 @@ public:
             if (dist1 > (distAB+distBC))
             {
                 rtarget = rhpos;
-                rtarget.y -= 0.75f*(distAB+distBC);
+                rtarget.y -= m_desired; // 0.75f*(distAB+distBC);
             }
 
             else if (distxz > 0.5f)
@@ -164,7 +166,7 @@ public:
         glm::vec3 delta = avg - xzpos;
 
 
-        float desired = pos.y - 0.75f*(distAB+distBC);
+        float desired = pos.y - m_desired;
         float current = 0.5f*(lfpos.y + rfpos.y);
               current = glm::max(current, glm::min(lfpos.y, rfpos.y));
         float error = current - desired;
@@ -230,6 +232,7 @@ idk::PlayerSys::update( idk::EngineAPI &api )
 
         // static LegController L(cmp.obj_id);
         // L.update(api.getEngine().deltaTime());
+
     }
 
     for (auto &cmp: idk::ECS2::getComponentArray<idk::OLPlayerControllerCmp>())
@@ -261,6 +264,24 @@ idk::PlayerControllerCmp::update( idk::EngineAPI &api )
     auto &events = api.getEventSys();
     auto &K      = events.keylog();
 
+
+    if (m_controller == nullptr)
+    {
+        m_controller = new LegController(obj_id);
+    }
+
+    if (K.keyDown(Keycode::LCTRL))
+    {
+        m_controller->m_desired = 0.65f * 0.75f*(m_controller->distAB+m_controller->distBC);
+    }
+
+    else
+    {
+        m_controller->m_desired = 0.75f*(m_controller->distAB+m_controller->distBC);
+    }
+
+    m_controller->update(dtime);
+
     if (model_obj == -1)
     {
         model_obj = idk::ECS2::createGameObject("model");
@@ -285,6 +306,21 @@ idk::PlayerControllerCmp::update( idk::EngineAPI &api )
     static float G = 9.8f;
     static glm::vec3 acc = glm::vec3(0.0f, 0.0f, 0.0f);
     static glm::vec3 vel = glm::vec3(0.0f, 0.0f, 0.0f);
+
+
+    // glm::vec3 pos = TransformSys::getPositionWorldspace(obj_id);
+    // glm::vec3 hit;
+
+    // if (PhysicsSys::raycast(pos, glm::vec3(0.0f, -1.0f, 0.0f), hit))
+    // {
+    //     float dist = glm::distance(pos, hit);
+    //     if (dist > m_controller->m_desired)
+    //     {
+    //         float dy = glm::min(dist, 0.05f);
+    //         TransformSys::translateWorldspace(obj_id, glm::vec3(0.0f, dy, 0.0f));
+    //     }
+    // }
+
 
     // auto &cmp = idk::ECS2::getComponent<idk::KinematicCapsuleCmp>(obj_id);
 
@@ -400,6 +436,9 @@ idk::OLPlayerControllerCmp::update( idk::EngineAPI &api )
         idk::ECS2::giveChild(obj_id, hinge_obj);
         TransformSys::setPositionLocalspace(hinge_obj, glm::vec3(0.0f));
     }
+
+    // ECS2::getComponent<ParticleCmp>(emitter_obj).desc.duration = (shooting) ? 1.0f : 0.001f;
+
 
     TransformSys::getData(obj_id).yaw = TransformSys::getData(hinge_obj).yaw;
 
@@ -544,7 +583,7 @@ idk::PlayerControllerCmp::onObjectAssignment( idk::EngineAPI &api, int obj_id )
 
     auto &cmp = ECS2::getComponent<PlayerControllerCmp>(obj_id);
 
-    cmp.walk_speed = 2.0f;
+    cmp.walk_speed = 4.0f;
     cmp.cam_obj    = ECS2::createGameObject("camera", false);
     cmp.hinge_obj  = idk::ECS2::createGameObject("hinge", false);
 
@@ -565,6 +604,18 @@ idk::PlayerControllerCmp::onObjectAssignment( idk::EngineAPI &api, int obj_id )
     TransformSys::setPositionLocalspace(cmp.cam_obj, glm::vec3(0.5f, 0.3f, 1.5f));
     ECS2::getComponent<CameraCmp>(cmp.cam_obj).cam_id = api.getRenderer().activeCamera();
 
+
+
+
+    cmp.model_obj = ECS2::createGameObject("model", false);
+    ECS2::giveComponent<TransformCmp>(cmp.model_obj);
+    ECS2::giveComponent<ModelCmp>(cmp.model_obj);
+
+    ECS2::giveChild(obj_id, cmp.model_obj);
+    TransformSys::setPositionLocalspace(cmp.model_obj, glm::vec3(0.0f, 0.5f, -0.15f));
+    TransformSys::getData(cmp.model_obj).yaw = -M_PI;
+
+    ModelSys::assignModel(cmp.model_obj, "assets/models/head.idkvi");
 }
 
 
@@ -579,6 +630,41 @@ void
 idk::PlayerControllerCmp::onObjectCopy( int src_obj, int dst_obj )
 {
     IDK_ASSERT("Cannot copy idk::PlayerControllerCmp!", false);
+}
+
+
+
+
+
+
+
+void
+idk::OLPlayerControllerCmp::onObjectAssignment( idk::EngineAPI &api, int obj_id )
+{
+    LOG_INFO() << "idk::OLPlayerControllerCmp::onObjectAssignment";
+
+    auto &cmp = ECS2::getComponent<OLPlayerControllerCmp>(obj_id);
+
+    cmp.walk_speed = 4.0f;
+    cmp.model_obj  = ECS2::createGameObject("model", false);
+    // cmp.emitter_obj = ECS2::createGameObject("emitter", false);
+
+
+    // ECS2::giveChild(obj_id, cmp.emitter_obj);
+    // TransformSys::setPositionLocalspace(cmp.emitter_obj, glm::vec3(0.0f));
+    // ECS2::giveComponent<ParticleCmp>(cmp.emitter_obj);
+    // ECS2::getComponent<ParticleCmp>(cmp.emitter_obj).desc.scale = 0.0f;
+    // ECS2::getComponent<ParticleCmp>(cmp.emitter_obj).desc.velocity.z = -15.0f;
+
+    ECS2::giveComponent<TransformCmp>(cmp.model_obj);
+    ECS2::giveComponent<ModelCmp>(cmp.model_obj);
+
+    ECS2::giveChild(obj_id, cmp.model_obj);
+    TransformSys::setPositionLocalspace(cmp.model_obj, glm::vec3(0.0f, 0.5f, -0.15f));
+    TransformSys::getData(cmp.model_obj).yaw = -M_PI;
+
+    ModelSys::assignModel(cmp.model_obj, "assets/models/head.idkvi");
+
 }
 
 
