@@ -10,10 +10,10 @@ class MeatWorldGame: public idk::Game
 private:
 
 public:
-    virtual void registerModules ( idk::EngineAPI & ) final;
-    virtual void init            ( idk::EngineAPI & ) final;
-    virtual void mainloop        ( idk::EngineAPI & ) final;
-    virtual void shutdown        (                  ) final;
+    virtual void registerModules ( idk::EngineAPI& ) final;
+    virtual void setup           ( idk::EngineAPI& ) final;
+    virtual void mainloop        ( idk::EngineAPI& ) final;
+    virtual void shutdown        (                 ) final;
 
 };
 

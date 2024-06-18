@@ -228,10 +228,19 @@ idk::PlayerSys::update( idk::EngineAPI &api )
         cmp.input(api);
         cmp.update(api);
 
+        // static LegController L(cmp.obj_id);
+        // L.update(api.getEngine().deltaTime());
+    }
 
-        static LegController L(cmp.obj_id);
-        L.update(api.getEngine().deltaTime());
+    for (auto &cmp: idk::ECS2::getComponentArray<idk::OLPlayerControllerCmp>())
+    {
+        if (cmp.obj_id == -1)
+        {
+            continue;
+        }
 
+        cmp.input(api);
+        cmp.update(api);
     }
 
     for (auto &cmp: idk::ECS2::getComponentArray<idk::PlayerArmsCmp>())
@@ -311,8 +320,6 @@ idk::PlayerControllerCmp::update( idk::EngineAPI &api )
     //     // PhysicsSys::addForce(obj_id, dP);
     // }
 
-    idkui::TextManager::text(10, 150) << "acc: " << acc.y;
-    idkui::TextManager::text(10, 175) << "vel: " << vel.y;
 }
 
 
@@ -362,6 +369,57 @@ idk::PlayerControllerCmp::input( idk::EngineAPI &api )
         TransformSys::yaw(hinge_obj, mouse_speed*dmouse.x);
         TransformSys::pitch(hinge_obj, mouse_speed*dmouse.y);
     }
+}
+
+
+
+
+void
+idk::OLPlayerControllerCmp::update( idk::EngineAPI &api )
+{
+    float dtime  = api.getEngine().deltaTime();
+    auto &ren    = api.getRenderer();
+    
+    auto &events = api.getEventSys();
+    auto &K      = events.keylog();
+
+    if (model_obj == -1)
+    {
+        model_obj = idk::ECS2::createGameObject("model");
+        idk::ECS2::giveComponent<TransformCmp>(model_obj);
+
+        idk::ECS2::giveChild(obj_id, model_obj);
+        TransformSys::setPositionLocalspace(model_obj, glm::vec3(0.0f));
+    }
+
+    if (hinge_obj == -1)
+    {
+        hinge_obj = idk::ECS2::createGameObject("hinge");
+        idk::ECS2::giveComponent<TransformCmp>(hinge_obj);
+
+        idk::ECS2::giveChild(obj_id, hinge_obj);
+        TransformSys::setPositionLocalspace(hinge_obj, glm::vec3(0.0f));
+    }
+
+    TransformSys::getData(obj_id).yaw = TransformSys::getData(hinge_obj).yaw;
+
+
+    static float G = 9.8f;
+    static glm::vec3 acc = glm::vec3(0.0f, 0.0f, 0.0f);
+    static glm::vec3 vel = glm::vec3(0.0f, 0.0f, 0.0f);
+}
+
+
+
+void
+idk::OLPlayerControllerCmp::input( idk::EngineAPI &api )
+{
+    if (m_controller == nullptr)
+    {
+        m_controller = new LegController(this->obj_id);
+    }
+
+    m_controller->update(api.getEngine().deltaTime());
 }
 
 
@@ -483,6 +541,30 @@ void
 idk::PlayerControllerCmp::onObjectAssignment( idk::EngineAPI &api, int obj_id )
 {
     LOG_INFO() << "idk::PlayerControllerCmp::onObjectAssignment";
+
+    auto &cmp = ECS2::getComponent<PlayerControllerCmp>(obj_id);
+
+    cmp.walk_speed = 2.0f;
+    cmp.cam_obj    = ECS2::createGameObject("camera", false);
+    cmp.hinge_obj  = idk::ECS2::createGameObject("hinge", false);
+
+
+    ECS2::giveComponent<TransformCmp>(cmp.cam_obj);
+    ECS2::giveComponent<TransformCmp>(cmp.hinge_obj);
+    ECS2::giveComponent<SmoothFollowCmp>(cmp.hinge_obj);
+
+
+    auto &fcmp = ECS2::getComponent<SmoothFollowCmp>(cmp.hinge_obj);
+    fcmp.anchor_id = obj_id;
+    fcmp.speed     = 32.0f;
+
+
+    ECS2::giveChild(cmp.hinge_obj, cmp.cam_obj);
+
+    ECS2::giveComponent<CameraCmp>(cmp.cam_obj);
+    TransformSys::setPositionLocalspace(cmp.cam_obj, glm::vec3(0.5f, 0.3f, 1.5f));
+    ECS2::getComponent<CameraCmp>(cmp.cam_obj).cam_id = api.getRenderer().activeCamera();
+
 }
 
 

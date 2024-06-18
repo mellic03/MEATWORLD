@@ -19,6 +19,16 @@ idk::ECS2::userCallback<idk::PlayerControllerCmp>( idk::EngineAPI &api, int obj_
 
 
 
+template <>
+void
+idk::ECS2::userCallback<idk::OLPlayerControllerCmp>( idk::EngineAPI &api, int obj_id )
+{
+    auto &cmp = idk::ECS2::getComponent<idk::OLPlayerControllerCmp>(obj_id);
+
+}
+
+
+
 
 void drag_drop_thing( std::string label, const std::string &payloadname, int &obj_id )
 {
