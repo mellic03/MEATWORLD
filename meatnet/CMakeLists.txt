@@ -9,17 +9,17 @@ set(OpenGL_GL_PREFERENCE GLVND)
 
 find_package(GLEW REQUIRED)
 find_package(OpenGL REQUIRED)
-find_package(SDL2 REQUIRED)
-find_package(SDL2_image REQUIRED)
-find_package(SDL2_mixer REQUIRED)
-find_package(SDL2_ttf REQUIRED)
+# find_package(SDL2 REQUIRED)
+# find_package(SDL2_image REQUIRED)
+# find_package(SDL2_mixer REQUIRED)
+# find_package(SDL2_ttf REQUIRED)
 
 include_directories(${GLEW_INCLUDE_DIRS})
 include_directories(${OPENGL_INCLUDE_DIRS})
-include_directories(${SDL2_INCLUDE_DIRS})
-include_directories(${SDL2_image_INCLUDE_DIRS})
-include_directories(${SDL2_mixer_INCLUDE_DIRS})
-include_directories(${SDL2_ttf_INCLUDE_DIRS})
+# include_directories(${SDL2_INCLUDE_DIRS})
+# include_directories(${SDL2_image_INCLUDE_DIRS})
+# include_directories(${SDL2_mixer_INCLUDE_DIRS})
+# include_directories(${SDL2_ttf_INCLUDE_DIRS})
 
 
 project(meatnet)
@@ -31,6 +31,13 @@ file(GLOB SOURCES
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
+
+
+if (IDK_DEBUG)
+    target_compile_options(${PROJECT_NAME} PUBLIC -O0 -g)
+else()
+    target_compile_options(${PROJECT_NAME} PUBLIC -Ofast)
+endif ()
 
 
 target_link_libraries(
