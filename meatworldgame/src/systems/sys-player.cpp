@@ -104,9 +104,9 @@ public:
         // glm::vec3 front      = TransformSys::getFront(player);
         glm::vec3 hit;
 
-        if (PhysicsSys::raycast(m_hip_pos+0.4f*front, glm::vec3(0.0f, -1.0f, 0.0f), hit))
+        if (PhysicsSys::raycast(m_hip_pos+front, glm::vec3(0.0f, -1.0f, 0.0f), hit))
         {
-            float dist0 = glm::distance(next_target, hit);
+            float dist0 = glm::distance(curr_target, hit);
             float dist1 = glm::distance(m_foot_pos, player_pos);
 
             // if (m_hip_pos.y - hit.y > distAB+distBC)
@@ -116,7 +116,7 @@ public:
             //     return true;
             // }
 
-            if (dist0 > 0.55f)
+            if (dist0 > 0.5f)
             {
                 curr_target = next_target;
                 next_target = hit;
@@ -140,28 +140,27 @@ public:
         m_foot_pos  = TransformSys::getPositionWorldspace(m_foot);
 
 
-        if (glm::length2(motion2) > 0.00001f)
+        // if (glm::length2(motion2) > 0.00001f)
         {
-            _raycast(player, glm::normalize(glm::vec3(motion2.x, 0.0f, motion2.y)));
-            m_alpha += glm::length(motion2);
+            _raycast(player, glm::vec3(motion2.x, 0.0f, motion2.y));
+            // m_alpha += glm::length(motion2);
         }
     
-        while (m_alpha + offset > M_PI)
-        {
-            m_alpha -= M_PI;
-        }
+        // while (m_alpha + offset > M_PI)
+        // {
+        //     m_alpha -= M_PI;
+        // }
     
-        while (m_alpha + offset < -M_PI)
-        {
-            m_alpha += M_PI;
-        }
+        // while (m_alpha + offset < -M_PI)
+        // {
+        //     m_alpha += M_PI;
+        // }
 
-        float dy = sin(m_alpha + offset);
+        // float dy = sin(m_alpha + offset);
   
 
-
-        TransformSys::moveTowards(m_foot, curr_target, 32.0f*dt);
         TransformSys::FABRIK(3, m_foot, {distAB, distBC}, m_hip_pos - glm::vec3(0.0f, distAB, 0.0f) - front);
+        TransformSys::moveTowards(m_foot, curr_target, 32.0f*dt);
     }
 
 };
@@ -227,7 +226,7 @@ public:
         float error = current - desired;
         glm::vec3 E = 0.05f * glm::vec3(0.0f, error, 0.0f);
 
-        TransformSys::translateWorldspace(m_player, 0.25f*dt*delta + E);
+        TransformSys::translateWorldspace(m_player, 0.1f*dt*delta);
     };
 
 
@@ -256,10 +255,6 @@ idk::PlayerSys::update( idk::EngineAPI &api )
     {
         cmp.input(api);
         cmp.update(api);
-
-        // static LegController L(cmp.obj_id);
-        // L.update(api.getEngine().deltaTime());
-
     }
 
     for (auto &cmp: idk::ECS2::getComponentArray<idk::OLPlayerControllerCmp>())
@@ -587,8 +582,8 @@ idk::PlayerControllerCmp::onObjectAssignment( idk::EngineAPI &api, int obj_id )
     cmp.hinge_obj  = idk::ECS2::createGameObject("hinge", false);
 
 
-    ECS2::giveComponent<TransformCmp>(cmp.cam_obj);
-    ECS2::giveComponent<TransformCmp>(cmp.hinge_obj);
+    // ECS2::giveComponent<TransformCmp>(cmp.cam_obj);
+    // ECS2::giveComponent<TransformCmp>(cmp.hinge_obj);
     ECS2::giveComponent<SmoothFollowCmp>(cmp.hinge_obj);
 
 
@@ -607,7 +602,7 @@ idk::PlayerControllerCmp::onObjectAssignment( idk::EngineAPI &api, int obj_id )
 
 
     cmp.model_obj = ECS2::createGameObject("model", false);
-    ECS2::giveComponent<TransformCmp>(cmp.model_obj);
+    // ECS2::giveComponent<TransformCmp>(cmp.model_obj);
     ECS2::giveComponent<ModelCmp>(cmp.model_obj);
 
     ECS2::giveChild(obj_id, cmp.model_obj);

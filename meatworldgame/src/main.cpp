@@ -12,8 +12,7 @@
 #include "systems/sys-player.hpp"
 #include "menu/menu.hpp"
 
-// #include "meatnet/meatnet.hpp"
-// #include "meatnet/meatnet.hpp"
+#include "../../meatnet/src/meatnet.hpp"
 
 #include <iostream>
 
@@ -35,15 +34,14 @@ MeatWorldGame::registerModules( idk::EngineAPI &api )
 
 int root_panel;
 idkui2::LayoutManager *LM;
-// Meatnet *meatnet = nullptr;
-// MeatnetBuffer meatnet_buffers[4];
+idkui2::Panel *ui_root;
 
-// meatnet::Host   *meatnet_host   = nullptr;
-// meatnet::Client *meatnet_client = nullptr;
+meatnet::Host   *meatnet_host   = nullptr;
+meatnet::Client *meatnet_client = nullptr;
 
 
 int player;
-// std::vector<int> players = std::vector<int>(meatnet::MAX_PLAYERS, -1);
+std::vector<int> players = std::vector<int>(meatnet::MAX_PLAYERS, -1);
 
 
 void
@@ -65,101 +63,35 @@ MeatWorldGame::setup( idk::EngineAPI &api )
 
     LM = new idkui2::LayoutManager("./assets/fonts/RodettaStamp.ttf", 32);
 
-
-    if (ECS2::getComponentArray<PlayerControllerCmp>().size() == 0)
+    // if (ECS2::getComponentArray<PlayerControllerCmp>().size() == 0)
     {
         LOG_INFO() << "Creating player";
         player = ECS2::createGameObject("Player", false);
         ECS2::giveComponent<PlayerControllerCmp>(player);
     }
 
-    else
-    {
-        player = (*(ECS2::getComponentArray<PlayerControllerCmp>().begin())).obj_id;
-    }
-
-    // for (int i=0; i<players.size(); i++)
-    // {
-    //     players[i] = idk::ECS2::createGameObject("Player " + std::to_string(i), false);
-    //     idk::ECS2::gameObjectPersistent(players[i], false);
-
-    //     idk::ECS2::giveComponent<idk::OLPlayerControllerCmp>(players[i]);
-    //     idk::ECS2::giveComponent<idk::TransformCmp>(players[i]);
-    //     TransformSys::setPositionLocalspace(players[i], glm::vec3(0.0f, 0.85f, 2.0f*i));
-    // }
+    ui_root = createMenu(api, LM, meatnet_host, meatnet_client);
 
 
 
 
-    idkui2::ElementStyle style1 = {
-        .fg = glm::vec4(1.0f),
-        .bg = glm::vec4(0.1f, 0.1f, 0.1f, 0.5f),
-        .radius = 16.0f
+    // Heightmap
+    // -----------------------------------------------------------------------------------------
+    static const idk::glTextureConfig config = {
+        .internalformat = GL_SRGB8_ALPHA8,
+        .format         = GL_RGBA,
+        .minfilter      = GL_LINEAR,
+        .magfilter      = GL_LINEAR,
+        .wrap_s         = GL_CLAMP_TO_BORDER,
+        .wrap_t         = GL_CLAMP_TO_BORDER,
+        .datatype       = GL_UNSIGNED_BYTE,
+        .genmipmap      = GL_FALSE
     };
 
-    idkui2::ElementStyle style2 = {
-        .fg = glm::vec4(1.0f),
-        .bg = glm::vec4(0.1f, 0.1f, 0.1f, 0.7f),
-        .radius = 16.0f
-    };
-
-
-    LM->createPanel("Root-Panel", idkui2::ALIGN_LEFT | idkui2::ALIGN_TOP, style1);
-    LM->createPanel("Multiplayer-Panel", idkui2::ALIGN_CENTER, style1);
-    LM->createPanel("Settings-Panel", idkui2::ALIGN_CENTER, style1);
-
-    // Main
-    // -----------------------------------------------------------------------------------------
-    LM->createButton("Root-Panel", "Continue", style2, [&eventsys]()
-    {
-        eventsys.mouseCapture(true);
-    });
-
-    LM->createButton("Root-Panel", "Multiplayer", style2, [=]()
-    {
-        LM->togglePanel("Multiplayer-Panel");
-    });
-
-    LM->createButton("Root-Panel", "Settings", style2, [=]()
-    {
-        LM->openPanel("Settings-Panel");
-    });
-
-    LM->createButton("Root-Panel", "Exit", style2, [&engine]()
-    {
-        engine.shutdown();
-    });
+    idk::TextureWrapper wrapper;
+    idk::gltools::loadTexture("assets/heightmaps/sand-dunes.jpg", config, &wrapper);
     // -----------------------------------------------------------------------------------------
 
-
-    // Multiplayer
-    // -----------------------------------------------------------------------------------------
-    LM->createButton("Multiplayer-Panel", "Host", style2, [=]()
-    {
-        // meatnet_host = new meatnet::Host;
-        // meatnet_host->connect(4200, [](){});
-    });
-
-    LM->createButton("Multiplayer-Panel", "Connect", style2, [=]()
-    {
-        // meatnet_client = new meatnet::Client;
-        // meatnet_client->connect("Michael" + std::to_string(rand()%1000), "127.0.0.1", 4200, [](){});
-    });
-
-    LM->createButton("Multiplayer-Panel", "Return", style2, [=]()
-    {
-        LM->closePanel("Multiplayer-Panel");
-    });
-    // -----------------------------------------------------------------------------------------
-
-
-    // Settings
-    // -----------------------------------------------------------------------------------------
-    LM->createButton("Settings-Panel", "Return", style2, [=]()
-    {
-        LM->closePanel("Settings-Panel");
-    });
-    // -----------------------------------------------------------------------------------------
 
 }
 
@@ -183,35 +115,35 @@ MeatWorldGame::mainloop( idk::EngineAPI &api )
     }
 
 
-    // if (meatnet_host)
-    // {
-    //     idkui::TextManager::text(10, 30) << "Connected as host";
-    //     meatnet_host->update(api, players);
-    // }
+    if (meatnet_host)
+    {
+        idkui::TextManager::text(10, 30) << "Connected as host";
+        meatnet_host->update(api, players);
+    }
 
-    // if (meatnet_client)
-    // {
-    //     idkui::TextManager::text(10, 30) << "Connected as client";
-    //     meatnet_client->update(api, player, players);
-    // }
+    if (meatnet_client)
+    {
+        idkui::TextManager::text(10, 30) << "Connected as client";
+        meatnet_client->update(api, player, players);
+    }
 
     {
         LM->update(api, dt);
 
         if (eventsys.mouseCaptured())
         {
-            LM->closePanel("Root-Panel");
+            ui_root->close();
         }
 
         else
         {
-            LM->openPanel("Root-Panel");
+            ui_root->open();
         }
 
         LM->renderTexture(api);
     }
 
-    ren.drawTextureOverlay(LM->m_atlas);
+    // ren.drawTextureOverlay(LM->m_atlas);
 }
 
 
@@ -221,10 +153,15 @@ MeatWorldGame::shutdown()
 {
     LOG_INFO() << "MeatWorldGame::shutdown";
 
-    // if (meatnet)
-    // {
-    //     meatnet->shutdown();
-    // }
+    if (meatnet_host)
+    {
+        meatnet_host->shutdown();
+    }
+
+    if (meatnet_client)
+    {
+        meatnet_client->shutdown();
+    }
 
     // idk::ui::shutdown();
 }
