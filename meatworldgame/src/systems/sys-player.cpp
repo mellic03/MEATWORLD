@@ -116,7 +116,12 @@ public:
             //     return true;
             // }
 
-            if (dist0 > 0.5f)
+            if (abs(curr_target.y - hit.y) > m_desired)
+            {
+                curr_target = m_hip_pos + glm::vec3(0.0f, -m_desired, 0.0f);
+            }
+
+            else if (dist0 > 0.5f)
             {
                 curr_target = next_target;
                 next_target = hit;
@@ -226,7 +231,7 @@ public:
         float error = current - desired;
         glm::vec3 E = 0.05f * glm::vec3(0.0f, error, 0.0f);
 
-        TransformSys::translateWorldspace(m_player, 0.1f*dt*delta);
+        TransformSys::translateWorldspace(m_player, 0.1f*dt*delta + E);
     };
 
 
@@ -344,41 +349,46 @@ idk::PlayerControllerCmp::update( idk::EngineAPI &api )
     // }
 
 
+    // if (ECS2::hasComponent<KinematicCapsuleCmp>(obj_id) == false)
+    // {
+    //     idk::ECS2::giveComponent<idk::KinematicCapsuleCmp>(obj_id);
+    // }
+
     // auto &cmp = idk::ECS2::getComponent<idk::KinematicCapsuleCmp>(obj_id);
 
-    acc.y = -PhysicsConstants::G;
+    // acc.y = -PhysicsConstants::G;
 
     // if (cmp.enabled)
-    {
-        // if (cmp.grounded)
-        // {
-        //     vel.y *= 0.5f;
+    // {
+    //     if (cmp.grounded)
+    //     {
+    //         vel.y *= 0.5f;
 
-        //     if (K.keyDown(idk::Keycode::SPACE))
-        //     {
-        //         vel.y = jump_force*PhysicsConstants::G;
-        //         // glm::vec3 f = glm::vec3(0.0f, jump_force*PhysicsConstants::G, 0.0f);
-        //         // PhysicsSys::addForce(obj_id, f);
-        //     }
+    //         if (K.keyDown(idk::Keycode::SPACE))
+    //         {
+    //             vel.y = jump_force*PhysicsConstants::G;
+    //             glm::vec3 f = glm::vec3(0.0f, jump_force*PhysicsConstants::G, 0.0f);
+    //             PhysicsSys::addForce(obj_id, f);
+    //         }
 
-        //     if (K.keyDown(idk::Keycode::LCTRL))
-        //     {
-        //         cmp.bottom = 0.5f;
-        //     }
+    //         if (K.keyDown(idk::Keycode::LCTRL))
+    //         {
+    //             cmp.bottom = 0.5f;
+    //         }
 
-        //     else if (cmp.bottom < 0.75f)
-        //     {
-        //         cmp.bottom += 2.0f*dtime;
-        //     }
-        // }
+    //         else if (cmp.bottom < 0.75f)
+    //         {
+    //             cmp.bottom += 2.0f*dtime;
+    //         }
+    //     }
 
-        vel = glm::clamp(vel, glm::vec3(-100.0f), glm::vec3(+100.0f));
-        vel += dtime*acc;
-        glm::vec3 dP = vel + 0.5f*dtime*acc;
+    //     vel = glm::clamp(vel, glm::vec3(-100.0f), glm::vec3(+100.0f));
+    //     vel += dtime*acc;
+    //     glm::vec3 dP = vel + 0.5f*dtime*acc;
 
-        // TransformSys::translateWorldspace(obj_id, glm::vec3(0.0f, -0.02f, 0.0f));
-        // PhysicsSys::addForce(obj_id, dP);
-    }
+    //     // TransformSys::translateWorldspace(obj_id, glm::vec3(0.0f, -0.02f, 0.0f));
+    //     PhysicsSys::addForce(obj_id, dP);
+    // }
 
 }
 
@@ -398,6 +408,11 @@ idk::PlayerControllerCmp::input( idk::EngineAPI &api )
     glm::vec3 right = TransformSys::getRight(obj_id);
     glm::vec3 front = TransformSys::getFront(obj_id);
 
+
+    // if (ECS2::hasComponent<KinematicCapsuleCmp>(obj_id) == false)
+    // {
+    //     idk::ECS2::giveComponent<idk::KinematicCapsuleCmp>(obj_id);
+    // }
 
     if (K.keyDown(idk::Keycode::A)) delta -= right;
     if (K.keyDown(idk::Keycode::D)) delta += right;

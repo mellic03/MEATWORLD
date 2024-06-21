@@ -80,16 +80,32 @@ idkui2::Panel *createMenu( idk::EngineAPI &api, idkui2::LayoutManager *LM,
     ));
 
     mainmenu_list->pushChildFront(new idkui2::Button("Multiplayer", buttonstyle,
-        [multiplayer]()
+        [root, multiplayer, settings]()
         {
+            auto *&tempA = root->m_children[0][1];
+            auto *&tempB = root->m_children[0][2];
+
+            if (tempA != multiplayer)
+            {
+                std::swap(tempA, tempB);
+            }
             multiplayer->open();
+            settings->close();
         }
     ));
 
     mainmenu_list->pushChildFront(new idkui2::Button("Settings", buttonstyle,
-        [settings]()
+        [root, multiplayer, settings]()
         {
+            auto *&tempA = root->m_children[0][1];
+            auto *&tempB = root->m_children[0][2];
+
+            if (tempA != settings)
+            {
+                std::swap(tempA, tempB);
+            }
             settings->open();
+            multiplayer->close();
         }
     ));
 

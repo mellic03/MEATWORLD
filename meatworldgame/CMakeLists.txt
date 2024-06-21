@@ -5,10 +5,6 @@ set(PROJECT_VERSION_MAJOR 0)
 set(PROJECT_VERSION_MINOR 1)
 
 
-# find_package(SDL2_net REQUIRED)
-# include_directories(${SDL2_net_INCLUDE_DIRS})
-
-
 file(GLOB SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/systems/*.cpp
@@ -32,7 +28,7 @@ set_target_properties(
 )
 
 if (IDK_DEBUG)
-    target_compile_options(${PROJECT_NAME} PUBLIC -O0 -g)
+    target_compile_options(${PROJECT_NAME} PUBLIC -Werror -fsanitize=undefined -lstdc++fs -g)
 else()
     target_compile_options(${PROJECT_NAME} PUBLIC -Ofast)
 endif ()
@@ -55,6 +51,9 @@ target_link_libraries(
     IDKBuiltinCS
     IDKThreading
     IDKECS
+
+    ImGui
+    IDKBuiltinUI
 
     SDL2_net
 )

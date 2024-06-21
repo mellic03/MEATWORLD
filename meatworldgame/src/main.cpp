@@ -63,12 +63,17 @@ MeatWorldGame::setup( idk::EngineAPI &api )
 
     LM = new idkui2::LayoutManager("./assets/fonts/RodettaStamp.ttf", 32);
 
-    // if (ECS2::getComponentArray<PlayerControllerCmp>().size() == 0)
     {
         LOG_INFO() << "Creating player";
         player = ECS2::createGameObject("Player", false);
         ECS2::giveComponent<PlayerControllerCmp>(player);
     }
+
+    // for (int i=0; i<4; i++)
+    // {
+    //     players[i] = ECS2::createGameObject("Player " + std::to_string(i), false);
+    //     ECS2::giveComponent<OLPlayerControllerCmp>(players[i]);
+    // }
 
     ui_root = createMenu(api, LM, meatnet_host, meatnet_client);
 
@@ -90,6 +95,7 @@ MeatWorldGame::setup( idk::EngineAPI &api )
 
     idk::TextureWrapper wrapper;
     idk::gltools::loadTexture("assets/heightmaps/sand-dunes.jpg", config, &wrapper);
+    idk::PhysicsSys::bakeHeightmap(wrapper);
     // -----------------------------------------------------------------------------------------
 
 
@@ -143,7 +149,7 @@ MeatWorldGame::mainloop( idk::EngineAPI &api )
         LM->renderTexture(api);
     }
 
-    // ren.drawTextureOverlay(LM->m_atlas);
+
 }
 
 
