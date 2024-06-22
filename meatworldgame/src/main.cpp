@@ -49,16 +49,16 @@ MeatWorldGame::setup( idk::EngineAPI &api )
 {
     using namespace idk;
 
-    auto &engine   = api.getEngine();
-    auto &eventsys = api.getEventSys();
-    auto &ren      = api.getRenderer();
+    auto &engine = api.getEngine();
+    auto &events = api.getEventSys();
+    auto &ren    = api.getRenderer();
 
-    eventsys.onDropFile(".idksc", [](const char *filepath)
+    events.onDropFile(".idksc", [](const char *filepath)
     {
         idk::ECS2::load(filepath);
     });
 
-    ren.useSkybox(ren.loadSkybox("assets/cubemaps/skybox5/"));
+    ren.useSkybox(ren.loadSkybox("assets/cubemaps/skybox8/"));
     ren.pushRenderOverlay("assets/meatworld-white.png", 0.5f, 2.0f, 0.5f);
 
     LM = new idkui2::LayoutManager("./assets/fonts/RodettaStamp.ttf", 32);
@@ -107,15 +107,15 @@ MeatWorldGame::setup( idk::EngineAPI &api )
 void
 MeatWorldGame::mainloop( idk::EngineAPI &api )
 {
-    auto &engine   = api.getEngine();
-    auto &ren      = api.getRenderer();
-    auto &eventsys = api.getEventSys();
+    auto &engine = api.getEngine();
+    auto &ren    = api.getRenderer();
+    auto &events = api.getEventSys();
 
     float dt = engine.deltaTime();
 
     idkui::TextManager::text(10, 10) << "MEATWORLD v0.1.0";
 
-    if (eventsys.keylog().keyTapped(idk::Keycode::SPACE))
+    if (events.keylog().keyTapped(idk::Keycode::SPACE))
     {
         ren.skipRenderOverlay();
     }
@@ -133,22 +133,20 @@ MeatWorldGame::mainloop( idk::EngineAPI &api )
         meatnet_client->update(api, player, players);
     }
 
+
+    LM->update(api, dt);
+
+    if (events.mouseCaptured())
     {
-        LM->update(api, dt);
-
-        if (eventsys.mouseCaptured())
-        {
-            ui_root->close();
-        }
-
-        else
-        {
-            ui_root->open();
-        }
-
-        LM->renderTexture(api);
+        ui_root->close();
     }
 
+    else
+    {
+        ui_root->open();
+    }
+
+    LM->renderTexture(api);
 
 }
 

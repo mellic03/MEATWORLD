@@ -3,7 +3,7 @@
 #extension GL_GOOGLE_include_directive: require
 #extension GL_ARB_bindless_texture: require
 
-#include "./include/SSBO_indirect.glsl"
+#include "./include/storage.glsl"
 #include "./include/util.glsl"
 
 layout (location = 0) out vec4 fsout_albedo;
@@ -14,7 +14,7 @@ in vec3 fsin_fragpos;
 in vec3 fsin_normal;
 in vec3 fsin_tangent;
 in vec2 fsin_texcoords;
-flat in int draw_id;
+flat in uint draw_id;
 
 
 in vec3 TBN_viewpos;
@@ -28,15 +28,15 @@ void main()
 {
     vec2 texcoords = fsin_texcoords;
 
-    uint  offset = un_IndirectDrawData.texture_offsets[draw_id];
-    float height = texture(un_IndirectDrawData.textures[offset+0], texcoords).r;
-    vec3  albedo = texture(un_IndirectDrawData.textures[offset+1], texcoords).rgb;
-    vec3  normal = texture(un_IndirectDrawData.textures[offset+2], texcoords).rgb;
-    vec3  ao_r_m = texture(un_IndirectDrawData.textures[offset+3], texcoords).rgb;
+    uint  offset = IDK_SSBO_texture_offsets[draw_id];
+    float height = texture(IDK_SSBO_textures[offset+0], texcoords).r;
+    vec3  albedo = texture(IDK_SSBO_textures[offset+1], texcoords).rgb;
+    vec3  normal = texture(IDK_SSBO_textures[offset+2], texcoords).rgb;
+    vec3  ao_r_m = texture(IDK_SSBO_textures[offset+3], texcoords).rgb;
 
-    vec3  albedo2 = texture(un_IndirectDrawData.textures[offset+4], 4.0*texcoords).rgb;
-    vec3  normal2 = texture(un_IndirectDrawData.textures[offset+5], 4.0*texcoords).rgb;
-    vec3  ao_r_m2 = texture(un_IndirectDrawData.textures[offset+6], 4.0*texcoords).rgb;
+    vec3  albedo2 = texture(IDK_SSBO_textures[offset+4], 4.0*texcoords).rgb;
+    vec3  normal2 = texture(IDK_SSBO_textures[offset+5], 4.0*texcoords).rgb;
+    vec3  ao_r_m2 = texture(IDK_SSBO_textures[offset+6], 4.0*texcoords).rgb;
 
 
     float ao        = ao_r_m.r;

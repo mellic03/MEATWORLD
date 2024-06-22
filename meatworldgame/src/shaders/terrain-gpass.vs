@@ -1,10 +1,8 @@
 #version 460 core
 
 #extension GL_GOOGLE_include_directive: require
-#extension GL_ARB_bindless_texture: require
+#include "./include/storage.glsl"
 
-#include "./include/SSBO_indirect.glsl"
-#include "./include/UBOs.glsl"
 
 layout (location = 0) in vec3 vsin_pos;
 layout (location = 1) in vec3 vsin_normal;
@@ -15,7 +13,7 @@ out vec3 fsin_fragpos;
 out vec3 fsin_normal;
 out vec3 fsin_tangent;
 out vec2 fsin_texcoords;
-flat out int draw_id;
+flat out uint draw_id;
 
 out vec3 TBN_viewpos;
 out vec3 TBN_fragpos;
@@ -63,13 +61,13 @@ float snoise( vec2 v )
 
 vec3 computeNormal( uint offset )
 {
-    vec2 size  = textureSize(un_IndirectDrawData.textures[offset+0], 0);
+    vec2 size  = textureSize(IDK_SSBO_textures[offset+0], 0);
     vec2 uv = vsin_texcoords;
 
-    float Lheight = textureOffset(un_IndirectDrawData.textures[offset+0], uv, ivec2(-1, 0)).r;
-    float Rheight = textureOffset(un_IndirectDrawData.textures[offset+0], uv, ivec2(+1, 0)).r;
-    float Uheight = textureOffset(un_IndirectDrawData.textures[offset+0], uv, ivec2(0, -1)).r;
-    float Dheight = textureOffset(un_IndirectDrawData.textures[offset+0], uv, ivec2(0, +1)).r;
+    float Lheight = textureOffset(IDK_SSBO_textures[offset+0], uv, ivec2(-1, 0)).r;
+    float Rheight = textureOffset(IDK_SSBO_textures[offset+0], uv, ivec2(+1, 0)).r;
+    float Uheight = textureOffset(IDK_SSBO_textures[offset+0], uv, ivec2(0, -1)).r;
+    float Dheight = textureOffset(IDK_SSBO_textures[offset+0], uv, ivec2(0, +1)).r;
 
     vec3 left  = vec3(-1.0, Lheight, 0.0);
     vec3 right = vec3(+1.0, Rheight, 0.0);
@@ -80,18 +78,19 @@ vec3 computeNormal( uint offset )
 }
 
 
+uniform uint un_draw_offset;
 
 void main()
 {
-    draw_id = gl_DrawID;
+    draw_id = gl_DrawID + un_draw_offset;
 
     IDK_Camera camera = IDK_RenderData_GetCamera();
 
-    const uint offset = un_IndirectDrawData.transform_offsets[gl_DrawID];
-    const mat4 model  = un_IndirectDrawData.transforms[offset + gl_InstanceID];
+    const uint offset = IDK_SSBO_transform_offsets[draw_id];
+    const mat4 model  = IDK_SSBO_transforms[offset + gl_InstanceID];
 
-    uint texture_offset = un_IndirectDrawData.texture_offsets[gl_DrawID];
-    float height = texture(un_IndirectDrawData.textures[texture_offset+0], vsin_texcoords).r;
+    uint texture_offset = IDK_SSBO_texture_offsets[draw_id];
+    float height = texture(IDK_SSBO_textures[texture_offset+0], vsin_texcoords).r;
 
     vec4 position = vec4(vsin_pos, 1.0);
          position.y += height;
@@ -119,5 +118,5 @@ void main()
     TBN_fragpos = TBNT * fsin_fragpos;
     TBN_viewpos = TBNT * camera.position.xyz;
 
-    gl_Position = camera.PV * position;
+    gl_Position = camera.P * camera.V * position;
 }

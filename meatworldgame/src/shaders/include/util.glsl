@@ -47,8 +47,6 @@ vec3 IDK_WorldFromDepth( sampler2D depth, vec2 texcoords, mat4 P, mat4 V )
 }
 
 
-
-
 vec3 IDK_PackNormal( vec3 N )
 {
     return N;

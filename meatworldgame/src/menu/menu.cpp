@@ -66,6 +66,8 @@ idkui2::Panel *createMenu( idk::EngineAPI &api, idkui2::LayoutManager *LM,
     root->giveChild(0, 1, settings);
     root->giveChild(0, 2, multiplayer);
 
+    settings->close();
+    multiplayer->close();
 
     // Main
     // -----------------------------------------------------------------------------------------
