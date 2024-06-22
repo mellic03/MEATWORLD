@@ -43,7 +43,6 @@ namespace meatnet
         uint32_t  action;
     };
 
-
     struct PlayerBuffer
     {
         int32_t   player_id;
@@ -57,6 +56,15 @@ namespace meatnet
         char    header[16];
         char    body[32];
         int32_t response;
+    };
+
+
+    struct File
+    {
+        std::string name = "";
+
+        size_t  nbytes;
+        void   *data;
     };
 
 
@@ -78,7 +86,6 @@ class meatnet::Base
 protected:
     std::mutex       m_mutex;
     std::atomic_bool m_running;
-    std::atomic_bool m_shutdown;
 
     static constexpr uint16_t PORT_MAIN      = 4200;
     static constexpr uint16_t PORT_HANDSHAKE = 4201;
@@ -88,16 +95,30 @@ protected:
         STATUS_NONE       = 1 << 0,
         STATUS_CONNECTING = 1 << 1,
         STATUS_CONNECTED  = 1 << 2,
-        STATUS_ERROR      = 1 << 3,
-        STATUS_TIMEOUT    = 1 << 4
+        STATUS_GAMEPLAY   = 1 << 3,
+        STATUS_ERROR      = 1 << 4,
+        STATUS_TIMEOUT    = 1 << 5
     };
 
-    std::atomic_uint32_t      m_status;
-    std::vector<ClientBuffer> m_data;
-    std::function<void()>     m_callback = []() {  };
+    std::atomic_uint32_t             m_status;
+    std::vector<ClientBuffer>        m_data;
+    std::function<void(std::string)> m_callback = [](std::string) {  };
 
     void     _set_status( uint32_t s ) { m_status.store(s);      };
     uint32_t _get_status(            ) { return m_status.load(); };
+
+    template <typename T>
+    bool generic_send( TCPsocket, const T& );
+
+    template <typename T>
+    bool generic_recv( TCPsocket, T* );
+
+    void string_recv( TCPsocket, std::string* );
+    void string_send( TCPsocket, const std::string& );
+
+    void file_recv( TCPsocket, meatnet::File& );
+    void file_send( TCPsocket, const std::string& );
+
 
 
 public:
@@ -105,7 +126,6 @@ public:
     Base(): m_data(MAX_PLAYERS)
     {
         m_running.store(true);
-        m_shutdown.store(false);
     };
 
 
@@ -121,7 +141,7 @@ public:
     {
         while (m_running.load() == true)
         {
-            m_shutdown.store(true);
+            m_running.store(false);
         }
     };
 
@@ -136,18 +156,24 @@ private:
     std::vector<int32_t>       m_available_player_ids;
     std::vector<ClientBuffer>  m_players;
     std::map<uint32_t, int>    m_host_map;
+    std::string                m_filepath;
+
 
     int  _add_player( uint32_t host, std::string username );
+    TCPsocket _client_join( TCPsocket server, int idx );
 
-    void _handshake( UDPsocket );
     void _handshake_thread( uint16_t port );
     void _process_request( ClientBuffer *buffer );
     void _server_thread( uint16_t port );
+
+    void _msg_thread  ( uint16_t port );
+    void _main_thread ( uint16_t port );
+
     void _send_players( TCPsocket socket, void *data );
 
 public:
     void update( idk::EngineAPI&, std::vector<int> &players );
-    void connect( uint16_t port, std::function<void()> callback );
+    void connect( const std::string&, uint16_t );
 
 };
 
@@ -161,6 +187,7 @@ private:
 
     ClientBuffer m_buffer;
     std::string  m_name = "";
+    std::string  m_filepath = "";
 
     int  _handshake( const char *host );
     void _client_thread(const char *host, uint16_t port );
@@ -169,10 +196,55 @@ private:
 
 public:
     void update( idk::EngineAPI&, int player, std::vector<int> &players );
-    void connect( const std::string &name, const char *host, uint16_t port, std::function<void()> callback );
+    void connect( const std::string&, const char *, uint16_t, std::function<void(std::string)> );
 
 };
 
 
 
 
+
+template <typename T>
+bool
+meatnet::Base::generic_send( TCPsocket socket, const T &data )
+{
+    while (running())
+    {
+        int sent = SDLNet_TCP_Send(socket, (const void *)(&data), sizeof(T));
+
+        if (sent == sizeof(T))
+        {
+            return true;
+        }
+
+        else if (sent == -1)
+        {
+            return false;
+        }
+    }
+
+    return false;
+}
+
+
+template <typename T>
+bool
+meatnet::Base::generic_recv( TCPsocket socket, T *data )
+{
+    while (running())
+    {
+        int received = SDLNet_TCP_Recv(socket, (void *)(data), sizeof(T));
+
+        if (received == sizeof(T))
+        {
+            return true;
+        }
+
+        else if (received == -1)
+        {
+            return false;
+        }
+    }
+
+    return false;
+}

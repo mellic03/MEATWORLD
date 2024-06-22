@@ -8,7 +8,7 @@ set(PROJECT_VERSION_MINOR 1)
 file(GLOB SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/systems/*.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/menu/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/meatnet/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../meatnet/src/meatnet.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../meatnet/src/meatnet_client.cpp

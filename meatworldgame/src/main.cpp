@@ -10,7 +10,7 @@
 #include <libidk/idk_log.hpp>
 
 #include "systems/sys-player.hpp"
-#include "menu/menu.hpp"
+#include "ui/ui.hpp"
 
 #include "../../meatnet/src/meatnet.hpp"
 
@@ -32,16 +32,15 @@ MeatWorldGame::registerModules( idk::EngineAPI &api )
 }
 
 
-int root_panel;
+
 idkui2::LayoutManager *LM;
-idkui2::Panel *ui_root;
+
+
+
+meatworld::GameData gamedata;
 
 meatnet::Host   *meatnet_host   = nullptr;
 meatnet::Client *meatnet_client = nullptr;
-
-
-int player;
-std::vector<int> players = std::vector<int>(meatnet::MAX_PLAYERS, -1);
 
 
 void
@@ -58,24 +57,20 @@ MeatWorldGame::setup( idk::EngineAPI &api )
         idk::ECS2::load(filepath);
     });
 
+
     ren.useSkybox(ren.loadSkybox("assets/cubemaps/skybox8/"));
     ren.pushRenderOverlay("assets/meatworld-white.png", 0.5f, 2.0f, 0.5f);
 
     LM = new idkui2::LayoutManager("./assets/fonts/RodettaStamp.ttf", 32);
 
     {
-        LOG_INFO() << "Creating player";
-        player = ECS2::createGameObject("Player", false);
-        ECS2::giveComponent<PlayerControllerCmp>(player);
+        gamedata.player = ECS2::createGameObject("Player", false);
+        ECS2::giveComponent<PlayerControllerCmp>(gamedata.player);
     }
 
-    // for (int i=0; i<4; i++)
-    // {
-    //     players[i] = ECS2::createGameObject("Player " + std::to_string(i), false);
-    //     ECS2::giveComponent<OLPlayerControllerCmp>(players[i]);
-    // }
-
-    ui_root = createMenu(api, LM, meatnet_host, meatnet_client);
+    createMenu(api, LM, meatnet_host, meatnet_client, &(gamedata), &(gamedata.gameui));
+    createSettings(api, LM, &(gamedata.gameui));
+    createSyndromes(api, LM, &(gamedata.gameui));
 
 
 
@@ -92,6 +87,7 @@ MeatWorldGame::setup( idk::EngineAPI &api )
         .datatype       = GL_UNSIGNED_BYTE,
         .genmipmap      = GL_FALSE
     };
+
 
     idk::TextureWrapper wrapper;
     idk::gltools::loadTexture("assets/heightmaps/sand-dunes.jpg", config, &wrapper);
@@ -121,16 +117,10 @@ MeatWorldGame::mainloop( idk::EngineAPI &api )
     }
 
 
-    if (meatnet_host)
-    {
-        idkui::TextManager::text(10, 30) << "Connected as host";
-        meatnet_host->update(api, players);
-    }
-
     if (meatnet_client)
     {
         idkui::TextManager::text(10, 30) << "Connected as client";
-        meatnet_client->update(api, player, players);
+        meatnet_client->update(api, gamedata.player, gamedata.players);
     }
 
 
@@ -138,13 +128,14 @@ MeatWorldGame::mainloop( idk::EngineAPI &api )
 
     if (events.mouseCaptured())
     {
-        ui_root->close();
+        gamedata.gameui.root->close();
     }
 
     else
     {
-        ui_root->open();
+        gamedata.gameui.root->open();
     }
+
 
     LM->renderTexture(api);
 
@@ -156,11 +147,6 @@ void
 MeatWorldGame::shutdown()
 {
     LOG_INFO() << "MeatWorldGame::shutdown";
-
-    if (meatnet_host)
-    {
-        meatnet_host->shutdown();
-    }
 
     if (meatnet_client)
     {

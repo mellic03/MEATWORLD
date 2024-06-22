@@ -1,13 +1,14 @@
-#include "menu.hpp"
+#include "ui.hpp"
 
 #include <libidk/idk_log.hpp>
 #include <IDKGraphics/UI/idk_ui2.hpp>
 #include <IDKGameEngine/IDKGameEngine.hpp>
 #include <IDKEvents/IDKEvents.hpp>
 
-
-idkui2::Panel *createMenu( idk::EngineAPI &api, idkui2::LayoutManager *LM,
-                           meatnet::Host *&meatnet_host, meatnet::Client *&meatnet_client )
+void
+createMenu( idk::EngineAPI &api, idkui2::LayoutManager *LM,
+            meatnet::Host *&meatnet_host, meatnet::Client *&meatnet_client,
+            meatworld::GameData *gamedata, meatworld::GameUI *gameui )
 {
     auto &engine = api.getEngine();
     auto &events = api.getEventSys();
@@ -51,27 +52,20 @@ idkui2::Panel *createMenu( idk::EngineAPI &api, idkui2::LayoutManager *LM,
     };
 
 
-    auto *root = LM->createRootPanel(1, 3, rootstyle);
+    gameui->root = LM->createRootPanel(1, 3, rootstyle);
 
-    auto *mainmenu      = new idkui2::Panel("Main Menu", settingsstyle, 1, 1);
+    gameui->mainmenu    = new idkui2::Grid("Main Menu", settingsstyle, 1, 1);
     auto *mainmenu_list = new idkui2::List("Main Menu List", liststyle);
+    gameui->mainmenu->open();
 
-    auto *multiplayer      = new idkui2::Panel("Multiplayer", settingsstyle, 1, 1);
+    gameui->multiplayer    = new idkui2::Grid("Multiplayer", settingsstyle, 1, 1);
     auto *multiplayer_list = new idkui2::List("Multiplayer List", liststyle);
 
-    auto *settings      = new idkui2::Panel("Settings", settingsstyle, 1, 1);
-    auto *settings_list = new idkui2::List("Settings List", liststyle);
-
-    root->giveChild(0, 0, mainmenu);
-    root->giveChild(0, 1, settings);
-    root->giveChild(0, 2, multiplayer);
-
-    settings->close();
-    multiplayer->close();
+    gameui->root->setChild(0, 0, gameui->mainmenu);
 
     // Main
     // -----------------------------------------------------------------------------------------
-    mainmenu->giveChild(0, 0, mainmenu_list);
+    gameui->mainmenu->setChild(0, 0, mainmenu_list);
     mainmenu_list->pushChildFront(new idkui2::Title("Paused", buttonstyle));
 
     mainmenu_list->pushChildFront(new idkui2::Button("Continue", buttonstyle,
@@ -82,32 +76,18 @@ idkui2::Panel *createMenu( idk::EngineAPI &api, idkui2::LayoutManager *LM,
     ));
 
     mainmenu_list->pushChildFront(new idkui2::Button("Multiplayer", buttonstyle,
-        [root, multiplayer, settings]()
+        [gameui]()
         {
-            auto *&tempA = root->m_children[0][1];
-            auto *&tempB = root->m_children[0][2];
-
-            if (tempA != multiplayer)
-            {
-                std::swap(tempA, tempB);
-            }
-            multiplayer->open();
-            settings->close();
+            gameui->root->m_children[0][1] = gameui->multiplayer;
+            gameui->multiplayer->open();
         }
     ));
 
     mainmenu_list->pushChildFront(new idkui2::Button("Settings", buttonstyle,
-        [root, multiplayer, settings]()
+        [gameui]()
         {
-            auto *&tempA = root->m_children[0][1];
-            auto *&tempB = root->m_children[0][2];
-
-            if (tempA != settings)
-            {
-                std::swap(tempA, tempB);
-            }
-            settings->open();
-            multiplayer->close();
+            gameui->root->m_children[0][1] = gameui->settings;
+            gameui->settings->open();
         }
     ));
 
@@ -124,67 +104,45 @@ idkui2::Panel *createMenu( idk::EngineAPI &api, idkui2::LayoutManager *LM,
 
     // Multiplayer
     // -----------------------------------------------------------------------------------------
-    multiplayer->giveChild(0, 0, multiplayer_list);
+    gameui->multiplayer->setChild(0, 0, multiplayer_list);
     multiplayer_list->pushChildFront(new idkui2::Title("Multiplayer", buttonstyle));
 
-    multiplayer_list->pushChildFront(new idkui2::Button("Host", buttonstyle,
-        [multiplayer, &meatnet_host]()
-        {
-            meatnet_host = new meatnet::Host;
-            meatnet_host->connect(4200, [](){});
-        }
-    ));
+    // multiplayer_list->pushChildFront(new idkui2::Button("Host", buttonstyle,
+    //     [gameui, &meatnet_host]()
+    //     {
+    //         meatnet_host = new meatnet::Host;
+    //         meatnet_host->connect(4200, [](){});
+    //     }
+    // ));
 
     multiplayer_list->pushChildFront(new idkui2::Button("Connect", buttonstyle,
-        [multiplayer, &meatnet_client]()
+        [gamedata, &meatnet_client]()
         {
+            auto callback = [gamedata]( std::string filepath )
+            {
+                gamedata->init_multiplayer(filepath);
+            };
+
             meatnet_client = new meatnet::Client;
-            meatnet_client->connect("Michael", "127.0.0.1", 4200, [](){});
+            meatnet_client->connect(
+                "Michael",
+                "127.0.0.1",
+                4200,
+                callback
+            );
         }
     ));
 
     multiplayer_list->pushChildBack(new idkui2::Button("Return", buttonstyle,
-        [multiplayer]()
+        [gameui]()
         {
-            multiplayer->close();
+            gameui->multiplayer->close();
         }
     ));
     // -----------------------------------------------------------------------------------------
 
 
 
-
-    // Settings
-    // -----------------------------------------------------------------------------------------
-    settings->giveChild(0, 0, settings_list);
-    settings_list->pushChildFront(new idkui2::Title("Settings", buttonstyle));
-
-
-    settings_list->pushChildFront(new idkui2::Button("Audio", buttonstyle,
-        [settings]()
-        {
-            // settings->close();
-        }
-    ));
-
-    settings_list->pushChildFront(new idkui2::Button("Graphics", buttonstyle,
-        [settings]()
-        {
-            // settings->close();
-        }
-    ));
-
-    settings_list->pushChildBack(new idkui2::Button("Return", buttonstyle,
-        [settings]()
-        {
-            settings->close();
-        }
-    ));
-    // -----------------------------------------------------------------------------------------
-
-
-
-    return root;
 }
 
 
