@@ -586,8 +586,6 @@ idk::PlayerControllerCmp::deserialize( std::ifstream &stream )
 void
 idk::PlayerControllerCmp::onObjectAssignment( idk::EngineAPI &api, int obj_id )
 {
-    LOG_INFO() << "idk::PlayerControllerCmp::onObjectAssignment";
-
     auto &cmp = ECS2::getComponent<PlayerControllerCmp>(obj_id);
     TransformSys::getData(obj_id).position.y = 0.8f;
 
@@ -596,11 +594,7 @@ idk::PlayerControllerCmp::onObjectAssignment( idk::EngineAPI &api, int obj_id )
     cmp.cam_obj    = ECS2::createGameObject("camera", false);
     cmp.hinge_obj  = idk::ECS2::createGameObject("hinge", false);
 
-
-    // ECS2::giveComponent<TransformCmp>(cmp.cam_obj);
-    // ECS2::giveComponent<TransformCmp>(cmp.hinge_obj);
     ECS2::giveComponent<SmoothFollowCmp>(cmp.hinge_obj);
-
 
     auto &fcmp = ECS2::getComponent<SmoothFollowCmp>(cmp.hinge_obj);
     fcmp.anchor_id = obj_id;
@@ -615,9 +609,7 @@ idk::PlayerControllerCmp::onObjectAssignment( idk::EngineAPI &api, int obj_id )
 
 
 
-
     cmp.model_obj = ECS2::createGameObject("model", false);
-    // ECS2::giveComponent<TransformCmp>(cmp.model_obj);
     ECS2::giveComponent<ModelCmp>(cmp.model_obj);
 
     ECS2::giveChild(obj_id, cmp.model_obj);
@@ -631,14 +623,14 @@ idk::PlayerControllerCmp::onObjectAssignment( idk::EngineAPI &api, int obj_id )
 void
 idk::PlayerControllerCmp::onObjectDeassignment( idk::EngineAPI &api, int obj_id )
 {
-    LOG_INFO() << "idk::PlayerControllerCmp::onObjectDeassignment";
+
 }
 
 
 void
 idk::PlayerControllerCmp::onObjectCopy( int src_obj, int dst_obj )
 {
-    IDK_ASSERT("Cannot copy idk::PlayerControllerCmp!", false);
+
 }
 
 
@@ -656,14 +648,6 @@ idk::OLPlayerControllerCmp::onObjectAssignment( idk::EngineAPI &api, int obj_id 
 
     cmp.walk_speed = 4.0f;
     cmp.model_obj  = ECS2::createGameObject("model", false);
-    // cmp.emitter_obj = ECS2::createGameObject("emitter", false);
-
-
-    // ECS2::giveChild(obj_id, cmp.emitter_obj);
-    // TransformSys::setPositionLocalspace(cmp.emitter_obj, glm::vec3(0.0f));
-    // ECS2::giveComponent<ParticleCmp>(cmp.emitter_obj);
-    // ECS2::getComponent<ParticleCmp>(cmp.emitter_obj).desc.scale = 0.0f;
-    // ECS2::getComponent<ParticleCmp>(cmp.emitter_obj).desc.velocity.z = -15.0f;
 
     ECS2::giveComponent<TransformCmp>(cmp.model_obj);
     ECS2::giveComponent<ModelCmp>(cmp.model_obj);

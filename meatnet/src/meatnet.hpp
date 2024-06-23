@@ -1,9 +1,12 @@
 #pragma once
 
-#include <libidk/idk_glm.hpp>
-#include <IDKECS/IDKECS.hpp>
-
 #include <SDL2/SDL_net.h>
+
+#include <libidk/idk_glm.hpp>
+#include <libidk/memory/common.hpp>
+#include <libidk/idk_assert.hpp>
+
+#include <IDKGameEngine/IDKGameEngine.hpp>
 
 #include <vector>
 #include <map>
@@ -13,6 +16,7 @@
 #include <mutex>
 #include <vector>
 #include <string>
+#include <functional>
 
 
 
@@ -23,59 +27,58 @@ namespace meatnet
     class Client;
 
     static constexpr size_t MAX_PLAYERS = 4;
+    static constexpr size_t BUFFER_SIZE = 16 * idk::KILO * sizeof(uint8_t);
+    static constexpr uint32_t TIMEOUT_SECONDS = 8;
 
-    enum ClientAction: uint32_t
+
+    enum Request: uint32_t
     {
-        ACTION_NONE       = 0,
-        ACTION_SHOOT      = 1 << 1,
-        ACTION_DISCONNECT = 1 << 2
+        REQ_NONE        = 0 << 0,
+        REQ_CONNECT     = 1 << 0,
+        REQ_DISCONNECT  = 1 << 1,
+        REQ_FILE        = 1 << 2,
+        REQ_PLAYERDATA  = 1 << 3,
     };
 
-    struct ClientBuffer
+    enum Response: uint32_t
     {
-        char    header[16];
-        char    body[32];
-        int32_t response;
-
-        int32_t   player_id;
-        glm::vec3 position;
-        float     yaw;
-        uint32_t  action;
+        RES_NONE        = 0 << 0,
+        RES_OKAY        = 1 << 0,
+        RES_STRING      = 1 << 1,
+        RES_FILE        = 1 << 2,
+        RES_PEERDATA    = 1 << 3,
     };
 
-    struct PlayerBuffer
-    {
-        int32_t   player_id;
-        glm::vec3 position;
-        float     yaw;
-        uint32_t  action;
-    };
+    std::string req_str( uint32_t req );
+    std::string res_str( uint32_t res );
 
-    struct HandshakeBuffer
+
+    struct Header
     {
-        char    header[16];
-        char    body[32];
-        int32_t response;
+        uint32_t timestamp;
+        uint32_t request;
+        uint32_t response;
+        size_t   nbytes;
     };
 
 
     struct File
     {
-        std::string name = "";
-
-        size_t  nbytes;
-        void   *data;
+        char   name[64];
+        size_t nbytes;
+    
+        File()
+        {
+            std::memset(name, '\0', sizeof(name));
+        }
     };
 
-
-    HandshakeBuffer HandshakeBuffer_new();
-    void HandshakeBuffer_recv( HandshakeBuffer* );
-    void HandshakeBuffer_send( HandshakeBuffer* );
-
-    ClientBuffer ClientBuffer_new( int player_id );
-    void ClientBuffer_recv( ClientBuffer* );
-    void ClientBuffer_send( ClientBuffer* );
-
+    struct PlayerData
+    {
+        glm::vec3 position;
+        float     yaw;
+        uint32_t  action;
+    };
 
 };
 
@@ -84,11 +87,7 @@ namespace meatnet
 class meatnet::Base
 {
 protected:
-    std::mutex       m_mutex;
-    std::atomic_bool m_running;
-
-    static constexpr uint16_t PORT_MAIN      = 4200;
-    static constexpr uint16_t PORT_HANDSHAKE = 4201;
+    using lock_type = std::lock_guard<std::mutex>;
 
     enum Status: uint32_t
     {
@@ -100,9 +99,10 @@ protected:
         STATUS_TIMEOUT    = 1 << 5
     };
 
-    std::atomic_uint32_t             m_status;
-    std::vector<ClientBuffer>        m_data;
-    std::function<void(std::string)> m_callback = [](std::string) {  };
+    std::mutex           m_mutex;
+    std::atomic_bool     m_running;
+    std::atomic_uint32_t m_status;
+
 
     void     _set_status( uint32_t s ) { m_status.store(s);      };
     uint32_t _get_status(            ) { return m_status.load(); };
@@ -119,23 +119,35 @@ protected:
     void file_recv( TCPsocket, meatnet::File& );
     void file_send( TCPsocket, const std::string& );
 
+    bool header_send( TCPsocket, const meatnet::Header&, const void* );
+    bool header_recv( TCPsocket, meatnet::Header&, void* );
+
+    bool data_send( TCPsocket, const meatnet::Header&, const void* );
+    bool data_recv( TCPsocket, meatnet::Header&, void* );
+
+    bool msg_send( TCPsocket, const meatnet::Header&, const void* );
+    bool msg_recv( TCPsocket, meatnet::Header&, void* );
 
 
 public:
 
-    Base(): m_data(MAX_PLAYERS)
+    Base()
     {
         m_running.store(true);
     };
 
 
-    uint32_t getStatus() const { return m_status.load(); };
+    uint32_t getStatus() const
+    {
+        return m_status.load();
+    };
 
 
     bool running() const
     {
         return m_running.load();
     };
+
 
     void shutdown()
     {
@@ -152,28 +164,29 @@ public:
 class meatnet::Host: public meatnet::Base
 {
 private:
+    std::string             m_filepath;
 
-    std::vector<int32_t>       m_available_player_ids;
-    std::vector<ClientBuffer>  m_players;
-    std::map<uint32_t, int>    m_host_map;
-    std::string                m_filepath;
+    std::vector<PlayerData> m_playerdata;
+    std::vector<TCPsocket>  m_clients;
+    std::vector<uint32_t>   m_timers;
+
+    void      _process_req_disconnect ( int, meatnet::Header&, void* );
+    void      _process_req_file       ( int, meatnet::Header&, void* );
+    void      _process_req_player     ( int, meatnet::Header&, void* );
+    void      _process_request        ( int, meatnet::Header&, void* );
 
 
-    int  _add_player( uint32_t host, std::string username );
-    TCPsocket _client_join( TCPsocket server, int idx );
 
-    void _handshake_thread( uint16_t port );
-    void _process_request( ClientBuffer *buffer );
-    void _server_thread( uint16_t port );
+    TCPsocket _open_connection ( uint16_t port );
+    TCPsocket _client_connect  ( TCPsocket server );
 
-    void _msg_thread  ( uint16_t port );
-    void _main_thread ( uint16_t port );
-
-    void _send_players( TCPsocket socket, void *data );
+    void      _msg_thread  ( uint16_t port );
+    void      _main_thread ( uint16_t port );
 
 public:
-    void update( idk::EngineAPI&, std::vector<int> &players );
-    void connect( const std::string&, uint16_t );
+    Host( uint16_t main_port, uint16_t msg_port );
+
+    void loadScene( const std::string& );
 
 };
 
@@ -182,21 +195,29 @@ public:
 class meatnet::Client: public meatnet::Base
 {
 private:
-    std::atomic_int32_t        m_player_id;
-    std::vector<PlayerBuffer>  m_players;
+    using callback_type = std::function<void(std::string)>;
 
-    ClientBuffer m_buffer;
-    std::string  m_name = "";
-    std::string  m_filepath = "";
+    callback_type  m_callback;
+    std::string    m_username = "";
+    std::string    m_hostname = "";
+    std::string    m_filepath = "";
 
-    int  _handshake( const char *host );
-    void _client_thread(const char *host, uint16_t port );
-    void _write_data( const glm::vec3&, float, uint32_t );
-    void _recv_players( TCPsocket socket );
+    PlayerData              m_playerdata;
+    std::vector<PlayerData> m_peers;
+
+
+    bool      _make_request( TCPsocket, uint32_t, Header&, void* );
+
+    TCPsocket _connect     ( const char *host, uint16_t port );
+    void      _msg_thread  ( const char *host, uint16_t port );
+    void      _main_thread ( const char *host, uint16_t port );
 
 public:
-    void update( idk::EngineAPI&, int player, std::vector<int> &players );
-    void connect( const std::string&, const char *, uint16_t, std::function<void(std::string)> );
+
+    Client( const std::string&, const std::string&, uint16_t, std::function<void(std::string)> );
+    void update( meatnet::PlayerData& );
+
+    std::vector<PlayerData> getPeers();
 
 };
 

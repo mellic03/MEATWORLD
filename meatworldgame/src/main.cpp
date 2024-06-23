@@ -12,8 +12,6 @@
 #include "systems/sys-player.hpp"
 #include "ui/ui.hpp"
 
-#include "../../meatnet/src/meatnet.hpp"
-
 #include <iostream>
 
 
@@ -34,13 +32,8 @@ MeatWorldGame::registerModules( idk::EngineAPI &api )
 
 
 idkui2::LayoutManager *LM;
-
-
-
 meatworld::GameData gamedata;
 
-meatnet::Host   *meatnet_host   = nullptr;
-meatnet::Client *meatnet_client = nullptr;
 
 
 void
@@ -63,14 +56,13 @@ MeatWorldGame::setup( idk::EngineAPI &api )
 
     LM = new idkui2::LayoutManager("./assets/fonts/RodettaStamp.ttf", 32);
 
-    {
-        gamedata.player = ECS2::createGameObject("Player", false);
-        ECS2::giveComponent<PlayerControllerCmp>(gamedata.player);
-    }
+    gamedata.reset_player();
 
-    createMenu(api, LM, meatnet_host, meatnet_client, &(gamedata), &(gamedata.gameui));
-    createSettings(api, LM, &(gamedata.gameui));
-    createSyndromes(api, LM, &(gamedata.gameui));
+
+    createMenu(api, LM, &gamedata);
+    createSettings(api, LM, &gamedata);
+    createMultiplayer(api, LM, &gamedata);
+    createSyndromes(api, LM, &gamedata);
 
 
 
@@ -117,14 +109,33 @@ MeatWorldGame::mainloop( idk::EngineAPI &api )
     }
 
 
-    if (meatnet_client)
+    if (gamedata.player == -1)
     {
-        idkui::TextManager::text(10, 30) << "Connected as client";
-        meatnet_client->update(api, gamedata.player, gamedata.players);
+        gamedata.reset_player();
     }
 
+    // std::cout << "[MeatWorldGame::mainloop] Player ID: " << gamedata.player << "\n";
 
-    LM->update(api, dt);
+    if (gamedata.meatnet)
+    {
+        idkui::TextManager::text(10, 30) << "Connected as client";
+
+        meatnet::PlayerData data = {
+            .position = idk::TransformSys::getPositionWorldspace(gamedata.player),
+            .yaw      = idk::TransformSys::getData(gamedata.player).yaw,
+            .action   = 1
+        };
+
+        gamedata.meatnet->update(data);
+
+        auto peers = gamedata.meatnet->getPeers();
+
+        for (int i=0; i<peers.size(); i++)
+        {
+            idk::TransformSys::setPositionWorldspace(gamedata.players[i], peers[i].position);
+            idk::TransformSys::getData(gamedata.players[i]).yaw = peers[i].yaw;
+        }
+    }
 
     if (events.mouseCaptured())
     {
@@ -137,7 +148,7 @@ MeatWorldGame::mainloop( idk::EngineAPI &api )
     }
 
 
-    LM->renderTexture(api);
+    LM->renderTexture(api, gamedata.gameui.root);
 
 }
 
@@ -148,11 +159,9 @@ MeatWorldGame::shutdown()
 {
     LOG_INFO() << "MeatWorldGame::shutdown";
 
-    if (meatnet_client)
+    if (gamedata.meatnet)
     {
-        meatnet_client->shutdown();
+        gamedata.meatnet->shutdown();
     }
 
-    // idk::ui::shutdown();
 }
-

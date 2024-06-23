@@ -7,22 +7,27 @@
 
 #include "systems/sys-player.hpp"
 
+#include <meatnet.hpp>
+
+
 
 
 
 namespace meatworld
 {
     struct GameUI;
+    struct GameSettings;
     struct GameData;
 }
+
 
 struct meatworld::GameUI
 {
     idkui2::Grid *root;
 
-    idkui2::Grid *mainmenu;
-    idkui2::Grid *multiplayer;
-    idkui2::Grid *settings;
+    idkui2::List *mainmenu;
+    idkui2::List *multiplayer;
+    idkui2::List *settings;
 
     idkui2::Grid *inventory;
     idkui2::Grid *syndromes;
@@ -36,34 +41,31 @@ struct meatworld::GameUI
 };
 
 
+
+struct meatworld::GameSettings
+{
+    int   win_width  = 1280;
+    int   win_height = 720;
+    float res_scale  = 1.0f;
+
+};
+
+
 struct meatworld::GameData
 {
+    meatworld::GameSettings settings;
+    meatworld::GameUI       gameui;
 
-    meatworld::GameUI gameui;
+    meatnet::Client        *meatnet = nullptr;
+    std::string             meatnet_hostname = "127.0.0.1";
+    meatnet::PlayerData     meatnet_playerdata;
+    bool                    should_reset = false;
 
-    int               player;
-    std::vector<int>  players;
+    int                     player;
+    std::vector<int>        players;
 
-    void init_multiplayer( const std::string &filepath )
-    {
-        using namespace idk;
-
-        std::cout << "[MEATWORLD] Initializing multiplayer" << std::endl;
-        ECS2::load(filepath);
-
-
-        player = ECS2::createGameObject("Player", false);
-        ECS2::giveComponent<PlayerControllerCmp>(player);
-
-
-        players.resize(4);
-
-        for (int i=0; i<4; i++)
-        {
-            players[i] = ECS2::createGameObject("Player " + std::to_string(i), false);
-            ECS2::giveComponent<OLPlayerControllerCmp>(players[i]);
-        }
-    }
+    void init_multiplayer( const std::string &filepath );
+    void reset_player();
 
 };
 

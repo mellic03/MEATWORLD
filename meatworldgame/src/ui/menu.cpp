@@ -6,92 +6,49 @@
 #include <IDKEvents/IDKEvents.hpp>
 
 void
-createMenu( idk::EngineAPI &api, idkui2::LayoutManager *LM,
-            meatnet::Host *&meatnet_host, meatnet::Client *&meatnet_client,
-            meatworld::GameData *gamedata, meatworld::GameUI *gameui )
+createMenu( idk::EngineAPI &api, idkui2::LayoutManager *LM, meatworld::GameData *gamedata )
 {
+    meatworld::GameUI *gameui = &(gamedata->gameui);
+
     auto &engine = api.getEngine();
     auto &events = api.getEventSys();
     auto &ren    = api.getRenderer();
 
 
-    idkui2::ElementStyle rootstyle = {
-        .invisible = true,
-        .radius    = 0.0f
-    };
+    gameui->root = new idkui2::Grid("Root", meatui::root_style, 3, 4);
+    gameui->root->setRowProportions({0.1, 0.8, 0.1});
+    gameui->root->setColProportions({0.25, 0.25, 0.25, 0.25});
 
-    idkui2::ElementStyle style1 = {
-        .margin = glm::vec4(8.0f),
-        .radius = 16.0f,
-        .fg     = glm::vec4(1.0f),
-        .bg     = glm::vec4(0.25f, 0.25f, 0.25f, 0.95f)
-    };
+    gameui->mainmenu = new idkui2::List("Main Menu", meatui::list_style);
+    gameui->root->setChild(1, 0, gameui->mainmenu);
 
-    idkui2::ElementStyle settingsstyle = {
-        .invisible = true,
-        .margin  = glm::vec4(0.0f),
-        .padding = glm::vec4(0.0f),
-        .radius  = 16.0f,
-        .fg      = glm::vec4(1.0f),
-        .bg      = glm::vec4(0.25f, 0.25f, 0.25f, 0.95f)
-    };
-
-    idkui2::ElementStyle liststyle = {
-        .margin  = glm::vec4(16.0f),
-        .padding = glm::vec4(0.0f, 0.0f, 0.0f, 64.0f),
-        .radius  = 16.0f,
-        .fg      = glm::vec4(1.0f),
-        .bg      = glm::vec4(0.1f, 0.1f, 0.1f, 0.95f)
-    };
-
-    idkui2::ElementStyle buttonstyle = {
-        .margin = glm::vec4(4.0f),
-        .radius = 16.0f,
-        .fg     = glm::vec4(1.0f),
-        .bg     = glm::vec4(0.25f, 0.25f, 0.25f, 0.95f)
-    };
-
-
-    gameui->root = LM->createRootPanel(1, 3, rootstyle);
-
-    gameui->mainmenu    = new idkui2::Grid("Main Menu", settingsstyle, 1, 1);
-    auto *mainmenu_list = new idkui2::List("Main Menu List", liststyle);
-    gameui->mainmenu->open();
-
-    gameui->multiplayer    = new idkui2::Grid("Multiplayer", settingsstyle, 1, 1);
-    auto *multiplayer_list = new idkui2::List("Multiplayer List", liststyle);
-
-    gameui->root->setChild(0, 0, gameui->mainmenu);
 
     // Main
     // -----------------------------------------------------------------------------------------
-    gameui->mainmenu->setChild(0, 0, mainmenu_list);
-    mainmenu_list->pushChildFront(new idkui2::Title("Paused", buttonstyle));
+    gameui->mainmenu->pushChildFront(new idkui2::Title("Paused", meatui::title_style));
 
-    mainmenu_list->pushChildFront(new idkui2::Button("Continue", buttonstyle,
+    gameui->mainmenu->pushChildFront(new idkui2::Button("Continue", meatui::button_style,
         [&events]()
         {
             events.mouseCapture(true);
         }
     ));
 
-    mainmenu_list->pushChildFront(new idkui2::Button("Multiplayer", buttonstyle,
+    gameui->mainmenu->pushChildFront(new idkui2::Button("Multiplayer", meatui::button_style,
         [gameui]()
         {
-            gameui->root->m_children[0][1] = gameui->multiplayer;
-            gameui->multiplayer->open();
+            gameui->root->m_children[1][1] = gameui->multiplayer;
         }
     ));
 
-    mainmenu_list->pushChildFront(new idkui2::Button("Settings", buttonstyle,
+    gameui->mainmenu->pushChildFront(new idkui2::Button("Settings", meatui::button_style,
         [gameui]()
         {
-            gameui->root->m_children[0][1] = gameui->settings;
-            gameui->settings->open();
+            gameui->root->m_children[1][1] = gameui->settings;
         }
     ));
 
-    mainmenu_list->pushChildFront(new idkui2::Button("Exit", buttonstyle,
+    gameui->mainmenu->pushChildFront(new idkui2::Button("Exit", meatui::button_style,
         [&engine]()
         {
             engine.shutdown();
@@ -104,41 +61,37 @@ createMenu( idk::EngineAPI &api, idkui2::LayoutManager *LM,
 
     // Multiplayer
     // -----------------------------------------------------------------------------------------
-    gameui->multiplayer->setChild(0, 0, multiplayer_list);
-    multiplayer_list->pushChildFront(new idkui2::Title("Multiplayer", buttonstyle));
+    // gameui->multiplayer->pushChildFront(new idkui2::Title("Multiplayer", meatui::title_style));
 
-    // multiplayer_list->pushChildFront(new idkui2::Button("Host", buttonstyle,
-    //     [gameui, &meatnet_host]()
+    // auto *splitwindow = new idkui2::Split("", meatui::splitwindow_style, 0.35f);
+    // multiplayer_list->pushChildFront(splitwindow);
+
+
+    // splitwindow->setLeft(new idkui2::TextInput(
+    //     "hostname", meatui::textinput_style, gamedata->meatnet_hostname
+    // ));
+
+    // splitwindow->setRight(new idkui2::Button("Connect", meatui::button_style,
+    //     [gamedata]()
     //     {
-    //         meatnet_host = new meatnet::Host;
-    //         meatnet_host->connect(4200, [](){});
+    //         auto callback = [gamedata]( std::string filepath )
+    //         {
+    //             gamedata->init_multiplayer(filepath);
+    //         };
+
+    //         gamedata->meatnet = new meatnet::Client(
+    //             "Michael", gamedata->meatnet_hostname, 4200, callback
+    //         );
     //     }
     // ));
 
-    multiplayer_list->pushChildFront(new idkui2::Button("Connect", buttonstyle,
-        [gamedata, &meatnet_client]()
-        {
-            auto callback = [gamedata]( std::string filepath )
-            {
-                gamedata->init_multiplayer(filepath);
-            };
 
-            meatnet_client = new meatnet::Client;
-            meatnet_client->connect(
-                "Michael",
-                "127.0.0.1",
-                4200,
-                callback
-            );
-        }
-    ));
-
-    multiplayer_list->pushChildBack(new idkui2::Button("Return", buttonstyle,
-        [gameui]()
-        {
-            gameui->multiplayer->close();
-        }
-    ));
+    // multiplayer_list->pushChildBack(new idkui2::Button("Return", meatui::button_style,
+    //     [gameui]()
+    //     {
+    //         gameui->root->m_children[1][1] = nullptr;
+    //     }
+    // ));
     // -----------------------------------------------------------------------------------------
 
 
