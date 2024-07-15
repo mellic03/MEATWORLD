@@ -17,6 +17,6 @@
 
 // layout (std430, binding = 0) buffer SSBO_IndirectDrawData
 // {
-//     IDK_IndirectDrawData IDK_SSBO_
+//     IDK_IndirectDrawData un_IndirectDrawData;
 // };
 

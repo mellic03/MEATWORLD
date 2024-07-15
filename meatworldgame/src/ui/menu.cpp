@@ -5,22 +5,26 @@
 #include <IDKGameEngine/IDKGameEngine.hpp>
 #include <IDKEvents/IDKEvents.hpp>
 
+
+
 void
 createMenu( idk::EngineAPI &api, idkui2::LayoutManager *LM, meatworld::GameData *gamedata )
 {
     meatworld::GameUI *gameui = &(gamedata->gameui);
+    
+    auto *&root = gameui->ingame_root;
 
     auto &engine = api.getEngine();
     auto &events = api.getEventSys();
     auto &ren    = api.getRenderer();
 
 
-    gameui->root = new idkui2::Grid("Root", meatui::root_style, 3, 4);
-    gameui->root->setRowProportions({0.1, 0.8, 0.1});
-    gameui->root->setColProportions({0.25, 0.25, 0.25, 0.25});
+    root = new idkui2::Grid("Root", meatui::root_style, 3, 4);
+    root->setRowProportions({0.1, 0.8, 0.1});
+    root->setColProportions({0.25, 0.5, 0.125, 0.125});
 
     gameui->mainmenu = new idkui2::List("Main Menu", meatui::list_style);
-    gameui->root->setChild(1, 0, gameui->mainmenu);
+    root->setChild(1, 0, gameui->mainmenu);
 
 
     // Main
@@ -37,21 +41,21 @@ createMenu( idk::EngineAPI &api, idkui2::LayoutManager *LM, meatworld::GameData 
     gameui->mainmenu->pushChildFront(new idkui2::Button("Multiplayer", meatui::button_style,
         [gameui]()
         {
-            gameui->root->m_children[1][1] = gameui->multiplayer;
+            gameui->ingame_root->m_children[1][1] = gameui->multiplayer;
         }
     ));
 
     gameui->mainmenu->pushChildFront(new idkui2::Button("Settings", meatui::button_style,
         [gameui]()
         {
-            gameui->root->m_children[1][1] = gameui->settings;
+            gameui->ingame_root->m_children[1][1] = gameui->settings;
         }
     ));
 
     gameui->mainmenu->pushChildFront(new idkui2::Button("Exit", meatui::button_style,
-        [&engine]()
+        []()
         {
-            engine.shutdown();
+            idk::ECS2::load("scenes/mainmenu");
         }
     ));
     // -----------------------------------------------------------------------------------------

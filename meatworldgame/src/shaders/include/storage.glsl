@@ -6,15 +6,16 @@
 #define MAX_POINTLIGHTS 16
 #define MAX_SPOTLIGHTS  8
 
-#define MAX_TEXTURES   1024
-#define MAX_TRANSFORMS 1024
-#define MAX_DRAW_CALLS 512
+#define MAX_TEXTURES   (16*4096)
+#define MAX_TRANSFORMS 4096
+#define MAX_DRAW_CALLS (16*4096)
 
 
 struct IDK_Camera
 {
     vec4 position;
     mat4 P, V;
+    mat4 prev_P, prev_V;
 
     float width, height, near, far;
     float exposure, gamma, shutter, pad0;
@@ -25,6 +26,9 @@ struct IDK_Camera
 struct IDK_Dirlight
 {
     mat4 transform;
+    mat4 transforms[4];
+    vec4 cascades;
+
     vec4 direction;
     vec4 ambient;
     vec4 diffuse;
@@ -51,18 +55,18 @@ struct IDK_Spotlight
 };
 
 
-layout (std140, binding = 0) uniform IDK_UBO_Buffer
+layout (std140, binding = 0) uniform IDK_UBO_Lightsources
 {
     IDK_Camera      IDK_UBO_cameras     [MAX_CAMERAS];
     IDK_Dirlight    IDK_UBO_dirlights   [MAX_DIRLIGHTS];
     IDK_Pointlight  IDK_UBO_pointlights [MAX_POINTLIGHTS];
     IDK_Spotlight   IDK_UBO_spotlights  [MAX_SPOTLIGHTS];
+    int             IDK_UBO_counter;
 };
 
 
 
-
-layout (std430, binding = 0) readonly buffer IDK_SSBO_Buffer
+layout (std430, binding = 0) readonly buffer IDK_SSBO_Indirect
 {
     sampler2D   IDK_SSBO_textures          [MAX_TEXTURES];
     mat4        IDK_SSBO_transforms        [MAX_TRANSFORMS];

@@ -1,5 +1,5 @@
 #include "ui.hpp"
-
+#include "../systems/sys-player.hpp"
 
 
 void
@@ -16,19 +16,24 @@ createMultiplayer( idk::EngineAPI &api, idkui2::LayoutManager *LM, meatworld::Ga
         gameui->multiplayer->pushChildFront(new idkui2::Title("Multiplayer", meatui::title_style));
 
 
-        gameui->multiplayer->pushChildFront(new idkui2::Button("Connect", meatui::button_style,
+        auto *connect = new idkui2::Button("Connect", meatui::button_style,
             [gamedata]()
             {
-                auto callback = [gamedata]( std::string filepath )
-                {
-                    gamedata->init_multiplayer(filepath);
-                };
-
-                gamedata->meatnet = new meatnet::Client(
-                    "Michael", gamedata->meatnet_hostname, 4200, callback
-                );
+                meatworld::PlayerSys::init_multiplayer(gamedata->mp_hostname);
             }
-        ));
+        );
+
+
+
+        auto *split = new idkui2::Split("", meatui::splitwindow_style, 0.65f); 
+        gameui->multiplayer->pushChildFront(split);
+
+        split->setLeft(
+            new idkui2::TextInput("", meatui::textinput_style, gamedata->mp_hostname)
+        );
+
+        split->setRight(connect);
+
 
 
         gameui->multiplayer->pushChildBack(new idkui2::Button("Return", meatui::button_style,

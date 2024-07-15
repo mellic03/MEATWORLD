@@ -7,6 +7,7 @@
 #include "../gamedata.hpp"
 
 
+void createMainMenu    ( idk::EngineAPI&, idkui2::LayoutManager*, meatworld::GameData* );
 void createMenu        ( idk::EngineAPI&, idkui2::LayoutManager*, meatworld::GameData* );
 void createMultiplayer ( idk::EngineAPI&, idkui2::LayoutManager*, meatworld::GameData* );
 void createSettings    ( idk::EngineAPI&, idkui2::LayoutManager*, meatworld::GameData* );

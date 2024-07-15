@@ -43,12 +43,12 @@ int main( int argc, char **argv )
 
     meatnet::Host host(4200, 4201);
 
-    host.loadScene("./scenes/S1.idksc");
+    // host.loadScene("./scenes/S1.idksc");
 
-    while (host.running())
-    {
-        // ...
-    }
+    // while (host.running())
+    // {
+    //     // ...
+    // }
 
     return 0;
 }

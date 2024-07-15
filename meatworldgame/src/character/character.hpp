@@ -1,103 +1,54 @@
-// #pragma once
+#pragma once
 
-// #include <IDKBuiltinCS/IDKBuiltinCS.hpp>
+#include <IDKECS/IDKECS.hpp>
 
-// #include <libidk/idk_allocator_id.hpp>
-// #include <libidk/idk_identifiable.hpp>
+#include <IDKBuiltinCS/sys-transform.hpp>
+#include <IDKBuiltinCS/sys-physics.hpp>
+#include <IDKBuiltinCS/sys-model.hpp>
+#include <IDKBuiltinCS/sys-particle.hpp>
 
+#include <IDKEvents/IDKEvents.hpp>
+#include <IDKGraphics/UI/idk_ui.hpp>
 
-// namespace idkg
-// {
-//     class CharacterFactory;
-//     class Character;
-//     class Player;
-//     class Enemy;
-//     class Asshole;
-// }
+#include <libidk/idk_log.hpp>
 
 
 
-// class idkg::CharacterFactory
-// {
-// protected:
-//     idk::EngineAPI &m_api;
-//     idk::Allocator_ID<idkg::Character *> m_characters;
-
-// public:
-//     CharacterFactory( idk::EngineAPI& );
-
-//     template <typename character_type>
-//     character_type *createCharacter();
+namespace meatworld
+{
+    class CharacterBase;
+    class NPC;
+    class CharacterController;
+};
 
 
-//     void update();
+class meatworld::CharacterBase
+{
+private:
+    CharacterController *m_controller;
 
-// };
+protected:
 
+public:
+    int m_obj_id = -1;
 
+    // CharacterBase( CharacterController *controller )
+    // :   m_controller(controller)
+    // {
+        
+    // }
 
-// class idkg::Character: public idk::Identifiable
-// {
-// protected:
-//     friend class idkg::CharacterFactory;
+    virtual void update( idk::EngineAPI& ) = 0;
 
-//     int m_obj;
-//     Character( idk::EngineAPI&, int obj_id );
-
-//     virtual void update( idk::EngineAPI& ) = 0;
-// };
+};
 
 
 
+class meatworld::NPC: public meatworld::CharacterBase
+{
+public:
+    virtual void update( idk::EngineAPI& ) final;
 
+};
 
-// class idkg::Player: public idkg::Character
-// {
-// protected:
-//     friend class idkg::CharacterFactory;
-
-//     int m_hinge_obj;
-//     int m_cam_obj;
-
-//     Player( idk::EngineAPI&, int obj_id );
-
-//     virtual void update( idk::EngineAPI& ) final;
-
-// public:
-
-// };
-
-
-
-// class idkg::Enemy: public idkg::Character
-// {
-// private:
-//     friend class idkg::CharacterFactory;
-
-//     Enemy( idk::EngineAPI&, int obj_id );
-//     virtual void update( idk::EngineAPI& ) final;
-
-// public:
-
-// };
-
-
-
-// class idkg::Asshole: public idkg::Character
-// {
-// private:
-//     friend class idkg::CharacterFactory;
-
-//     using idkg::Character::Character;
-//     virtual void update( idk::EngineAPI& ) final;
-
-// public:
-
-// };
-
-
-
-
-
-// #include "./character.inl"
 

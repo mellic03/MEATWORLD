@@ -100,7 +100,7 @@ createSyndromes( idk::EngineAPI &api, idkui2::LayoutManager *LM, meatworld::Game
         }
     }
 
-    api.getEventSys().onKeyTapped(idk::Keycode::E,
+    api.getEventSys().onKeyTapped(idk::Keycode::TAB,
         [gameui]()
         {
             gameui->root->setChild(1, 1, gameui->syndromes);

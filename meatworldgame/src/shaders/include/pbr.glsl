@@ -100,7 +100,7 @@ IDK_PBRSurfaceData_load( IDK_Camera camera, vec2 texcoord, sampler2D depth_tex, 
     vec3  normal   = texture(normal_tex, texcoord).xyz;
 
     vec4  texture_pbr = texture(PBR_tex, texcoord);
-    float roughness   = clamp(texture_pbr.r*texture_pbr.r, 0.0, 1.0);
+    float roughness   = clamp(texture_pbr.r, 0.0, 1.0);
     float metallic    = clamp(texture_pbr.g, 0.0, 1.0);
     float ao          = clamp(texture_pbr.b, 0.0, 1.0);
     float emission    = clamp(texture_pbr.a, 0.0, 1.0);
@@ -139,6 +139,7 @@ IDK_PBRSurfaceData_load( IDK_Camera camera, vec2 texcoord, sampler2D depth_tex, 
 
     return data;
 }
+
 
 
 
@@ -220,10 +221,8 @@ vec3 IDK_PBR_Dirlight( IDK_Dirlight light, IDK_PBRSurfaceData surface, vec3 frag
     vec3  specular    = numerator / denominator;
 
     vec3 radiance = light.diffuse.rgb * light.diffuse.a;
-    vec3 ambient  = surface.albedo * light.ambient.rgb;
 
-
-    return ((surface.Kd * surface.albedo) / PBR_PI + specular) * radiance * NdotL + ambient;
+    return ((surface.Kd * surface.albedo) / PBR_PI + specular) * radiance * NdotL;
 }
 
 

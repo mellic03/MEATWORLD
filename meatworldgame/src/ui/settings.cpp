@@ -107,6 +107,24 @@ void createSettings( idk::EngineAPI &api, idkui2::LayoutManager *LM,
         )
     );
 
+
+    split = new idkui2::Split("", meatui::splitwindow_style, 0.35f); 
+    graphics_list->pushChildFront(split);
+
+    split->setLeft(new idkui2::Label("FOV", meatui::label_style));
+
+    split->setRight(
+        new idkui2::Slider(
+            "FOV",
+            meatui::slider_style,
+            gamesettings->cam_fov,
+            60.0f,
+            100.0f,
+            5.0f
+        )
+    );
+
+
     graphics_list->pushChildFront(new idkui2::Button("graphics1", meatui::button_style,
         [gameui, graphics_list]()
         {

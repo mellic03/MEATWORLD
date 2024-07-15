@@ -32,21 +32,8 @@ endif ()
 target_link_libraries(
     ${PROJECT_NAME} PUBLIC
 
-    GLEW
     SDL2
-    SDL2_image
-    SDL2_mixer
-    SDL2_ttf
     SDL2_net
-    ${OPENGL_LIBRARIES}
 
-    libidk
-    IDKGraphics
-
-    IDKAudio
-    IDKEvents
-    IDKBuiltinCS
-    IDKThreading
-    IDKECS
 )
 

@@ -9,7 +9,10 @@ file(GLOB SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/systems/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/*.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/meatnet/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/character/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/player/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/environment/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/prefabs/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../meatnet/src/meatnet.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../meatnet/src/meatnet_client.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../meatnet/src/meatnet_server.cpp
