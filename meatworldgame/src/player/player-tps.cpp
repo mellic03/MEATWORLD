@@ -1,4 +1,4 @@
-#include "player.hpp"
+#include "player-tps.hpp"
 
 #include <IDKAudio/IDKAudio.hpp>
 #include <IDKBuiltinCS/sys-audio.hpp>
@@ -12,11 +12,11 @@
 
 
 
-meatworld::Player::Player()
+meatworld::PlayerTPS::PlayerTPS()
 {
     using namespace idk;
 
-    m_obj_id = ECS2::createGameObject("Player", false);
+    m_obj_id = ECS2::createGameObject("PlayerTPS", false);
     ECS2::giveComponent<TransformCmp>(m_obj_id);
     ECS2::giveComponent<AudioListenerCmp>(m_obj_id);
     TransformSys::setPositionLocalspace(m_obj_id, glm::vec3(0.0f));
@@ -57,10 +57,10 @@ meatworld::Player::Player()
 }
 
 
-meatworld::Player::~Player()
+meatworld::PlayerTPS::~PlayerTPS()
 {
     using namespace idk;
-    std::cout << "Player::~Player\n";
+    std::cout << "PlayerTPS::~PlayerTPS\n";
     ECS2::deleteGameObject(m_obj_id);
 }
 
@@ -68,7 +68,7 @@ meatworld::Player::~Player()
 
 
 void
-meatworld::Player::move( idk::EngineAPI &api, const glm::vec3 &delta, float dx, float dy )
+meatworld::PlayerTPS::move( idk::EngineAPI &api, const glm::vec3 &delta, float dx, float dy )
 {
     using namespace idk;
 
@@ -100,7 +100,7 @@ meatworld::Player::move( idk::EngineAPI &api, const glm::vec3 &delta, float dx, 
 
 
 void
-meatworld::Player::update( idk::EngineAPI &api )
+meatworld::PlayerTPS::update( idk::EngineAPI &api )
 {
     using namespace idk;
 
@@ -191,7 +191,7 @@ meatworld::Player::update( idk::EngineAPI &api )
 
 
 void
-meatworld::Player::update( idk::EngineAPI &api, meatnet::PeerData &data )
+meatworld::PlayerTPS::update( idk::EngineAPI &api, meatnet::PeerData &data )
 {
     using namespace idk;
 
@@ -242,50 +242,3 @@ meatworld::Player::update( idk::EngineAPI &api, meatnet::PeerData &data )
 
 }
 
-
-
-
-void
-meatworld::EditorPlayer::update( idk::EngineAPI &api )
-{
-    using namespace idk;
-
-    float dtime  = api.getEngine().deltaTime();
-    auto &ren    = api.getRenderer();
-    
-    auto &events = api.getEventSys();
-    auto &K      = events.keylog();
-
-    if (events.mouseCaptured() == false)
-    {
-        return;
-    }
-
-    glm::vec3 delta = glm::vec3(0.0f);
-    glm::vec3 up    = TransformSys::getUp(m_obj_id);
-    glm::vec3 right = TransformSys::getRight(m_cam_obj);
-    glm::vec3 front = TransformSys::getFront(m_cam_obj);
-
-
-    if (K.keyDown(idk::Keycode::A)) { delta -= right; }
-    if (K.keyDown(idk::Keycode::D)) { delta += right; }
-    if (K.keyDown(idk::Keycode::W)) { delta += front; }
-    if (K.keyDown(idk::Keycode::S)) { delta -= front; }
-
-    delta.y = 0.0f;
-
-    if (K.keyDown(idk::Keycode::SPACE)) { delta += up; }
-    if (K.keyDown(idk::Keycode::LCTRL)) { delta -= up; }
-
-    if (fabs(delta.x) > 0.01f|| fabs(delta.y) > 0.01f || fabs(delta.z) > 0.01f)
-    {
-        delta = 0.0025f * m_walk_speed * glm::normalize(delta);
-    }
-
-
-    TransformSys::translateWorldspace(m_obj_id, delta);
-
-    glm::vec2 dmouse = 0.1f * events.mouseDelta();
-    TransformSys::pitch(m_cam_obj, -dmouse.y);
-    TransformSys::yaw(m_obj_id, -dmouse.x);
-};

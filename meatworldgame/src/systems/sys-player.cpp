@@ -17,7 +17,7 @@
 
 
 
-static meatworld::OLPlayer OL_Players[4];
+// static meatworld::OLPlayer OL_Players[4];
 
 
 void
@@ -33,30 +33,30 @@ meatworld::PlayerSys::update( idk::EngineAPI &api )
 {
     using namespace idk;
 
-    if (m_client == nullptr || MeatWorldGame::player == nullptr)
-    {
-        return;
-    }
+    // if (m_client == nullptr || MeatWorldGame::player == nullptr)
+    // {
+    //     return;
+    // }
 
 
-    static meatnet::PeerData player_data;
-    static meatnet::PeerData peer_data[4];
+    // static meatnet::PeerData player_data;
+    // static meatnet::PeerData peer_data[4];
 
-    MeatWorldGame::player->update(api, player_data);
-    m_client->send(player_data);
+    // MeatWorldGame::player->update(api, player_data);
+    // m_client->send(player_data);
 
-    if (m_client->recv(&peer_data[0]))
-    {
-        for (int i=0; i<4; i++)
-        {
-            OL_Players[i].update(api, peer_data[i]);
+    // if (m_client->recv(&peer_data[0]))
+    // {
+    //     for (int i=0; i<4; i++)
+    //     {
+    //         OL_Players[i].update(api, peer_data[i]);
 
-            if (OL_Players[i].m_health < 0.0f)
-            {
-                OL_Players[i].init();
-            }
-        }
-    }
+    //         if (OL_Players[i].m_health < 0.0f)
+    //         {
+    //             OL_Players[i].init();
+    //         }
+    //     }
+    // }
 }
 
 
@@ -66,14 +66,14 @@ meatworld::PlayerSys::init_multiplayer( const std::string &host )
 {
     using namespace idk;
 
-    m_client = new meatnet::Client(
-        "Michael", "127.0.0.1", 4201, [](std::string){}
-    );
+    // m_client = new meatnet::Client(
+    //     "Michael", "127.0.0.1", 4201, [](std::string){}
+    // );
 
-    for (int i=0; i<4; i++)
-    {
-        OL_Players[i].init();
-    }
+    // for (int i=0; i<4; i++)
+    // {
+    //     OL_Players[i].init();
+    // }
 }
 
 

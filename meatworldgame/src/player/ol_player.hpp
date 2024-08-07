@@ -22,7 +22,7 @@ public:
     float m_health  = 10.0f;
 
     Flashlight m_flashlight;
-    RangedWeapon *m_weapon = nullptr;
+    NPC_RangedWeapon *m_weapon = nullptr;
 
     void init();
 
@@ -39,7 +39,7 @@ public:
             delete m_weapon;
         }
 
-        m_weapon = new T(m_obj_id);
+        m_weapon = new T(m_obj_id, -1);
     }
 };
 

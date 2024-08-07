@@ -6,9 +6,22 @@
 #include <IDKBuiltinCS/sys-transform.hpp>
 #include <IDKBuiltinCS/sys-lightsource.hpp>
 
+#include <IDKGraphics/particle_system.hpp>
+
 #include <libidk/idk_random.hpp>
 
 
+
+
+
+namespace
+{
+    std::vector<meatworld::Projectile> m_projectiles;
+};
+
+
+
+static idk::EngineAPI *api_ptr;
 
 int decal;
 
@@ -18,13 +31,14 @@ meatworld::WeaponSys::init( idk::EngineAPI &api )
 {
     using namespace idk;
 
+    api_ptr = &api;
     decal = api.getRenderer().loadModel("assets/models/decal/bullet-decal.idkvi");
 }
 
 
 
-static std::vector<glm::vec3> A;
-static std::vector<glm::vec3> B;
+static std::deque<glm::vec3> A;
+static std::deque<glm::vec3> B;
 static std::deque<glm::vec3> C;
 static std::deque<glm::vec3> D;
 
@@ -38,7 +52,8 @@ meatworld::WeaponSys::update( idk::EngineAPI &api )
 
     for (int i=0; i<A.size(); i++)
     {
-        ren.drawSphere(A[i], 0.1f);
+        // ren.drawLine(A[i], B[i], 0.05f);
+        // ren.drawSphere(A[i], 0.1f);
     }
 
     for (int i=0; i<C.size(); i++)
@@ -47,39 +62,92 @@ meatworld::WeaponSys::update( idk::EngineAPI &api )
         ren.drawDecal(decal, C[i]+0.01f*D[i], D[i], 0.15f);
     }
 
+
+    if (A.size() > 50)
+    {
+        A.pop_front();
+        B.pop_front();
+    }
+
     if (C.size() > 50)
     {
         C.pop_front();
         D.pop_front();
     }
 
-    for (auto &cmp: ECS2::getComponentArray<WeaponCmp>())
+
+    for (auto &proj: m_projectiles)
     {
-        if (cmp.fire)
+        glm::vec3 hit_pos;
+        glm::vec3 hit_normal;
+        int       hit_obj;
+
+        glm::vec3 pos = proj.pos;
+        glm::vec3 dir = proj.dir;
+        auto &desc = proj.desc;
+
+        for (int i=0; i<desc.shots; i++)
         {
-            glm::vec3 pos = TransformSys::getWorldPosition(cmp.obj_id);
-            glm::vec3 dir = TransformSys::getFront(cmp.obj_id);
+            float spread = (proj.aim) ? desc.inner_spread : desc.outer_spread;
 
-            float spread = cmp.config.spread;
+            glm::vec3 N = glm::vec3(
+                idk::randf_guassian(spread, 2),
+                idk::randf_guassian(spread, 2),
+                idk::randf_guassian(spread, 2)
+            );
 
-            for (int i=0; i<cmp.config.shots; i++)
+            N = glm::normalize(dir + N); 
+
+            A.push_back(pos);
+            B.push_back(pos + 32.0f*N);
+
+            if (_raycast(api, proj, pos, N, &hit_pos, &hit_normal, &hit_obj))
             {
-                glm::vec3 offset = glm::vec3(
-                    idk::randf(-spread, +spread),
-                    idk::randf(-spread, +spread),
-                    idk::randf(-spread, +spread)
-                );
+                proj.callback(hit_pos, hit_normal);
 
-                _raycast(api, cmp, pos, glm::normalize(dir + offset));
+                C.push_back(hit_pos);
+                D.push_back(hit_normal);
             }
-
-            cmp.fire = false;
-
-            ECS2::getComponent<PointlightCmp>(cmp.obj_id).light.diffuse = glm::vec4(0.0f);
         }
 
-
     }
+
+    m_projectiles.clear();
+
+
+    // for (auto &cmp: ECS2::getComponentArray<WeaponCmp>())
+    // {
+    //     if (cmp.fire)
+    //     {
+    //         glm::vec3 pos = TransformSys::getWorldPosition(cmp.obj_id);
+    //         glm::vec3 dir = TransformSys::getFront(cmp.obj_id);
+    //         // glm::mat3 M   = glm::mat3(TransformSys::getModelMatrix(cmp.obj_id));
+
+    //         for (int i=0; i<cmp.desc.shots; i++)
+    //         {
+    //             float spread = cmp.desc.outer_spread;
+
+    //             if (idk::randf() < cmp.desc.inner_prob)
+    //             {
+    //                 spread = cmp.desc.inner_spread;
+    //             }
+
+    //             glm::vec3 N = glm::vec3(
+    //                 idk::randf_guassian(spread, 2),
+    //                 idk::randf_guassian(spread, 2),
+    //                 -1.0f
+    //             );
+
+    //             std::cout << N.x << ", " << N.y << "\n";
+
+    //             _raycast(api, cmp, pos, glm::normalize(dir * N));
+    //         }
+
+    //         cmp.fire = false;
+
+    //         ECS2::getComponent<PointlightCmp>(cmp.obj_id).light.diffuse = glm::vec4(0.0f);
+    //     }
+    // }
 
 
     for (auto &cmp: ECS2::getComponentArray<HitSphereCmp>())
@@ -106,9 +174,9 @@ meatworld::WeaponSys::update( idk::EngineAPI &api )
 }
 
 void
-meatworld::WeaponSys::config( int obj_id, const WeaponConfig &config )
+meatworld::WeaponSys::config( int obj_id, const WeaponDesc &desc )
 {
-    idk::ECS2::getComponent<WeaponCmp>(obj_id).config = config;
+    idk::ECS2::getComponent<WeaponCmp>(obj_id).desc = desc;
 }
 
 
@@ -121,13 +189,30 @@ meatworld::WeaponSys::fire( int obj_id )
 
 
 void
-meatworld::WeaponSys::_raycast( idk::EngineAPI &api, meatworld::WeaponCmp &wcmp, const glm::vec3 &origin,
-                                const glm::vec3 &dir )
+meatworld::WeaponSys::createProjectile( const glm::vec3 &origin, const glm::vec3 &dir,
+                                        const WeaponDesc &desc, bool aim,
+                                        std::function<void(glm::vec3, glm::vec3)> callback,
+                                        int ignore )
+{
+    using namespace idk;
+    m_projectiles.push_back({true, aim, origin, dir, desc, callback, ignore});
+}
+
+
+bool
+meatworld::WeaponSys::_raycast( idk::EngineAPI &api, const Projectile &proj,
+                                const glm::vec3 &origin, const glm::vec3 &dir,
+                                glm::vec3 *hit, glm::vec3 *N, int *obj_id )
 {
     using namespace idk;
 
+    glm::vec3 nearest_hit = glm::vec3(+INFINITY);
+    glm::vec3 nearest_N   = glm::vec3(+INFINITY);
+    float nearest_distSq  = +INFINITY;
+    int   nearest_obj     = -1;
+    bool  ret_value       = false;
+
     glm::vec3 res;
-    glm::vec3 N;
 
     for (auto &cmp: ECS2::getComponentArray<HitSphereCmp>())
     {
@@ -136,10 +221,16 @@ meatworld::WeaponSys::_raycast( idk::EngineAPI &api, meatworld::WeaponCmp &wcmp,
 
         if (geometry::raySphereIntersects(origin, dir, sphere_pos, radius, &res))
         {
-            C.push_back(res);
-            D.push_back(N);
-            cmp.is_hit = true;
-            cmp.hit    = res;
+            float distSq = glm::distance2(origin, res);
+
+            if (distSq < nearest_distSq)
+            {
+                nearest_distSq = distSq;
+                nearest_hit    = res;
+                nearest_N      = *N;
+                nearest_obj    = cmp.obj_id;
+            }
+            ret_value = true;
         }
     }
 
@@ -147,16 +238,20 @@ meatworld::WeaponSys::_raycast( idk::EngineAPI &api, meatworld::WeaponCmp &wcmp,
     {
         glm::mat4 M = TransformSys::getModelMatrix(cmp.obj_id);
         glm::vec3 bounds = glm::mat3(M) * glm::vec3(0.5f, 0.5f, 0.5f);
-
         glm::vec3 rect_pos = TransformSys::getWorldPosition(cmp.obj_id);
 
-        if (geometry::rayAABBIntersection(origin, dir, rect_pos, bounds, &res, &N))
+        if (geometry::rayAABBIntersection(origin, dir, rect_pos, bounds, &res, N))
         {
-            cmp.is_hit = true;
-            cmp.hit    = res;
+            float distSq = glm::distance2(origin, res);
 
-            C.push_back(res);
-            D.push_back(N);
+            if (distSq < nearest_distSq)
+            {
+                nearest_distSq = distSq;
+                nearest_hit    = res;
+                nearest_N      = *N;
+                nearest_obj    = cmp.obj_id;
+            }
+            ret_value = true;
         }
     }
 
@@ -167,19 +262,33 @@ meatworld::WeaponSys::_raycast( idk::EngineAPI &api, meatworld::WeaponCmp &wcmp,
 
         glm::vec3 rect_pos = TransformSys::getWorldPosition(cmp.obj_id);
 
-        if (cmp.obj_id == wcmp.ignore_obj)
+        if (cmp.obj_id == proj.ignore)
         {
             continue;
         }
 
-        if (geometry::rayAABBIntersection(origin, dir, rect_pos, bounds, &res, &N))
+        if (geometry::rayAABBIntersection(origin, dir, rect_pos, bounds, &res, N))
         {
-            cmp.is_hit = true;
-            cmp.hit    = res;
+            float distSq = glm::distance2(origin, res);
 
-            cmp.callback();
+            if (distSq < nearest_distSq)
+            {
+                nearest_distSq = distSq;
+                nearest_hit    = res;
+                nearest_N      = *N;
+                nearest_obj    = cmp.obj_id;
+            }
+            ret_value = true;
         }
     }
+
+    {
+        *hit    = nearest_hit;
+        *N      = nearest_N;
+        *obj_id = nearest_obj;
+    }
+
+    return ret_value;
 }
 
 

@@ -20,11 +20,15 @@ meatworld::BuildingSys::init( idk::EngineAPI &api )
     api_ptr = &api;
     auto &ren = api.getRenderer();
 
-    m_wall_program = ren.createProgram(
-        "meatworld-wall", "assets/shaders/", "wall.vs", "wall.fs"
-    );
 
-    m_RQ = ren.createRenderQueue("meatworld-wall");
+    if (m_RQ == -1)
+    {
+        m_wall_program = ren.createProgram(
+            "meatworld-wall", "assets/shaders/", "wall.vs", "wall.fs"
+        );
+
+        m_RQ = ren.createRenderQueue("meatworld-wall");
+    }
 
     for (auto &cmp: ECS2::getComponentArray<meatworld::DoorCmp>())
     {
@@ -50,10 +54,12 @@ meatworld::BuildingSys::update( idk::EngineAPI &api )
         current += 0.01f*error;
     }
 
-    // for (auto &cmp: ECS2::getComponentArray<meatworld::WallCmp>())
-    // {
-    //     ren.drawModelRQ(m_RQ, cmp.model, TransformSys::getModelMatrix(cmp.obj_id));
-    // }
+    for (auto &cmp: ECS2::getComponentArray<meatworld::WallCmp>())
+    {
+        ModelSys::assignCustomRQ(cmp.obj_id, m_RQ);
+
+        // ren.drawModelRQ(m_RQ, cmp.model, TransformSys::getModelMatrix(cmp.obj_id));
+    }
 }
 
 

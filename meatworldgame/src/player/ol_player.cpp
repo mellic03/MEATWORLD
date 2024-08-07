@@ -56,7 +56,7 @@ meatworld::OLPlayer::update( idk::EngineAPI &api, const meatnet::PeerData &data 
     auto &events = api.getEventSys();
     auto &K      = events.keylog();
 
-    TransformSys::setPositionWorldspace(m_obj_id, data.position);
+    TransformSys::setWorldPosition(m_obj_id, data.position);
     TransformSys::getTransform(m_obj_id).rotation = glm::quat(glm::vec3(0.0f));
 
     auto &cmp = TransformSys::getTransformCmp(m_obj_id);
@@ -97,12 +97,12 @@ meatworld::OLPlayer::update( idk::EngineAPI &api, const meatnet::PeerData &data 
 
         if ((flags & meatnet::WEAPON_GLOCK) && name != "Glock")
         {
-            giveWeapon<Glock>();
+            giveWeapon<NPC_Glock>();
         }
 
         else if ((flags & meatnet::WEAPON_AR2) && name != "AR2")
         {
-            giveWeapon<HL2_AR2>();
+            giveWeapon<NPC_HL2_AR2>();
         }
     }
 

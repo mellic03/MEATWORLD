@@ -4,6 +4,21 @@
 #include "./include/storage.glsl"
 #include "./include/util.glsl"
 
+vec4 triplanar( uint idx, vec3 pos, vec3 N )
+{
+    vec4 result = vec4(0.0);
+
+    vec3 W = abs(N);
+         W /= (W.x + W.y + W.z);
+
+    result += W.z * texture(IDK_SSBO_textures[idx], pos.xy);
+    result += W.x * texture(IDK_SSBO_textures[idx], pos.yz);
+    result += W.y * texture(IDK_SSBO_textures[idx], pos.xz);
+
+    return result;
+}
+
+
 
 layout (location = 0) out vec4 fsout_albedo;
 layout (location = 1) out vec3 fsout_normal;
@@ -22,18 +37,17 @@ in mat3 TBN;
 in mat3 TBNT;
 
 
-
 void main()
 {
     vec2 texcoords = fsin_texcoords;
-
-    uint offset = IDK_SSBO_texture_offsets[drawID];
+    uint offset    = IDK_SSBO_texture_offsets[drawID];
 
     vec4  albedo = texture(IDK_SSBO_textures[offset+0], texcoords).rgba;
     vec3  normal = texture(IDK_SSBO_textures[offset+1], texcoords).xyz * 2.0 - 1.0;
     vec3  ao_r_m = texture(IDK_SSBO_textures[offset+2], texcoords).rgb;
     float noidea = texture(IDK_SSBO_textures[offset+3], texcoords).r;
     float emissv = texture(IDK_SSBO_textures[offset+4], texcoords).r;
+
     float ao        = ao_r_m.r;
     float roughness = ao_r_m.g;
     float metallic  = ao_r_m.b;
@@ -44,6 +58,5 @@ void main()
     fsout_albedo = vec4(albedo.rgb, 1.0);
     fsout_normal = TBN * normalize(normal);
     fsout_pbr    = vec4(roughness, metallic, ao, emissv);
-    // fsout_pbr    = vec4(0.8, 0.001, 1.0, 0.0);
 
 }

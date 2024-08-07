@@ -47,6 +47,19 @@ vec3 IDK_WorldFromDepth( sampler2D depth, vec2 texcoords, mat4 P, mat4 V )
 }
 
 
+vec3 IDK_WorldFromDepthSample( float depth, vec2 texcoords, mat4 P, mat4 V )
+{
+    float z = depth * 2.0 - 1.0;
+
+    vec4 pos = vec4(texcoords * 2.0 - 1.0, z, 1.0);
+         pos = inverse(P) * vec4(pos.xyz, 1.0);
+         pos /= pos.w;
+         pos = inverse(V) * vec4(pos.xyz, 1.0);
+    
+    return pos.xyz;
+}
+
+
 
 vec3 IDK_PackNormal( vec3 N )
 {

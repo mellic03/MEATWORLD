@@ -8,13 +8,12 @@
 
 namespace meatworld
 {
-    class Player;
-    class EditorPlayer;
+    class PlayerTPS;
 };
 
 
 
-class meatworld::Player: public meatworld::CharacterBase
+class meatworld::PlayerTPS: public meatworld::CharacterBase
 {
 private:
     int m_audio_emitter = -1;
@@ -23,6 +22,7 @@ public:
     int m_grabbed_obj = -1;
     int m_hinge_obj   = -1;
     int m_hit_obj     = -1;
+    int m_cam_obj     = -1;
 
     float m_health = 10.0f;
 
@@ -31,14 +31,11 @@ public:
     float m_jump_force = 1.0f;
 
     Flashlight m_flashlight;
-    // Glock *m_glock = nullptr;
     RangedWeapon *m_weapon = nullptr;
 
 
-    int m_cam_obj = -1;
-
-    Player();
-    ~Player();
+    PlayerTPS();
+    ~PlayerTPS();
 
     virtual void move( idk::EngineAPI&, const glm::vec3&, float dx, float dy );
     void update( idk::EngineAPI& );
@@ -57,14 +54,4 @@ public:
 
 };
 
-
-
-
-class meatworld::EditorPlayer: public meatworld::Player
-{
-public:
-
-    void update( idk::EngineAPI& );
-    virtual void move( idk::EngineAPI&, const glm::vec3&, float dx, float dy ) final {  };
-};
 

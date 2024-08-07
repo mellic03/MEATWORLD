@@ -1,14 +1,13 @@
 #extension GL_ARB_bindless_texture: require
 
-
 #define MAX_CAMERAS     1
 #define MAX_DIRLIGHTS   1
-#define MAX_POINTLIGHTS 16
-#define MAX_SPOTLIGHTS  8
+#define MAX_POINTLIGHTS 32
+#define MAX_SPOTLIGHTS  32
 
-#define MAX_TEXTURES   (16*4096)
-#define MAX_TRANSFORMS 4096
-#define MAX_DRAW_CALLS (16*4096)
+#define MAX_TEXTURES   (4*4096)
+#define MAX_TRANSFORMS 1024
+#define MAX_DRAW_CALLS 4096
 
 
 struct IDK_Camera
@@ -63,7 +62,6 @@ layout (std140, binding = 0) uniform IDK_UBO_Lightsources
     IDK_Spotlight   IDK_UBO_spotlights  [MAX_SPOTLIGHTS];
     int             IDK_UBO_counter;
 };
-
 
 
 layout (std430, binding = 0) readonly buffer IDK_SSBO_Indirect

@@ -36,16 +36,21 @@ void main()
     vec4 normal   = model * vec4(vsin_normal,  0.0);
     vec4 tangent  = model * vec4(vsin_tangent, 0.0);
 
+
     vec3 N = normalize(mat3(model) * normalize(vsin_normal));
     vec3 T = normalize(mat3(model) * normalize(vsin_tangent));
     T = normalize(T - dot(T, N) * N);
     vec3 B = cross(N, T);
     B = normalize(B - dot(B, N) * N);
 
+
     fsin_fragpos   = position.xyz;
     fsin_normal    = N;
     fsin_tangent   = T;
-    fsin_texcoords = vsin_pos.xy * 0.25 * vec2(length(vec3(model[0])), length(vec3(model[1])));
+
+    fsin_texcoords   = vsin_pos.xy;
+    fsin_texcoords.x = 1.0 - fsin_texcoords.x;
+    fsin_texcoords  *= 0.25 * vec2(length(vec3(model[0])), length(vec3(model[1])));
 
     TBN  = mat3(T, B, N);
     TBNT = transpose(TBN);

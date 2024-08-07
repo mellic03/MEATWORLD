@@ -83,13 +83,19 @@ void createSettings( idk::EngineAPI &api, idkui2::LayoutManager *LM,
     // -----------------------------------------------------------------------------------------
     graphics_list->pushChildFront(new idkui2::Title("Graphics", meatui::title_style));
 
-    graphics_list->pushChildFront(new idkui2::Button("Window Size", meatui::button_style,
-        [gameui, graphics_list]()
+    graphics_list->pushChildFront(new idkui2::Button("1280x720", meatui::button_style,
+        [&api, gameui, graphics_list]()
         {
-            
+            api.getRenderer().resize(1280, 720);
         }
     ));
 
+    graphics_list->pushChildFront(new idkui2::Button("1920x1080", meatui::button_style,
+        [&api, gameui, graphics_list]()
+        {
+            api.getRenderer().resize(1920, 1080);
+        }
+    ));
 
     auto *split = new idkui2::Split("", meatui::splitwindow_style, 0.35f); 
     graphics_list->pushChildFront(split);

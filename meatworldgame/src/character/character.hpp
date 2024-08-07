@@ -38,7 +38,7 @@ public:
         
     // }
 
-    virtual void update( idk::EngineAPI& ) = 0;
+    virtual void move( idk::EngineAPI&, const glm::vec3&, float dx, float dy ) = 0;
 
 };
 
@@ -47,7 +47,7 @@ public:
 class meatworld::NPC: public meatworld::CharacterBase
 {
 public:
-    virtual void update( idk::EngineAPI& ) final;
+    virtual void move( idk::EngineAPI&, const glm::vec3&, float dx, float dy ) final;
 
 };
 

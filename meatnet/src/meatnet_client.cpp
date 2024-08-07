@@ -8,9 +8,9 @@ meatnet::Client::send( const PeerData &data )
     {
         lock_type lock(m_send_mutex);
 
-        m_idx = (m_idx + 1) % 8;
+        // m_idx = (m_idx + 1) % 8;
 
-        std::memcpy(&m_playerdata[m_idx], &data, sizeof(PeerData));
+        std::memcpy(&m_playerdata[0], &data, sizeof(PeerData));
         m_playerdata[m_idx].timestamp = getTime();
 
     }
@@ -37,8 +37,24 @@ meatnet::Client::Client( const std::string &username, const std::string &hostnam
     m_hostname (hostname),
     m_callback (callback)
 {
-    std::thread thread1(&meatnet::Client::_in_thread, this, m_hostname.c_str(), port);
-    std::thread thread2(&meatnet::Client::_out_thread, this, m_hostname.c_str(), port+1);
+    UDPsocket socket;
+
+    if (SDLNet_Init() < 0)
+    {
+        printf("Couldn't initialize net: %s\n", SDLNet_GetError());
+        exit(1);
+    }
+
+    socket = SDLNet_UDP_Open(0);
+    if(!socket)
+    {
+        printf("SDLNet_UDP_Open: %s\n", SDLNet_GetError());
+        exit(2);
+    }
+
+
+    std::thread thread1(&meatnet::Client::_in_thread,  this, socket);
+    std::thread thread2(&meatnet::Client::_out_thread, this, socket, m_hostname.c_str());
 
     thread1.detach();
     thread2.detach();
@@ -48,40 +64,47 @@ meatnet::Client::Client( const std::string &username, const std::string &hostnam
 
 
 void
-meatnet::Client::_in_thread( const char *host, uint16_t port )
+meatnet::Client::_in_thread( UDPsocket socket )
 {
-    IPaddress serverIP;
-    UDPsocket udpsock;
-    UDPpacket* packet;
-    SDLNet_SocketSet socketset = NULL;
-    int numused;
-    static const int MAX_PACKET_SIZE = 512;
+    UDPpacket *packet = SDLNet_AllocPacket(sizeof(PeerData));
 
+    if (!packet)
+    {
+        printf("Could not allocate packet\n");
+        exit(2);
+    }
+
+
+    PeerData buffer;
+
+    while (running())
+    {
+        if (SDLNet_UDP_Recv(socket, packet))
+        {
+            std::memcpy(&buffer, packet->data, sizeof(PeerData));
+
+            {
+                lock_type lock(m_recv_mutex);
+
+                if (m_peers[buffer.id].timestamp <= buffer.timestamp)
+                {
+                    m_peers[buffer.id] = buffer;
+                }
+            }
+        }
+
+    }
 }
 
 
 void
-meatnet::Client::_out_thread( const char *host, uint16_t port )
+meatnet::Client::_out_thread( UDPsocket socket, const char *host )
 {
     IPaddress  serverIP;
-    UDPsocket  udpsock;
     UDPpacket* packet;
     SDLNet_SocketSet socketset = NULL;
     int numused;
     static const int MAX_PACKET_SIZE = sizeof(PeerData);
-
-    if (SDLNet_Init() < 0)
-    {
-        printf("Couldn't initialize net: %s\n", SDLNet_GetError());
-        exit(1);
-    }
-
-    udpsock = SDLNet_UDP_Open(0);
-    if(!udpsock)
-    {
-        printf("SDLNet_UDP_Open: %s\n", SDLNet_GetError());
-        exit(2);
-    }
 
 
     if (SDLNet_ResolveHost(&serverIP, host, 4201) == -1)
@@ -100,51 +123,25 @@ meatnet::Client::_out_thread( const char *host, uint16_t port )
 
 
     PeerData buffer;
-    // std::memset(buffers, 0, 2 * sizeof(PeerData));
-    // int idx = 0;
-
 
     while (running())
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
 
-        // {
-        //     lock_type lock(m_mutex);
-
-        //     m_peerdata.timestamp = getTime();
-        //     std::memcpy(&buffer, &m_peerdata, sizeof(PeerData));
-        // }
-
-
-        for (int i=0; i<8; i++)
+        // for (int i=0; i<8; i++)
         {
             {
                 lock_type lock(m_send_mutex);
-                std::memcpy(packet->data, &m_playerdata[i], sizeof(PeerData));
+                std::memcpy(packet->data, &m_playerdata[0], sizeof(PeerData));
             }
 
             packet->address.host = serverIP.host;
             packet->address.port = serverIP.port;
             packet->len = sizeof(PeerData);
 
-            SDLNet_UDP_Send(udpsock, -1, packet);
-            SDLNet_UDP_Send(udpsock, -1, packet);
+            SDLNet_UDP_Send(socket, -1, packet);
         }
 
-
-        if (SDLNet_UDP_Recv(udpsock, packet))
-        {
-            std::memcpy(&buffer, packet->data, sizeof(PeerData));
-
-            {
-                lock_type lock(m_recv_mutex);
-
-                if (m_peers[buffer.id].timestamp <= buffer.timestamp)
-                {
-                    m_peers[buffer.id] = buffer;
-                }
-            }
-        }
     }
 }
 

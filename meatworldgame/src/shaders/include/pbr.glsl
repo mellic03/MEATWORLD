@@ -142,6 +142,67 @@ IDK_PBRSurfaceData_load( IDK_Camera camera, vec2 texcoord, sampler2D depth_tex, 
 
 
 
+IDK_PBRSurfaceData
+IDK_PBRSurfaceData_load2( IDK_Camera camera, vec2 texcoord, sampler2D depth_tex, sampler2D depth_tex2,
+                          sampler2D albedo_tex,
+                          sampler2D normal_tex, sampler2D PBR_tex, sampler2D BRDF_LUT )
+{
+    IDK_PBRSurfaceData data;
+
+    vec4  albedo_a = texture(albedo_tex, texcoord);
+    vec3  albedo   = albedo_a.rgb;
+    float alpha    = albedo_a.a;
+
+
+    float depth = texture(depth_tex, texcoord).r;
+          depth = min(depth, texture(depth_tex2, texcoord).r);
+
+    vec3  worldpos = IDK_WorldFromDepthSample(depth, texcoord, camera.P, camera.V);
+    vec3  normal   = texture(normal_tex, texcoord).xyz;
+
+    vec4  texture_pbr = texture(PBR_tex, texcoord);
+    float roughness   = clamp(texture_pbr.r, 0.0, 1.0);
+    float metallic    = clamp(texture_pbr.g, 0.0, 1.0);
+    float ao          = clamp(texture_pbr.b, 0.0, 1.0);
+    float emission    = clamp(texture_pbr.a, 0.0, 1.0);
+
+    vec3  N     = normal;
+    vec3  V     = normalize(camera.position.xyz - worldpos);
+    vec3  R     = reflect(-V, N); 
+    vec3  F0    = clamp(mix(vec3(0.04), albedo, metallic), 0.0, 1.0);
+    float NdotV = PBR_DOT(N, V);
+    vec3  F     = fresnelSchlickR(NdotV, F0, roughness);
+    vec3  Ks    = F;
+    vec3  Kd    = (vec3(1.0) - Ks) * (1.0 - metallic);
+    vec2  BRDF  = texture(BRDF_LUT, vec2(NdotV, roughness)).rg;
+    vec3  brdf  = (Ks * BRDF.x + BRDF.y);
+
+
+    data.position   = worldpos;
+
+    data.albedo     = albedo;
+    data.alpha      = alpha;
+
+    data.roughness  = roughness;
+    data.metallic   = metallic;
+    data.ao         = ao;
+    data.emission   = emission;
+
+    data.N      = N;
+    data.V      = V;
+    data.R      = R;
+    data.F0     = F0;
+    data.NdotV  = NdotV;
+    data.F      = F;
+    data.Ks     = Ks;
+    data.Kd     = Kd;
+    data.brdf   = brdf;
+
+    return data;
+}
+
+
+
 
 
 vec3 IDK_PBR_Pointlight( IDK_Pointlight light, IDK_PBRSurfaceData surface, vec3 fragpos )
@@ -160,8 +221,7 @@ vec3 IDK_PBR_Pointlight( IDK_Pointlight light, IDK_PBRSurfaceData surface, vec3 
     float denominator = 4.0 * surface.NdotV * NdotL + PBR_EPSILON;
     vec3  specular    = light.diffuse.a * (numerator / denominator); // Can zero-out specular.
 
-    float d   = distance(light_position, fragpos);
-
+    float d = distance(light_position, fragpos);
     float attenuation = d / light.radius;
           attenuation = 1.0 - clamp(attenuation, 0.0, 1.0);
 

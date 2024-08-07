@@ -276,11 +276,18 @@ public:
 class meatnet::Host: public meatnet::Base
 {
 private:
-    std::string  m_filepath;
-    std::map<uint32_t, uint16_t, ClientRep> m_clients;
+    std::mutex     m_send_mutex;
+    std::mutex     m_recv_mutex;
 
-    void      _in_thread ( uint16_t port );
-    void      _out_thread( uint16_t port );
+    std::string  m_filepath;
+    std::atomic_int m_idx;
+    std::map<std::pair<uint32_t, uint16_t>, int> m_clients;
+    std::vector<std::pair<uint32_t, uint16_t>> m_dst;
+    PeerData m_players[4];
+
+
+    void      _in_thread ( UDPsocket, uint16_t port );
+    void      _out_thread( UDPsocket, uint16_t port );
 
 public:
     Host( uint16_t main_port, uint16_t msg_port );
@@ -310,8 +317,8 @@ private:
     PeerData       m_peerdata;
     PeerData       m_peers[4];
 
-    void      _in_thread ( const char *host, uint16_t port );
-    void      _out_thread( const char *host, uint16_t port );
+    void      _in_thread ( UDPsocket );
+    void      _out_thread( UDPsocket, const char* );
 
 
 public:

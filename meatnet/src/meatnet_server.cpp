@@ -8,13 +8,30 @@ meatnet::Host::Host( uint16_t main_port, uint16_t msg_port )
     // m_clients  = std::vector<TCPsocket>(MAX_PLAYERS, NULL);
     // m_timers   = std::vector<uint32_t>(MAX_PLAYERS, std::time(NULL) - 60);
 
-    _in_thread(4201);
+    std::memset(m_players, '\0', 4*sizeof(PeerData));
+    m_idx.store(0);
 
-    // std::thread thread1(&meatnet::Host::_in_thread, this, main_port+1);
-    // std::thread thread2(&meatnet::Host::_out_thread, this, main_port);
 
-    // thread1.detach();
-    // thread2.detach();
+    if (SDLNet_Init() < 0)
+    {
+        printf("Couldn't initialize net: %s\n", SDLNet_GetError());
+        exit(1);
+    }
+
+    UDPsocket socket = SDLNet_UDP_Open(4201);
+
+    if (!socket)
+    {
+        printf("SDLNet_UDP_Open: %s\n", SDLNet_GetError());
+        exit(2);
+    }
+
+
+    std::thread thread1(&meatnet::Host::_in_thread,  this, socket, 4201);
+    std::thread thread2(&meatnet::Host::_out_thread, this, socket, 4201);
+
+    thread1.detach();
+    thread2.detach();
 }
 
 
@@ -28,77 +45,10 @@ meatnet::Host::loadScene( const std::string &filepath )
 
 
 void
-meatnet::Host::_out_thread( uint16_t port )
+meatnet::Host::_out_thread( UDPsocket socket, uint16_t port )
 {
-    // UDPsocket  udpsock;
-    // UDPpacket* packet;
-    // SDLNet_SocketSet socketset = NULL;
-    // int numused;
-    // static const int MAX_PACKET_SIZE = sizeof(PeerData);
+    UDPpacket *packet = SDLNet_AllocPacket(sizeof(PeerData));
 
-
-    // udpsock = SDLNet_UDP_Open(0);
-    // if(!udpsock)
-    // {
-    //     printf("SDLNet_UDP_Open: %s\n", SDLNet_GetError());
-    //     exit(2);
-    // }
-
-
-    // packet = SDLNet_AllocPacket(MAX_PACKET_SIZE);
-
-    // if (!packet)
-    // {
-    //     printf("Could not allocate packet\n");
-    //     exit(2);
-    // }
-
-
-    // while (running())
-    // {
-    //     for (auto &[key1, client1]: m_clients)
-    //     {
-    //         for (auto &[key2, client2]: m_clients)
-    //         {
-    //             if (key != key2)
-    //             {
-
-    //             }
-    //         }
-    //     }
-    // }
-
-}
-
-
-void
-meatnet::Host::_in_thread( uint16_t port )
-{
-    IPaddress serverIP;
-    UDPsocket udpsock;
-    UDPpacket* packet;
-    static const int MAX_PACKET_SIZE = sizeof(PeerData);
-
-
-    if (SDLNet_Init() < 0)
-    {
-        printf("Couldn't initialize net: %s\n", SDLNet_GetError());
-        exit(1);
-    }
-
-    udpsock = SDLNet_UDP_Open(port);
-    if (!udpsock)
-    {
-        printf("SDLNet_UDP_Open: %s\n", SDLNet_GetError());
-        exit(2);
-    }
-
-    else
-    {
-        std::cout << "Listening on port " << port << "\n";
-    }
-
-    packet = SDLNet_AllocPacket(MAX_PACKET_SIZE);
     if (!packet)
     {
         printf("Could not allocate packet\n");
@@ -106,69 +56,102 @@ meatnet::Host::_in_thread( uint16_t port )
     }
 
 
-    // std::set<uint16_t> clients;
-    std::map<std::pair<uint32_t, uint16_t>, int> clients;
-    PeerData players[4];
-    std::memset(players, '\0', 4*sizeof(PeerData));
+    PeerData buffer;
 
-    int idx = 0;
+    while (running())
+    {
+        int n = m_idx.load();
+
+        for (int j=0; j<n; j++)
+        {
+            auto key = m_dst[j];
+
+            packet->address.host = key.first;
+            packet->address.port = key.second;
+            packet->len = sizeof(PeerData);
+
+            for (int i=0; i<n; i++)
+            {
+                if (i != j)
+                {
+                    {
+                        lock_type lock(m_recv_mutex);
+                        std::memcpy(packet->data, &m_players[i], sizeof(PeerData));
+                    }
+
+                    SDLNet_UDP_Send(socket, -1, packet);
+                }
+            }
+        }
+    }
+}
+
+
+
+void
+meatnet::Host::_in_thread( UDPsocket socket, uint16_t port )
+{
+    UDPpacket *packet = SDLNet_AllocPacket(sizeof(PeerData));
+
+    if (!packet)
+    {
+        printf("Could not allocate packet\n");
+        exit(2);
+    }
+
 
     PeerData buffer;
 
     while (running())
     {
-        if (SDLNet_UDP_Recv(udpsock, packet))
+        if (SDLNet_UDP_Recv(socket, packet))
         {
             auto key = std::make_pair(packet->address.host, packet->address.port);
 
-            if (clients.contains(key) == false)
+            if (m_clients.contains(key) == false)
             {
-                clients[key] = idx++;
+                int idx = m_idx.load();
+                m_clients[key] = idx;
+
+                {
+                    lock_type lock(m_send_mutex);
+                    m_dst.push_back(key);
+                }
+
+                m_idx.store(idx + 1);
             }
 
             std::memcpy(&buffer, packet->data, sizeof(PeerData));
 
-            int id = clients[key];
+            int id = m_clients[key];
 
-            if (players[id].timestamp >= buffer.timestamp)
+
+            if (m_players[id].timestamp >= buffer.timestamp)
             {
                 continue;
             }
 
-            players[id] = buffer;
-            players[id].id = id;
-
-            for (int i=0; i<idx; i++)
             {
-                if (i != id)
-                {
-                    // packet->address.host = key.first;
-                    // packet->address.port = key.second;
-                    packet->len = sizeof(PeerData);
+                lock_type lock(m_recv_mutex);
 
-                    players[i].timestamp = getTime();
-                    std::memcpy(packet->data, &players[i], sizeof(PeerData));
-                    SDLNet_UDP_Send(udpsock, -1, packet);
-                }
+                m_players[id] = buffer;
+                m_players[id].id = id;
             }
         }
 
 
-
-        // for (auto &[key, id]: clients)
+        // for (auto &[key, id]: m_clients)
         // {
-        //     for (int i=0; i<idx; i++)
+        //     packet->address.host = key.first;
+        //     packet->address.port = key.second;
+        //     packet->len = sizeof(PeerData);
+
+        //     for (int i=0; i<m_idx.load(); i++)
         //     {
         //         if (i != id)
         //         {
-        //             packet->address.host = key.first;
-        //             packet->address.port = key.second;
-        //             packet->len = sizeof(PeerData);
-
-        //             players[i].timestamp = getTime();
-        //             std::memcpy(packet->data, &players[i], sizeof(PeerData));
-
-        //             SDLNet_UDP_Send(udpsock, -1, packet);
+        //             std::memcpy(packet->data, &m_players[i], sizeof(PeerData));
+        //             SDLNet_UDP_Send(socket, -1, packet);
         //         }
         //     }
         // }

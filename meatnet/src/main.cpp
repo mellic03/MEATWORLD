@@ -45,10 +45,10 @@ int main( int argc, char **argv )
 
     // host.loadScene("./scenes/S1.idksc");
 
-    // while (host.running())
-    // {
-    //     // ...
-    // }
+    while (host.running())
+    {
+        // ...
+    }
 
     return 0;
 }
