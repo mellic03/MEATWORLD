@@ -97,12 +97,12 @@ meatworld::OLPlayer::update( idk::EngineAPI &api, const meatnet::PeerData &data 
 
         if ((flags & meatnet::WEAPON_GLOCK) && name != "Glock")
         {
-            giveWeapon<NPC_Glock>();
+            giveWeapon<Glock>();
         }
 
         else if ((flags & meatnet::WEAPON_AR2) && name != "AR2")
         {
-            giveWeapon<NPC_HL2_AR2>();
+            giveWeapon<HL2_AR2>();
         }
     }
 

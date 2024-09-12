@@ -22,7 +22,7 @@ public:
     float m_health  = 10.0f;
 
     Flashlight m_flashlight;
-    NPC_RangedWeapon *m_weapon = nullptr;
+    RangedWeapon *m_weapon = nullptr;
 
     void init();
 

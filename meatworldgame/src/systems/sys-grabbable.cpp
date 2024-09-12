@@ -43,58 +43,60 @@ idk::GrabbableSys::_update_pickup( idk::EngineAPI &api, PickupCmp &cmp )
 {
     using namespace idk;
 
-    if (cmp.curr_quantity <= 0)
-    {
-        return;
-    }
+    return;
+
+    // if (cmp.curr_quantity <= 0)
+    // {
+    //     return;
+    // }
 
 
-    auto *player = MeatWorldGame::player;
+    // auto *player = MeatWorldGame::player;
 
-    if (player == nullptr)
-    {
-        return;
-    }
+    // if (player == nullptr)
+    // {
+    //     return;
+    // }
 
-    glm::vec3 cam_pos    = TransformSys::getPositionWorldspace(player->m_cam_obj);
-    glm::vec3 cam_dir    = TransformSys::getFront(player->m_cam_obj);
-    glm::vec3 sphere_pos = TransformSys::getPositionWorldspace(cmp.obj_id);
-    float     sphere_rad = TransformSys::getUniformScale(cmp.obj_id);
-
-
-    if (glm::distance2(cam_pos, sphere_pos) > 1.0f)
-    {
-        return;
-    }
-
-    if (idk::geometry::raySphereIntersects(cam_pos, cam_dir, sphere_pos, sphere_rad) == false)
-    {
-        return;
-    }
-
-    auto &ren = api.getRenderer();
-    int w = ren.width();
-    int h = ren.height();
-
-    if (cmp.curr_quantity > 1)
-    {
-        idkui::TextManager::text(w/2, h/2) << "[E] pick up " << cmp.name
-                                           << " (" << cmp.curr_quantity  << ")";
-    }
-
-    else
-    {
-        idkui::TextManager::text(w/2, h/2) << "[E] pick up " << cmp.name;
-    }
+    // glm::vec3 cam_pos    = TransformSys::getPositionWorldspace(player->m_cam_obj);
+    // glm::vec3 cam_dir    = TransformSys::getFront(player->m_cam_obj);
+    // glm::vec3 sphere_pos = TransformSys::getPositionWorldspace(cmp.obj_id);
+    // float     sphere_rad = TransformSys::getUniformScale(cmp.obj_id);
 
 
-    if (api.getEventSys().keylog().keyTapped(idk::Keycode::E) == false)
-    {
-        return;
-    }
+    // if (glm::distance2(cam_pos, sphere_pos) > 1.0f)
+    // {
+    //     return;
+    // }
 
-    m_callbacks[cmp.callback](api, cmp.obj_id);
-    cmp.curr_quantity -= 1;
+    // if (idk::geometry::raySphereIntersects(cam_pos, cam_dir, sphere_pos, sphere_rad) == false)
+    // {
+    //     return;
+    // }
+
+    // auto &ren = api.getRenderer();
+    // int w = ren.width();
+    // int h = ren.height();
+
+    // if (cmp.curr_quantity > 1)
+    // {
+    //     idkui::TextManager::text(w/2, h/2) << "[E] pick up " << cmp.name
+    //                                        << " (" << cmp.curr_quantity  << ")";
+    // }
+
+    // else
+    // {
+    //     idkui::TextManager::text(w/2, h/2) << "[E] pick up " << cmp.name;
+    // }
+
+
+    // if (api.getEventSys().keylog().keyTapped(idk::Keycode::E) == false)
+    // {
+    //     return;
+    // }
+
+    // m_callbacks[cmp.callback](api, cmp.obj_id);
+    // cmp.curr_quantity -= 1;
 
 }
 

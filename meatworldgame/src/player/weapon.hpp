@@ -5,20 +5,12 @@
 
 namespace meatworld
 {
-    class WeaponBase;
-
-    class MeleeWeapon;
     class RangedWeapon;
-    class NPC_RangedWeapon;
 
     class Hands;
     class Glock;
-    class Kar98k;
+    // class Kar98k;
     class HL2_AR2;
-
-    class NPC_Glock;
-    class NPC_HL2_AR2;
-
 
     struct WeaponDesc
     {
@@ -48,70 +40,51 @@ namespace meatworld
 
 
 
-class meatworld::WeaponBase
+// class meatworld::WeaponBase
+// {
+// protected:
+
+// private:
+
+// public:
+
+//     WeaponBase( const std::string&, int parent );
+//     ~WeaponBase();
+
+//     virtual void update( idk::EngineAPI&, float dx, float dy ) = 0;
+//     virtual float attack( idk::EngineAPI& ) = 0;
+
+// };
+
+
+
+// class meatworld::MeleeWeapon: public WeaponBase
+// {
+// protected:
+
+// public:
+//     using WeaponBase::WeaponBase;
+
+//     virtual void update( idk::EngineAPI&, float dx, float dy ) {  };
+//     virtual float attack( idk::EngineAPI& ) { return 0.0f; };
+
+// };
+
+
+class meatworld::RangedWeapon
 {
 protected:
+    WeaponDesc m_desc;
+
+    int m_parent     = -1;
     int m_obj_id     = -1;
-    int m_weapon_obj = -1;
-    int m_parent_obj = -1;
+    int m_model_obj  = -1;
+    int m_emitter    = -1;
+    int m_ignore_obj = -1;
 
-    int  m_model     = -1;
     glm::vec3 m_position = glm::vec3(0.0f);
+    glm::vec3 m_offset   = glm::vec3(0.0f);
 
-private:
-
-public:
-
-    WeaponBase( const std::string&, int parent );
-    ~WeaponBase();
-
-    virtual void update( idk::EngineAPI&, float dx, float dy ) = 0;
-    virtual void attack( idk::EngineAPI& ) = 0;
-
-};
-
-
-
-class meatworld::MeleeWeapon: public WeaponBase
-{
-protected:
-
-public:
-    using WeaponBase::WeaponBase;
-
-    virtual void update( idk::EngineAPI&, float dx, float dy ) {  };
-    virtual void attack( idk::EngineAPI& ) {  };
-
-};
-
-
-class meatworld::NPC_RangedWeapon: public WeaponBase
-{
-protected:
-    WeaponDesc m_desc;
-    int m_emitter = -1;
-    int m_ignore_obj = -1;
-
-public:
-
-    NPC_RangedWeapon( int parent, const WeaponDesc&, int ignore = -1 );
-
-    virtual WeaponDesc getDesc() = 0;
-
-    virtual void update( idk::EngineAPI&, float dx, float dy );
-    virtual void attack( idk::EngineAPI& );
-
-};
-
-
-
-
-class meatworld::RangedWeapon: public WeaponBase
-{
-protected:
-    WeaponDesc m_desc;
-    int m_emitter = -1;
-    int m_ignore_obj = -1;
 
 public:
 
@@ -120,7 +93,7 @@ public:
     virtual WeaponDesc getDesc() = 0;
 
     virtual void update( idk::EngineAPI&, float dx, float dy );
-    virtual void attack( idk::EngineAPI& );
+    virtual float attack( idk::EngineAPI& );
 
 };
 
@@ -138,6 +111,7 @@ public:
     static const std::string model_path() { return "assets/models/weapons/glock.idkvi"; }
 
     virtual WeaponDesc getDesc() final;
+
 };
 
 
@@ -149,40 +123,6 @@ private:
 public:
     HL2_AR2( int parent, int ignore = -1 )
     : RangedWeapon(parent, getDesc(), ignore) {  };
-
-    static const std::string name()       { return "AR2"; }
-    static const std::string model_path() { return "assets/models/weapons/hl2-ar2.idkvi"; }
-
-    virtual WeaponDesc getDesc() final;
-
-};
-
-
-
-
-class meatworld::NPC_Glock: public NPC_RangedWeapon
-{
-private:
-
-public:
-    NPC_Glock( int parent, int ignore = -1 )
-    : NPC_RangedWeapon(parent, getDesc(), ignore) {  };
-
-    static const std::string name()       { return "Glock"; }
-    static const std::string model_path() { return "assets/models/weapons/glock.idkvi"; }
-
-    virtual WeaponDesc getDesc() final;
-};
-
-
-
-class meatworld::NPC_HL2_AR2: public NPC_RangedWeapon
-{
-private:
-
-public:
-    NPC_HL2_AR2( int parent, int ignore = -1 )
-    : NPC_RangedWeapon(parent, getDesc(), ignore) {  };
 
     static const std::string name()       { return "AR2"; }
     static const std::string model_path() { return "assets/models/weapons/hl2-ar2.idkvi"; }

@@ -108,38 +108,41 @@ meatworld::trigger_weapon( idk::EngineAPI &api, int obj_id )
 {
     using namespace idk;
 
-    if (MeatWorldGame::player == nullptr)
-    {
-        return false;
-    }
-
-    int player = MeatWorldGame::player->m_obj_id;
-    int camera = MeatWorldGame::player->m_cam_obj;
-
-    glm::vec3 cam_pos = TransformSys::getPositionWorldspace(camera);
-    glm::vec3 cam_dir = TransformSys::getFront(camera);
-
-    glm::vec3 sphere_pos = TransformSys::getPositionWorldspace(obj_id);
-    float     sphere_rad = TransformSys::getUniformScale(obj_id);
-    // api.getRenderer().drawSphere(sphere_pos, sphere_rad);
-
-    if (glm::distance(cam_pos, sphere_pos) < 1.0f)
-    {
-        if (idk::geometry::raySphereIntersects(cam_pos, cam_dir, sphere_pos, sphere_rad))
-        {
-            auto &ren = api.getRenderer();
-            int w = ren.width();
-            int h = ren.height();
-            idkui::TextManager::text(w/2, h/2) << "[E] pick up " << weapon_type::name();
-
-            if (api.getEventSys().keylog().keyTapped(idk::Keycode::E))
-            {
-                return true;
-            }
-        }
-    }
-
     return false;
+
+
+    // if (MeatWorldGame::player == nullptr)
+    // {
+    //     return false;
+    // }
+
+    // int player = MeatWorldGame::player->objID();
+    // int camera = MeatWorldGame::player->m_cam_obj;
+
+    // glm::vec3 cam_pos = TransformSys::getPositionWorldspace(camera);
+    // glm::vec3 cam_dir = TransformSys::getFront(camera);
+
+    // glm::vec3 sphere_pos = TransformSys::getPositionWorldspace(obj_id);
+    // float     sphere_rad = TransformSys::getUniformScale(obj_id);
+    // // api.getRenderer().drawSphere(sphere_pos, sphere_rad);
+
+    // if (glm::distance(cam_pos, sphere_pos) < 1.0f)
+    // {
+    //     if (idk::geometry::raySphereIntersects(cam_pos, cam_dir, sphere_pos, sphere_rad))
+    //     {
+    //         auto &ren = api.getRenderer();
+    //         int w = ren.width();
+    //         int h = ren.height();
+    //         idkui::TextManager::text(w/2, h/2) << "[E] pick up " << weapon_type::name();
+
+    //         if (api.getEventSys().keylog().keyTapped(idk::Keycode::E))
+    //         {
+    //             return true;
+    //         }
+    //     }
+    // }
+
+    // return false;
 }
 
 
@@ -149,8 +152,10 @@ meatworld::response_weapon( idk::EngineAPI &api, int obj_id )
 {
     using namespace idk;
 
-    auto *player = MeatWorldGame::player;
-    player->giveWeapon<weapon_type>();
-    ECS2::getComponent<ModelCmp>(ECS2::getParent(obj_id)).visible = false;
+    return;
+
+    // auto *player = MeatWorldGame::player;
+    // player->giveWeapon<weapon_type>();
+    // ECS2::getComponent<ModelCmp>(ECS2::getParent(obj_id)).visible = false;
 }
 

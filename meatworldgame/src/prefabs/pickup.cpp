@@ -38,24 +38,24 @@ meatworld::trigger_pickup( idk::EngineAPI &api, int obj_id )
 {
     using namespace idk;
 
-    if (MeatWorldGame::player == nullptr)
-    {
-        return false;
-    }
+    // if (MeatWorldGame::player == nullptr)
+    // {
+    //     return false;
+    // }
 
-    int player = MeatWorldGame::player->m_obj_id;
-    int camera = MeatWorldGame::player->m_cam_obj;
+    // int player = MeatWorldGame::player->m_root_obj;
+    // int camera = MeatWorldGame::player->m_cam_obj;
 
-    glm::vec3 cam_pos = TransformSys::getPositionWorldspace(camera);
-    glm::vec3 cam_dir = TransformSys::getFront(camera);
+    // glm::vec3 cam_pos = TransformSys::getPositionWorldspace(camera);
+    // glm::vec3 cam_dir = TransformSys::getFront(camera);
 
-    glm::vec3 sphere_pos = TransformSys::getPositionWorldspace(obj_id);
-    float     sphere_rad = TransformSys::getUniformScale(obj_id);
+    // glm::vec3 sphere_pos = TransformSys::getPositionWorldspace(obj_id);
+    // float     sphere_rad = TransformSys::getUniformScale(obj_id);
 
-    if (idk::geometry::raySphereIntersects(cam_pos, cam_dir, sphere_pos, sphere_rad))
-    {
-        return true;
-    }
+    // if (idk::geometry::raySphereIntersects(cam_pos, cam_dir, sphere_pos, sphere_rad))
+    // {
+    //     return true;
+    // }
 
     return false;
 }
@@ -66,22 +66,24 @@ meatworld::response_pickup( idk::EngineAPI &api, int obj_id )
 {
     using namespace idk;
 
-    auto &ren = api.getRenderer();
+    return;
 
-    int w = ren.width();
-    int h = ren.height();
+    // auto &ren = api.getRenderer();
 
-    idkui::TextManager::text(w/2, h/2) << "[E] pick up";
+    // int w = ren.width();
+    // int h = ren.height();
 
-    if (api.getEventSys().keylog().keyTapped(idk::Keycode::E))
-    {
-        auto *player = MeatWorldGame::player;
-        player->giveWeapon<Glock>();
+    // idkui::TextManager::text(w/2, h/2) << "[E] pick up";
 
-        ECS2::deleteGameObject(ECS2::getParent(obj_id));
+    // if (api.getEventSys().keylog().keyTapped(idk::Keycode::E))
+    // {
+    //     auto *player = MeatWorldGame::player;
+    //     player->giveWeapon<Glock>();
 
-        // AudioSys::playSound(obj_id, false);
-    }
+    //     ECS2::deleteGameObject(ECS2::getParent(obj_id));
+
+    //     // AudioSys::playSound(obj_id, false);
+    // }
 }
 
 

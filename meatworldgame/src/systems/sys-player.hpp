@@ -17,7 +17,6 @@ namespace meatworld
 {
     struct NPCConfig;
     struct NPCCmp;
-
     class  PlayerSys;
 }
 

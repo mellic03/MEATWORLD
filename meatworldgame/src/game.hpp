@@ -8,7 +8,6 @@
 
 #include "gamedata.hpp"
 #include "player/player.hpp"
-#include "player/player-tps.hpp"
 
 
 
@@ -17,7 +16,6 @@ class MeatWorldGame: public idk::Game
 public:
 
     inline static meatworld::GameData gamedata;
-    inline static meatworld::PlayerTPS *player = nullptr;
 
     MeatWorldGame(): idk::Game("MEATWORLD") {  };
 
@@ -29,6 +27,7 @@ public:
 
     void registerPrefabs();
     void onSceneLoad();
+    void preSceneLoad();
 
 };
 

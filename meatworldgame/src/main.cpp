@@ -20,10 +20,15 @@
 #include "ui/ui.hpp"
 #include "player/player.hpp"
 #include "prefabs/prefabs.hpp"
-
+#include "character/limb.hpp"
+#include "character/humanoid.hpp"
 
 #include <iostream>
 
+
+
+static meatworld::PlayerController controller;
+static meatworld::Player *player = nullptr;
 
 
 void
@@ -49,10 +54,10 @@ MeatWorldGame::registerModules( idk::EngineAPI &api )
     ECS2::registerComponent<HitBoxCmp>           ("HitBox",           "Meatworld");
     ECS2::registerComponent<CharacterHitBoxCmp>  ("Character HitBox", "Meatworld");
     ECS2::registerComponent<NPCCmp>              ("NPC",              "Meatworld");
-    // ECS2::registerComponent<OLPlayerCmp>         ("OLPlayer",    "Meatworld");
 
     ECS2::getComponentArray<WallCmp>().userCallback = drawComponent<WallCmp>;
 
+    ECS2::preSceneLoad([this]() { preSceneLoad(); });
     ECS2::onSceneLoad([this]() { onSceneLoad(); });
 }
 
@@ -64,7 +69,7 @@ bool module_mode = false;
 
 
 void
-MeatWorldGame::onSceneLoad()
+MeatWorldGame::preSceneLoad()
 {
     using namespace idk;
 
@@ -72,30 +77,27 @@ MeatWorldGame::onSceneLoad()
     {
         delete player;
     }
+}
 
-    if (editor_mode)
-    {
-        player = new meatworld::EditorPlayer();
-    }
 
-    else
+void
+MeatWorldGame::onSceneLoad()
+{
+    using namespace idk;
+
+    if (!player)
     {
         player = new meatworld::Player();
+        player->giveWeapon<meatworld::HL2_AR2>();
 
         auto &array = ECS2::getComponentArray<PlayerSpawnCmp>();
         if (array.size() == 1)
         {
             auto &cmp = *(array.getData().data());
 
-            TransformSys::getLocalPosition(player->m_obj_id) = TransformSys::getWorldPosition(cmp.obj_id);
-            auto &tcmp = TransformSys::getTransformCmp(player->m_obj_id);
+            TransformSys::getLocalPosition(player->objID()) = TransformSys::getWorldPosition(cmp.obj_id);
+            auto &tcmp = TransformSys::getTransformCmp(player->objID());
             tcmp.yaw   = TransformSys::getTransformCmp(cmp.obj_id).yaw;
-
-
-            ECS2::giveComponent<KinematicCapsuleCmp>(player->m_obj_id);
-            auto &capsule = ECS2::getComponent<KinematicCapsuleCmp>(player->m_obj_id);
-            capsule.curr_pos = TransformSys::getPositionWorldspace(cmp.obj_id);
-            capsule.prev_pos = capsule.curr_pos;
         }
     }
 }
@@ -161,68 +163,12 @@ MeatWorldGame::mainloop( idk::EngineAPI &api )
 
     float dt = engine.deltaTime();
 
-
-    // if (module_mode == false)
-    // {
-    //     SDL_SetWindowSize(ren.getWindow(), ren.width(), ren.height());
-    // }
-
-
-    {
-        static int face = ren.loadModel("assets/models/npc/lmao-face.idkvi");
-        static int body = ren.loadModel("assets/models/npc/lmao-body.idkvi");
-        static std::vector<glm::vec3> joints;
-        static std::vector<float> dists;
-
-        if (joints.size() == 0)
-        {
-            for (int i=0; i<8; i++)
-            {
-                joints.push_back(idk::randvec3(-1.0f, +1.0f));
-                dists.push_back(2.0f);
-            }
-        }
-
-        static glm::vec3 vel = glm::vec3(0.0f);
-
-        vel += idk::randvec3(-1.0f, +1.0f);
-
-        if (glm::distance(joints.front(), joints.back()) > 5.9f)
-        {
-            vel = 5.0f * glm::normalize(joints.front() - joints.back());
-        }
-        joints.back() += dt * vel;
-
-
-        TransformSys::FABRIK(joints, dists);
-
-        for (int i=0; i<joints.size()-1; i++)
-        {
-            ren.drawSphere(joints[i], 0.25f);
-            ren.drawCapsule(joints[i], joints[i+1], 0.125f);
-
-            glm::mat4 TR = glm::inverse(glm::lookAt(joints[i+1], joints[i], glm::vec3(0.0f, 1.0f, 0.0f)));
-            glm::mat4 T  = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -dists[0]));
-            glm::mat4 S  = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, glm::length(joints[i+1] - joints[i])));
-
-            ren.drawModel(body, TR*T*S);
-        }
-
-
-        glm::mat4 TR = glm::inverse(
-            glm::lookAt(joints.back(), glm::vec3(ren.getCamera().position), glm::vec3(0.0f, 1.0f, 0.0f))
-        );
-
-        ren.drawModel(face, glm::translate(glm::mat4(1.0f), joints.back()));
-
-    }
-
-
-
-
     idkui::TextManager::text(10, 10) << "MEATWORLD v0.1.0";
 
+    auto motion = controller.getMovement(api);
+    player->move(api, motion);
     player->update(api);
+
 
     if (events.keylog().keyTapped(idk::Keycode::SPACE))
     {
@@ -256,6 +202,59 @@ MeatWorldGame::mainloop( idk::EngineAPI &api )
     else
     {
         gamedata.gameui.root = gamedata.gameui.ingame_root;
+    }
+
+
+
+
+
+    {
+        static int face = ren.loadModel("assets/models/npc/lmao-face.idkvi");
+        static int body = ren.loadModel("assets/models/npc/lmao-body.idkvi");
+        static std::vector<glm::vec3> joints;
+        static std::vector<float> dists;
+
+        if (joints.size() == 0)
+        {
+            for (int i=0; i<8; i++)
+            {
+                joints.push_back(idk::randvec3(-1.0f, +1.0f));
+                dists.push_back(2.0f);
+            }
+        }
+
+        static glm::vec3 vel = glm::vec3(0.0f);
+
+        vel += idk::randvec3(-1.0f, +1.0f);
+
+        if (glm::distance(joints.front(), joints.back()) > 11.9f)
+        {
+            vel = 5.0f * glm::normalize(joints.front() - joints.back());
+        }
+        joints.back() += dt * vel;
+
+
+        TransformSys::FABRIK(joints, dists);
+
+        for (int i=0; i<joints.size()-1; i++)
+        {
+            ren.drawSphere(joints[i], 0.25f);
+            ren.drawCapsule(joints[i], joints[i+1], 0.125f);
+
+            glm::mat4 TR = glm::inverse(glm::lookAt(joints[i+1], joints[i], glm::vec3(0.0f, 1.0f, 0.0f)));
+            glm::mat4 T  = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -dists[0]));
+            glm::mat4 S  = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, glm::length(joints[i+1] - joints[i])));
+
+            ren.drawModel(body, TR*T*S);
+            ren.drawShadowCaster(body, TR*T*S);
+        }
+
+        glm::mat4 TR = glm::inverse(
+            glm::lookAt(joints.back(), glm::vec3(ren.getCamera().position), glm::vec3(0.0f, 1.0f, 0.0f))
+        );
+
+        ren.drawModel(face, glm::translate(glm::mat4(1.0f), joints.back()));
+        ren.drawShadowCaster(face, glm::translate(glm::mat4(1.0f), joints.back()));
     }
 
 

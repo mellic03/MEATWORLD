@@ -12,4 +12,7 @@
 #define IDK_BINDING_SSBO_Grass        6
 
 #define IDK_BINDING_SSBO_Noise        7
+#define IDK_BINDING_SSBO_NoiseGen     8
+
+#define IDK_BINDING_UBO_Time          8
 

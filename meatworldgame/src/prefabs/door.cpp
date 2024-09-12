@@ -18,23 +18,25 @@ meatworld::trigger_door( idk::EngineAPI &api, int obj_id )
 {
     using namespace idk;
 
-    if (MeatWorldGame::player == nullptr)
-    {
-        return false;
-    }
+    return false;
 
-    int player = MeatWorldGame::player->m_obj_id;
-    int camera = MeatWorldGame::player->m_cam_obj;
+    // if (MeatWorldGame::player == nullptr)
+    // {
+    //     return false;
+    // }
 
-    glm::vec3 cam_pos = TransformSys::getPositionWorldspace(camera);
-    glm::vec3 cam_dir = TransformSys::getFront(camera);
+    // int player = MeatWorldGame::player->objID();
+    // int camera = MeatWorldGame::player->m_cam_obj;
 
-    glm::vec3 sphere_pos = TransformSys::getPositionWorldspace(obj_id);
-    float     sphere_rad = TransformSys::getUniformScale(obj_id);
+    // glm::vec3 cam_pos = TransformSys::getPositionWorldspace(camera);
+    // glm::vec3 cam_dir = TransformSys::getFront(camera);
 
-    api.getRenderer().drawSphere(sphere_pos, sphere_rad);
+    // glm::vec3 sphere_pos = TransformSys::getPositionWorldspace(obj_id);
+    // float     sphere_rad = TransformSys::getUniformScale(obj_id);
 
-    return idk::geometry::raySphereIntersects(cam_pos, cam_dir, sphere_pos, sphere_rad);
+    // api.getRenderer().drawSphere(sphere_pos, sphere_rad);
+
+    // return idk::geometry::raySphereIntersects(cam_pos, cam_dir, sphere_pos, sphere_rad);
 }
 
 
