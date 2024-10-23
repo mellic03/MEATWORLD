@@ -7,12 +7,12 @@
 #include <IDKBuiltinCS/sys-lightsource.hpp>
 
 #include <IDKEvents/IDKEvents.hpp>
-#include <IDKGraphics/UI/idk_ui.hpp>
+// #include <IDKGraphics/UI/idk_ui.hpp>
 
 #include <libidk/idk_log.hpp>
 
 #include "sys-weapon.hpp"
-#include "../player/ol_player.hpp"
+// #include "../player/ol_player.hpp"
 #include "../game.hpp"
 
 
@@ -125,8 +125,10 @@ idk::PlayerSpawnCmp::onObjectCopy( int src_obj, int dst_obj )
 
 
 
+
+
 size_t
-meatworld::NPCCmp::serialize( std::ofstream &stream ) const
+meatworld::CharacterCmp::serialize( std::ofstream &stream ) const
 {
     size_t n = 0;
     n += idk::streamwrite(stream, obj_id);
@@ -135,7 +137,31 @@ meatworld::NPCCmp::serialize( std::ofstream &stream ) const
 
 
 size_t
-meatworld::NPCCmp::deserialize( std::ifstream &stream )
+meatworld::CharacterCmp::deserialize( std::ifstream &stream )
+{
+    size_t n = 0;
+    n += idk::streamread(stream, obj_id);
+    return n;
+}
+
+
+
+
+
+
+
+
+size_t
+meatworld::PlayerCmp::serialize( std::ofstream &stream ) const
+{
+    size_t n = 0;
+    n += idk::streamwrite(stream, obj_id);
+    return n;
+}
+
+
+size_t
+meatworld::PlayerCmp::deserialize( std::ifstream &stream )
 {
     size_t n = 0;
     n += idk::streamread(stream, obj_id);
@@ -144,33 +170,14 @@ meatworld::NPCCmp::deserialize( std::ifstream &stream )
 
 
 void
-meatworld::NPCCmp::onObjectAssignment( idk::EngineAPI &api, int obj_id )
+meatworld::PlayerCmp::onObjectAssignment( idk::EngineAPI &api, int obj_id )
 {
     using namespace idk;
 
-    auto &cmp = ECS2::getComponent<NPCCmp>(obj_id);
+    auto &cmp = ECS2::getComponent<PlayerCmp>(obj_id);
     ECS2::giveComponent<ModelCmp>(obj_id);
     ECS2::giveComponent<KinematicCapsuleCmp>(obj_id);
-
-    ModelSys::assignModel(obj_id, cmp.config.model_path);
 }
-
-
-void
-meatworld::NPCCmp::onObjectDeassignment( idk::EngineAPI &api, int obj_id )
-{
-
-}
-
-
-void
-meatworld::NPCCmp::onObjectCopy( int src_obj, int dst_obj )
-{
-
-}
-
-
-
 
 
 

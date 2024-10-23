@@ -1,12 +1,38 @@
 #pragma once
 
+#include <string>
+
 #include <IDKECS/IDKECS.hpp>
-#include "../player/weapon.hpp"
+#include <glm/glm.hpp>
 
 
 namespace meatworld
 {
     struct WeaponConfig;
+
+    struct WeaponDesc
+    {
+        glm::vec4 rest;
+        glm::vec4 aim;
+
+        glm::vec3 sway_speed;
+        glm::vec3 rest_speed;
+        glm::vec3 aim_speed;
+
+        std::string name;
+        std::string model_path;
+
+        std::string audio_path = "assets/audio/pistol.wav";
+
+        float recoil  = 1.0f;
+        float aim_fov = 1.0f;
+        int   shots   = 1;
+        float damage  = 1.0f;
+
+        float inner_prob   = 0.5f;
+        float inner_spread = 0.025f;
+        float outer_spread = 0.075f;
+    };
 
     struct Projectile
     {

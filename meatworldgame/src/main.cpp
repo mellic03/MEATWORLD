@@ -1,11 +1,13 @@
+#include <iostream>
+
 #include "game.hpp"
 
-#include <IDKEvents/IDKEvents.hpp>
+#include <IDKIO/IDKIO.hpp>
 #include <IDKGameEngine/IDKGameEngine.hpp>
 #include <IDKBuiltinCS/IDKBuiltinCS.hpp>
 #include <IDKGraphics/UI/idk_ui.hpp>
-#include <IDKGraphics/UI/idk_ui2.hpp>
 #include <IDKGraphics/terrain/terrain.hpp>
+#include <IDKGraphics/renderstage/ssr.hpp>
 #include <IDKECS/IDKECS.hpp>
 
 #include <libidk/idk_log.hpp>
@@ -15,20 +17,26 @@
 #include "systems/sys-grabbable.hpp"
 #include "systems/sys-building.hpp"
 #include "systems/sys-weapon.hpp"
+#include "systems/sys-projectile.hpp"
+#include "systems/sys-vehicle.hpp"
+#include "systems/sys-actor.hpp"
 #include "systems/draw.hpp"
 
-#include "ui/ui.hpp"
+#include "world/world.hpp"
+#include "character/character.hpp"
+#include "vehicle/vehicle.hpp"
+#include "item/health.hpp"
+
 #include "player/player.hpp"
-#include "prefabs/prefabs.hpp"
-#include "character/limb.hpp"
-#include "character/humanoid.hpp"
+#include "npc/humanoid.hpp"
+#include "npc/drone.hpp"
+#include "npc/turret.hpp"
 
-#include <iostream>
+#include "physics/rigidbody.hpp"
 
 
-
-static meatworld::PlayerController controller;
-static meatworld::Player *player = nullptr;
+static idkui::LayoutManager *LM = nullptr;
+static meat::World *world = nullptr;
 
 
 void
@@ -36,13 +44,19 @@ MeatWorldGame::registerModules( idk::EngineAPI &api )
 {
     using namespace idk;
     using namespace meatworld;
+    using namespace meat;
 
-    meatworld::registerPrefabs();
+    ECS2::registerPrefab("Truck", []()
+    {
+        auto *V = world->addObject<meat::VehicleTruck>(glm::vec3(-35, 0, 35));
+        return V->getID();
+    });
 
     ECS2::registerSystem<idk::GrabbableSys>();
     ECS2::registerSystem<meatworld::BuildingSys>();
     ECS2::registerSystem<meatworld::WeaponSys>();
     ECS2::registerSystem<meatworld::PlayerSys>();
+    ECS2::registerSystem<meat::ProjectileSys>();
 
     ECS2::registerComponent<idk::PlayerSpawnCmp> ("PlayerSpawn",      "Meatworld");
     ECS2::registerComponent<idk::GrabbableCmp>   ("Grabbable",        "Meatworld");
@@ -53,55 +67,19 @@ MeatWorldGame::registerModules( idk::EngineAPI &api )
     ECS2::registerComponent<HitSphereCmp>        ("HitSphere",        "Meatworld");
     ECS2::registerComponent<HitBoxCmp>           ("HitBox",           "Meatworld");
     ECS2::registerComponent<CharacterHitBoxCmp>  ("Character HitBox", "Meatworld");
-    ECS2::registerComponent<NPCCmp>              ("NPC",              "Meatworld");
+    ECS2::registerComponent<PlayerCmp>           ("NPC",              "Meatworld");
+    ECS2::registerComponent<CharacterCmp>        ("Character",        "Meatworld");
+    ECS2::registerComponent<VehicleCmp>          ("Vehicle",          "Meatworld");
+    ECS2::registerComponent<ActorCmp>            ("Actor",            "Meatworld");
+    ECS2::registerComponent<WeaponRangedCmp>     ("WeaponRanged",     "Meatworld");
 
-    ECS2::getComponentArray<WallCmp>().userCallback = drawComponent<WallCmp>;
+    ECS2::getComponentArray<PlayerCmp>().userCallback = drawComponent_PlayerCmp;
+    ECS2::getComponentArray<CharacterCmp>().userCallback = drawComponent_CharacterCmp;
+    ECS2::getComponentArray<VehicleCmp>().userCallback = drawComponent_VehicleCmp;
+    ECS2::getComponentArray<ActorCmp>().userCallback = drawComponent_ActorCmp;
+    ECS2::getComponentArray<WeaponRangedCmp>().userCallback = drawComponent_WeaponRangedCmp;
 
-    ECS2::preSceneLoad([this]() { preSceneLoad(); });
-    ECS2::onSceneLoad([this]() { onSceneLoad(); });
 }
-
-
-
-idkui2::LayoutManager *LM;
-bool editor_mode = false;
-bool module_mode = false;
-
-
-void
-MeatWorldGame::preSceneLoad()
-{
-    using namespace idk;
-
-    if (player)
-    {
-        delete player;
-    }
-}
-
-
-void
-MeatWorldGame::onSceneLoad()
-{
-    using namespace idk;
-
-    if (!player)
-    {
-        player = new meatworld::Player();
-        player->giveWeapon<meatworld::HL2_AR2>();
-
-        auto &array = ECS2::getComponentArray<PlayerSpawnCmp>();
-        if (array.size() == 1)
-        {
-            auto &cmp = *(array.getData().data());
-
-            TransformSys::getLocalPosition(player->objID()) = TransformSys::getWorldPosition(cmp.obj_id);
-            auto &tcmp = TransformSys::getTransformCmp(player->objID());
-            tcmp.yaw   = TransformSys::getTransformCmp(cmp.obj_id).yaw;
-        }
-    }
-}
-
 
 
 void
@@ -109,44 +87,47 @@ MeatWorldGame::setup( const std::vector<std::string> &args, idk::EngineAPI &api 
 {
     using namespace idk;
 
-    editor_mode = false;
+    auto &engine = api.getEngine();
+    auto &ren    = api.getRenderer();
 
-    for (const auto &arg: args)
+    static bool editor_mode = false;
+
+    for (auto &arg: args)
     {
-        if (arg == "--editor")
+        if (arg == "lm")
         {
             editor_mode = true;
         }
-
-        if (arg == "-lm")
-        {
-            module_mode = true;
-        }
     }
 
-    onSceneLoad();
+    // ren.createRenderStage(new idk::RenderStageBlueTint);
 
+    LM = new idkui::LayoutManager("./assets/fonts/RodettaStamp.ttf", 24);
+    world = new meat::World(api);
 
-    auto &engine = api.getEngine();
-    auto &events = api.getEventSys();
-    auto &ren    = api.getRenderer();
-
-    ren.pushRenderOverlay("assets/meatworld-white.png", 0.5f, 2.0f, 0.5f);
-
-    events.onDropFile(".idksc", [](const char *filepath)
+    if (editor_mode)
     {
-        idk::ECS2::load(filepath);
-    });
+        world->addObject<meat::CharacterFreecam>(glm::vec3(-14, 14, 32));
+    }
 
-    LM = new idkui2::LayoutManager("./assets/fonts/RodettaStamp.ttf", 24);
+    else
+    {
+        world->addObject<meat::CharacterPlayerFPS>(glm::vec3(-14, 14, 32));
+    }
 
-    createMainMenu(api, LM, &gamedata);
-    createMenu(api, LM, &gamedata);
-    createSettings(api, LM, &gamedata);
-    createMultiplayer(api, LM, &gamedata);
-    createSyndromes(api, LM, &gamedata);
+    world->addObject<meat::CharacterDrone>(glm::vec3(0, 16, 28));
+    world->addObject<meat::CharacterTurret>(glm::vec3(18, 16, 60));
 
-    gamedata.gameui.root = gamedata.gameui.mainmenu_root;
+    world->addObject<meat::VehicleTruck>(glm::vec3(-35, 0, 35));
+    world->addObject<meat::VehicleCanoe>(glm::vec3(-4, 0, -4));
+    world->addObject<meat::VehicleShipPinnacle>(glm::vec3(-27, 0, -26));
+
+    world->addObject<meat::ItemWrapper>(glm::vec3(8, 0, 0), new meat::ItemHealth);
+    world->addPhysicsBody<meat::RigidBody>(glm::vec3(-14, 18, 32), glm::vec3(4.0f, 1.75f, 2.0f));
+
+    // ren.pushRenderOverlay("assets/meatworld-white.png", 0.5f, 2.0f, 0.5f);
+    ren.pushRenderOverlayFill(glm::vec3(0.0f), 0.0f, 6.25f, 0.25f);
+    ren.pushRenderOverlay("assets/dream-demon-logo.png", 0.5f, 4.0f, 0.5f);
 }
 
 
@@ -159,106 +140,43 @@ MeatWorldGame::mainloop( idk::EngineAPI &api )
 
     auto &engine = api.getEngine();
     auto &ren    = api.getRenderer();
-    auto &events = api.getEventSys();
+    float dt     = engine.deltaTime();
 
-    float dt = engine.deltaTime();
-
-    idkui::TextManager::text(10, 10) << "MEATWORLD v0.1.0";
-
-    auto motion = controller.getMovement(api);
-    player->move(api, motion);
-    player->update(api);
+    world->update(api);
 
 
-    if (events.keylog().keyTapped(idk::Keycode::SPACE))
+    if (idkio::keyTapped(idk::Keycode::SPACE))
     {
-        ren.skipRenderOverlay();
-    }
-
-    if (events.keylog().keyTapped(idk::Keycode::ESCAPE))
-    {
-        bool b = events.mouseCaptured();
-        events.mouseCapture(!b);
+        // ren.skipRenderOverlay();
     }
 
 
-    if (events.mouseCaptured())
+    static float accum = 0.0f;
+    accum += dt;
+
+    if (accum >= 1.0f / 30.0f)
     {
-        gamedata.gameui.root->close();
+        glm::vec2 md = idkio::mouseDelta();
+        world->ui.crosshair->addOffset(0.5f*md);
+
+        LM->updateInput(world->ui.menu_ui->top());
+        LM->clearTexture(api, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // LM->clearTexture(api, GL_DEPTH_BUFFER_BIT);
+        LM->renderNode(world->ui.ingame_ui, 2);
+        LM->renderNode(world->ui.crosshair, 10);
+        // LM->clearTexture(api, GL_DEPTH_BUFFER_BIT);
+        LM->renderNode(world->ui.hitmarker_img, 10);
+        LM->renderTexture(api);
+
+        LM->clearTexture(api, GL_DEPTH_BUFFER_BIT);
+        LM->renderNode(world->ui.onscreen_text);
+        LM->renderTexture(api);
+
+        // LM->clearTexture(api, GL_DEPTH_BUFFER_BIT);
+        LM->renderNode(world->ui.menu_ui, 15);
+        LM->renderTexture(api);
     }
-
-    else
-    {
-        gamedata.gameui.root->open();
-    }
-
-    ren.getCamera().fov = gamedata.settings.cam_fov;
-
-    if (ECS2::getCurrentScene() == "scenes/mainmenu")
-    {
-        gamedata.gameui.root = gamedata.gameui.mainmenu_root;
-    }
-
-    else
-    {
-        gamedata.gameui.root = gamedata.gameui.ingame_root;
-    }
-
-
-
-
-
-    {
-        static int face = ren.loadModel("assets/models/npc/lmao-face.idkvi");
-        static int body = ren.loadModel("assets/models/npc/lmao-body.idkvi");
-        static std::vector<glm::vec3> joints;
-        static std::vector<float> dists;
-
-        if (joints.size() == 0)
-        {
-            for (int i=0; i<8; i++)
-            {
-                joints.push_back(idk::randvec3(-1.0f, +1.0f));
-                dists.push_back(2.0f);
-            }
-        }
-
-        static glm::vec3 vel = glm::vec3(0.0f);
-
-        vel += idk::randvec3(-1.0f, +1.0f);
-
-        if (glm::distance(joints.front(), joints.back()) > 11.9f)
-        {
-            vel = 5.0f * glm::normalize(joints.front() - joints.back());
-        }
-        joints.back() += dt * vel;
-
-
-        TransformSys::FABRIK(joints, dists);
-
-        for (int i=0; i<joints.size()-1; i++)
-        {
-            ren.drawSphere(joints[i], 0.25f);
-            ren.drawCapsule(joints[i], joints[i+1], 0.125f);
-
-            glm::mat4 TR = glm::inverse(glm::lookAt(joints[i+1], joints[i], glm::vec3(0.0f, 1.0f, 0.0f)));
-            glm::mat4 T  = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -dists[0]));
-            glm::mat4 S  = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, glm::length(joints[i+1] - joints[i])));
-
-            ren.drawModel(body, TR*T*S);
-            ren.drawShadowCaster(body, TR*T*S);
-        }
-
-        glm::mat4 TR = glm::inverse(
-            glm::lookAt(joints.back(), glm::vec3(ren.getCamera().position), glm::vec3(0.0f, 1.0f, 0.0f))
-        );
-
-        ren.drawModel(face, glm::translate(glm::mat4(1.0f), joints.back()));
-        ren.drawShadowCaster(face, glm::translate(glm::mat4(1.0f), joints.back()));
-    }
-
-
-    LM->renderTexture(api, gamedata.gameui.root);
 
 }
 

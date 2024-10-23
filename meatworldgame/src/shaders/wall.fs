@@ -23,12 +23,21 @@ vec4 triplanar( uint idx, vec3 pos, vec3 N )
 layout (location = 0) out vec4 fsout_albedo;
 layout (location = 1) out vec3 fsout_normal;
 layout (location = 2) out vec4 fsout_pbr;
+// layout (location = 3) out vec2 fsout_vel;
 
-in vec3 fsin_fragpos;
-in vec3 fsin_normal;
-in vec3 fsin_tangent;
-in vec2 fsin_texcoords;
-flat in uint drawID;
+
+
+in FS_in
+{
+    vec3 fragpos;
+    vec3 normal;
+    vec3 tangent;
+    vec2 texcoord;
+    flat uint drawID;
+
+    vec4 pos_curr;
+    vec4 pos_prev;
+} fsin;
 
 
 in vec3 TBN_viewpos;
@@ -39,8 +48,8 @@ in mat3 TBNT;
 
 void main()
 {
-    vec2 texcoords = fsin_texcoords;
-    uint offset    = IDK_SSBO_texture_offsets[drawID];
+    vec2 texcoords = fsin.texcoord;
+    uint offset    = IDK_SSBO_texture_offsets[fsin.drawID];
 
     vec4  albedo = texture(IDK_SSBO_textures[offset+0], texcoords).rgba;
     vec3  normal = texture(IDK_SSBO_textures[offset+1], texcoords).xyz * 2.0 - 1.0;
@@ -52,11 +61,18 @@ void main()
     float roughness = ao_r_m.g;
     float metallic  = ao_r_m.b;
 
-    // vec3 N = normalize(TBN * normalize(normal)); // normalize(fsin_normal);
-        //  N = normalize(mix(N, normalize(fsin_normal), 0.5));
+    // vec3 N = normalize(TBN * normalize(normal)); // normalize(fsin.normal);
+        //  N = normalize(mix(N, normalize(fsin.normal), 0.5));
 
     fsout_albedo = vec4(albedo.rgb, 1.0);
     fsout_normal = TBN * normalize(normal);
     fsout_pbr    = vec4(roughness, metallic, ao, emissv);
 
+
+    // vec2 curr_uv = (fsin.pos_curr.xy / fsin.pos_curr.w) * 0.5 + 0.5;
+    // vec2 prev_uv = (fsin.pos_prev.xy / fsin.pos_prev.w) * 0.5 + 0.5;
+    // fsout_vel = curr_uv.xy - prev_uv.xy;
+
 }
+
+

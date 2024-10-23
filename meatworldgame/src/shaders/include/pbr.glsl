@@ -47,6 +47,17 @@ float NDF( float roughness, vec3 N, vec3 H )
 }
 
 
+float GeometrySchlickGGX(float NdotV, float roughness)
+{
+    float r = (roughness + 1.0);
+    float k = (r*r) / 8.0;
+
+    float num   = NdotV;
+    float denom = NdotV * (1.0 - k) + k;
+	
+    return num / denom;
+}
+
 float GGX( float cosTheta, float k )
 {
     return cosTheta / (cosTheta * (1.0 - k) + k);
@@ -55,8 +66,13 @@ float GGX( float cosTheta, float k )
 
 float GSF( float roughness, vec3 N, vec3 V, vec3 L )
 {
-    // float NdotV = max(dot(N, V), 0.0);
-    // float NdotL = max(dot(N, L), 0.0);
+    float NdotV = max(dot(N, V), PBR_EPSILON);
+    float NdotL = max(dot(N, L), PBR_EPSILON);
+
+    float ggx1 = GeometrySchlickGGX(NdotL, roughness);
+    float ggx2 = GeometrySchlickGGX(NdotV, roughness);
+
+    return ggx1 * ggx2;
 
     // float k = (roughness * roughness) / 8.0;
     // float a = NdotV * (1.0 - k) + k;
@@ -65,7 +81,7 @@ float GSF( float roughness, vec3 N, vec3 V, vec3 L )
     // return GGX(NdotV, k) * GGX(NdotL, k);
     // return 0.25 / (a*b + PBR_EPSILON);
 
-    return fresnelDisney(N, V, L, roughness);
+    // return fresnelDisney(N, V, L, roughness);
 }
 
 
@@ -112,11 +128,11 @@ IDK_PBRSurfaceData_load( IDK_Camera camera, vec2 texcoord, sampler2D depth_tex, 
     vec3  V     = normalize(camera.position.xyz - worldpos);
     vec3  R     = reflect(-V, N); 
     vec3  F0    = clamp(mix(vec3(0.04), albedo, metallic), 0.0, 1.0);
-    float NdotV = max(dot(N, V), 0.0);
-    vec3  F     = fresnelSchlick(NdotV, F0);
+    float NdotV = max(dot(N, V), PBR_EPSILON);
+    vec3  F     = fresnelSchlickR(NdotV, F0, roughness);
     vec3  Ks    = F;
     vec3  Kd    = (vec3(1.0) - Ks) * (1.0 - metallic);
-    vec2  BRDF  = texture(BRDF_LUT, vec2(NdotV, roughness)).rg;
+    vec2  BRDF  = texture(BRDF_LUT, vec2(NdotV+1.0/128.0, roughness+1.0/128.0)).rg;
     vec3  brdf  = (Ks * BRDF.x + BRDF.y);
 
     data.position   = worldpos;
@@ -172,8 +188,8 @@ IDK_PBRSurfaceData_load2( IDK_Camera camera, vec2 texcoord, sampler2D depth_tex,
     vec3  V     = normalize(camera.position.xyz - worldpos);
     vec3  R     = reflect(-V, N); 
     vec3  F0    = clamp(mix(vec3(0.04), albedo, metallic), 0.0, 1.0);
-    float NdotV = max(dot(N, V), 0.0);
-    vec3  F     = fresnelSchlick(NdotV, F0);
+    float NdotV = max(dot(N, V), 0.01);
+    vec3  F     = fresnelSchlickR(NdotV, F0, roughness);
     vec3  Ks    = F;
     vec3  Kd    = (vec3(1.0) - Ks) * (1.0 - metallic);
     vec2  BRDF  = textureLod(BRDF_LUT, vec2(NdotV, roughness), 0.0).rg;
@@ -234,7 +250,7 @@ vec3 IDK_PBR_Pointlight( IDK_Pointlight light, IDK_PBRSurfaceData surface, vec3 
 vec3 IDK_PBR_Spotlight( IDK_Spotlight light, IDK_PBRSurfaceData surface, vec3 fragpos )
 {
     vec3  light_position = light.position.xyz;
-    vec3  light_diffuse  = light.diffuse.xyz;
+    vec3  light_diffuse  = light.diffuse.rgb;
 
     const vec3 L = normalize(light_position - fragpos);
     const vec3 H  = normalize(surface.V + L);
@@ -261,7 +277,9 @@ vec3 IDK_PBR_Spotlight( IDK_Spotlight light, IDK_PBRSurfaceData surface, vec3 fr
     float attenuation = d / light.radius;
           attenuation = 1.0 - clamp(attenuation, 0.0, 1.0);
 
-    return attenuation * strength * ((surface.Kd * surface.albedo) / PBR_PI + specular) * light_diffuse * NdotL;
+    vec3 result = ((surface.Kd * surface.albedo) / PBR_PI + specular) * light_diffuse * NdotL;
+
+    return attenuation * strength * result;
 }
 
 
@@ -270,7 +288,7 @@ vec3 IDK_PBR_Dirlight( IDK_Dirlight light, IDK_PBRSurfaceData surface, vec3 frag
 {
     const vec3 L = normalize(-light.direction.xyz);
     const vec3 H = normalize(surface.V + L);
-    float NdotL  = max(dot(surface.N, L), 0.0);
+    float NdotL  = max(dot(surface.N, L), 0.01);
 
     float ndf   = NDF(surface.roughness, surface.N, H);
     float G     = GSF(surface.roughness, surface.N, surface.V, L);
@@ -279,9 +297,9 @@ vec3 IDK_PBR_Dirlight( IDK_Dirlight light, IDK_PBRSurfaceData surface, vec3 frag
     float denominator = 4.0 * surface.NdotV * NdotL + PBR_EPSILON;
     vec3  specular    = numerator / denominator;
 
-    vec3 radiance = light.diffuse.rgb * light.diffuse.a;
+    vec3 radiance = light.diffuse.rgb;
 
-    return ((surface.Kd * surface.albedo) / PBR_PI + specular) * radiance * NdotL;
+    return ((surface.Kd * surface.albedo) / PBR_PI + specular) * radiance * NdotL * surface.ao;
 }
 
 

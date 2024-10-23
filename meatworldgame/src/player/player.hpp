@@ -1,96 +1,152 @@
 #pragma once
 
-#include "../character/character.hpp"
-#include "../character/humanoid.hpp"
+#include "../character/base.hpp"
 
 
-#include "player-controller.hpp"
-#include "flashlight.hpp"
-#include "weapon.hpp"
-#include <meatnet.hpp>
-
-
-namespace meatworld
+namespace meat
 {
-    class Player;
-    class EditorPlayer;
-};
+    class  BehaviourUserKeyInput;
+    class  BehaviourUserMouseInput;
+    class  BehaviourCollideWithTerrain;
+
+    class  BNodeDriveVehicles;
+
+    class  BNodeGravity;
+    class  BNodeTerrainCollision;
+
+    class  CharacterFreecam;
+    class  CharacterPlayerFPS;
+}
 
 
 
+// class meat::BNodeConditionMouseCaptured: public BNodeCondition
+// {
+// public:
+//     BNodeConditionMouseCaptured();
+// };
 
 
-class meatworld::Player: public meatworld::Humanoid
-{
-private:
 
-public:
-    int m_cam_obj    = -1;
-    int m_hinge_obj  = -1;
-    int m_weapon_obj = -1;
-
-    Player();
-    ~Player();
-
-    virtual void move( idk::EngineAPI &api, const CharacterMotion &motion );
+// class meat::BehaviourUserKeyInput: public BNodeAction
+// {
+// public:
+//     using BNodeAction::BNodeAction;
+//     virtual Status update( idk::EngineAPI&, meat::World& ) final;
+// };
 
 
-};
+// class meat::BehaviourUserMouseInput: public BNodeAction
+// {
+// public:
+//     using BNodeAction::BNodeAction;
+//     virtual Status update( idk::EngineAPI&, meat::World& ) final;
+// };
 
 
-// class meatworld::Player: public meatworld::CharacterBase
+// class meat::BNodeGravity: public BNodeAction
+// {
+// public:
+//     using BNodeAction::BNodeAction;
+//     virtual Status update( idk::EngineAPI&, meat::World& ) final;
+// };
+
+
+// class meat::BNodeTerrainCollision: public BNodeAction
 // {
 // private:
-//     int m_audio_emitter = -1;
-
+//     static constexpr float dt_threshold = 1.0f / 8.0f;
+//     float m_airtime = 0.0f;
 // public:
-//     int m_torso_obj = -1;
-//     int m_head_obj  = -1;
-
-//     int m_grabbed_obj = -1;
-//     int m_hinge_obj   = -1;
-//     int m_hit_obj     = -1;
-//     int m_cam_obj     = -1;
-
-//     float m_health = 10.0f;
-
-//     float m_run_speed  = 3.5f;
-//     float m_walk_speed = 2.5f;
-//     float m_jump_force = 1.0f;
-
-//     Flashlight m_flashlight;
-//     RangedWeapon *m_weapon = nullptr;
-
-
-
-//     Player();
-//     ~Player();
-
-//     virtual void move( idk::EngineAPI&, const CharacterMotion& );
-//     void update( idk::EngineAPI& );
-//     void update( idk::EngineAPI&, meatnet::PeerData& );
-
-//     template <typename T>
-//     void giveWeapon()
-//     {
-//         if (m_weapon)
-//         {
-//             delete m_weapon;
-//         }
-
-//         m_weapon = new T(m_cam_obj, m_hit_obj);
-//     }
-
+//     using BNodeAction::BNodeAction;
+//     virtual Status update( idk::EngineAPI&, meat::World& ) final;
 // };
 
 
-
-
-// class meatworld::EditorPlayer: public meatworld::Player
+// class meat::BehaviourCollideWithTerrain: public BNodeAction
 // {
 // public:
-
-//     void update( idk::EngineAPI& );
-//     virtual void move( idk::EngineAPI&, const CharacterMotion& ) final {  };
+//     using BNodeAction::BNodeAction;
+//     virtual Status update( idk::EngineAPI&, meat::World& ) final;
 // };
+
+
+
+
+// class meat::BehaviourUserInput: public BNodeAction
+// {
+// private:
+
+// public:
+//     using BNodeAction::BNodeAction;
+//     virtual Status update( idk::EngineAPI&, meat::World& ) final;
+// };
+
+
+
+
+
+
+
+
+
+class meat::CharacterPlayerFPS: public meat::ActorBase
+{
+private:
+    int m_hinge_obj;
+
+public:
+    CharacterPlayerFPS( World&, const glm::vec3 &pos=glm::vec3(0), float yaw=0 );
+
+    // virtual void update( idk::EngineAPI&, meat::World& ) override;
+    virtual void move( const glm::vec3& ) override;
+    virtual void look( const glm::vec2& ) override;
+};
+
+// namespace meat
+// {
+//     class  CharacterFreecam;
+//     class  CharacterPlayerFPS;
+//     class  ControllerPlayer;
+// }
+
+
+
+class meat::CharacterFreecam: public ActorBase
+{
+protected:
+    int m_hinge_obj;
+
+public:
+    CharacterFreecam( World &world, const glm::vec3 &pos=glm::vec3(0.0f), float yaw=0.0f );
+
+    virtual void look( const glm::vec2& ) override;
+    virtual void move( const glm::vec3& ) override;
+};
+
+
+
+// class meat::CharacterPlayerFPS: public CharacterFreecam
+// {
+// private:
+//     int m_sounds0[4];
+//     int m_sounds1[4];
+//     int m_sounds2[4];
+
+// public:
+//     CharacterPlayerFPS( World &world, const glm::vec3 &pos=glm::vec3(0.0f), float yaw=0.0f );
+
+//     virtual void move( idk::EngineAPI&, const glm::vec3& ) override;
+//     virtual void jump() override;
+
+// };
+
+
+// class meat::ControllerPlayer: public ControllerBase2
+// {
+// public:
+//     virtual void update( idk::EngineAPI&, ActorBase* );
+// };
+
+
 

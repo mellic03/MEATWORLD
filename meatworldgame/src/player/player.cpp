@@ -1,461 +1,380 @@
 #include "player.hpp"
+#include "../world/world.hpp"
+#include "../item/flashlight.hpp"
+#include "../item/inventory.hpp"
+#include "../character/behaviour.hpp"
+#include "../character/weapon.hpp"
+#include "../vehicle/vehicle.hpp"
 
-#include <IDKAudio/IDKAudio.hpp>
-#include <IDKBuiltinCS/sys-audio.hpp>
+#include <IDKBuiltinCS/IDKBuiltinCS.hpp>
+#include <IDKGameEngine/IDKGameEngine.hpp>
+#include <IDKEvents/IDKEvents.hpp>
+#include <IDKIO/IDKIO.hpp>
 
 #include <libidk/idk_math.hpp>
 
-#include "../systems/sys-grabbable.hpp"
-#include "../systems/sys-weapon.hpp"
 
-#include "../game.hpp"
-#include "../../../meatnet/src/meatnet.hpp"
-
-
-using namespace idk;
+using namespace meat;
 
 
 
-meatworld::CharacterMotion
-meatworld::PlayerController::getMovement( idk::EngineAPI &api )
+CharacterFreecam::CharacterFreecam( World &world, const glm::vec3 &pos, float yaw )
+:   ActorBase(world, "Freecam", pos, yaw)
 {
-    float dtime  = api.getEngine().deltaTime();
-    auto &ren    = api.getRenderer();
-    
-    auto &events = api.getEventSys();
-    auto &K      = events.keylog();
-
-    CharacterMotion motion;
-
-    if (events.mouseCaptured() == false)
     {
-        return motion;
+        m_hinge_obj = idk::ECS2::createGameObject("Hinge", false);
+
+        idk::ECS2::removeChild(m_root_obj, m_attach_obj);
+        idk::ECS2::giveChild(m_root_obj, m_hinge_obj);
+        idk::ECS2::giveChild(m_hinge_obj, m_attach_obj);
+
+        idk::TransformSys::getLocalPosition(m_hinge_obj) *= 0.0f;
+        idk::TransformSys::getLocalPosition(m_attach_obj) *= 0.0f;
+
+        setActorDesc({0.0f, 16.0f, 32.0f});
+
+        idk::ECS2::setGameObjectName(m_attach_obj, "Camera");
+        idk::ECS2::giveComponent<idk::CameraCmp>(m_attach_obj);
+        idk::ECS2::giveComponent<idk::AudioListenerCmp>(m_attach_obj);
+
+        giveItem<ItemFlashlight>();
+        giveItem<ItemInventory>(world);
     }
 
-    static const glm::vec3 up    = glm::vec3(0.0f, 1.0f, 0.0f);
-    static const glm::vec3 right = glm::vec3(1.0f, 0.0f, 0.0f);
-    static const glm::vec3 front = glm::vec3(0.0f, 0.0f, -1.0f);
 
-    glm::vec3 delta  = glm::vec3(0.0f);
-    glm::vec2 dmouse = -0.1f * events.mouseDelta();
-
-    if (K.keyDown(idk::Keycode::A)) { delta -= right; }
-    if (K.keyDown(idk::Keycode::D)) { delta += right; }
-    if (K.keyDown(idk::Keycode::W)) { delta += front; }
-    if (K.keyDown(idk::Keycode::S)) { delta -= front; }
-
-    motion.run    = K.keyDown(idk::Keycode::LSHIFT);
-    motion.jump   = K.keyTapped(idk::Keycode::SPACE);
-    motion.crouch = K.keyDown(idk::Keycode::LCTRL);
-    motion.aim    = events.mouseDown(idk::MouseButton::RIGHT);
-    motion.attack = events.mouseClicked(idk::MouseButton::LEFT);
-
-    motion.delta = delta;
-    motion.yaw   = dmouse.x;
-    motion.pitch = dmouse.y;
-
-    return motion;
+    giveBehaviour<BehaviourPlayerKeyInput>();
+    giveBehaviour<BehaviourPlayerMouseInput>();
+    giveBehaviour<BehaviourPlayerZoom>();
+    giveBehaviour<BehaviourDriveVehicle>();
 }
 
 
-meatworld::Player::Player(): meatworld::Humanoid()
+
+CharacterPlayerFPS::CharacterPlayerFPS( World &world, const glm::vec3 &pos, float yaw )
+:   ActorBase(world, "Player", pos, yaw)
 {
-    std::cout << "Player::Player\n";
+    {
+        m_hinge_obj = idk::ECS2::createGameObject("Hinge", false);
 
-    m_cam_obj    = ECS2::createGameObject("camera", false);
-    m_hinge_obj  = ECS2::createGameObject("hinge",  false);
+        idk::ECS2::removeChild(m_root_obj, m_attach_obj);
+        idk::ECS2::giveChild(m_root_obj, m_hinge_obj);
+        idk::ECS2::giveChild(m_hinge_obj, m_attach_obj);
 
-    ECS2::giveChild(m_hinge_obj, m_cam_obj);
+        idk::TransformSys::getLocalPosition(m_hinge_obj) *= 0.0f;
+        idk::TransformSys::getLocalPosition(m_attach_obj) *= 0.0f;
 
-    ECS2::giveComponent<SmoothFollowCmp>(m_hinge_obj);
-    ECS2::giveComponent<CameraCmp>(m_cam_obj);
+        setActorDesc({0.0f, 16.0f, 32.0f});
 
-    TransformSys::getLocalPosition(m_cam_obj) = glm::vec3(0.5f, 0.0f, 1.25f);
-    TransformSys::getTransformCmp(m_cam_obj).yaw = 0.0f;
-    TransformSys::getTransform(m_cam_obj).rotation = glm::quat(glm::vec3(0.0f));
+        idk::ECS2::setGameObjectName(m_attach_obj, "Camera");
+        idk::ECS2::giveComponent<idk::CameraCmp>(m_attach_obj);
+        idk::ECS2::giveComponent<idk::AudioListenerCmp>(m_attach_obj);
 
+        setActorDesc({1.75f, 2.0f, 4.0f});
+
+        idk::ECS2::setGameObjectName(m_root_obj, "Player");
+
+        giveItem<ItemFlashlight>();
+        giveItem<ItemInventory>(world);
+        giveItem<ItemWeaponInventory>();
+    }
+
+
+    giveBehaviour<BehaviourPlayerKeyInput>();
+    giveBehaviour<BehaviourPlayerMouseInput>();
+    giveBehaviour<BehaviourPlayerZoom>();
+
+    giveBehaviour<BehaviourGravity>();
+    giveBehaviour<BehaviourCollideWithTerrain>();
+    giveBehaviour<BehaviourDriveVehicle>();
+    giveBehaviour<BehaviourPushBodies>();
+
+
+    // const auto callback1 = [&world]()
+    // {
+    //     return (idkio::mouseCaptured()) && (idkio::keyTapped(idk::Keycode::E));
+    // };
+
+    // const auto callback2 = [this]()
+    // {
+    //     getItem<ItemInventory>()->open();
+    //     return BNode::SUCCESS;
+    // };
+
+
+    // auto *node = new BNodeSequence({
+    //     new BNodeCondition(callback1),
+    //     new BNodeAction(callback2)
+    // });
+
+    // setBehaviour(node);
 }
 
 
-meatworld::Player::~Player()
+
+// void
+// CharacterPlayerFPS::update( idk::EngineAPI &api, meat::World &world )
+// {
+//     auto *I = getItem<ItemInventory>();
+
+//     if (idkio::keyTapped(idk::Keycode::E))
+//     {
+//         I->open();
+//     }
+// }
+
+
+
+
+// BNode::Status
+// BehaviourUserKeyInput::update( idk::EngineAPI &api, meat::World &world )
+// {
+//     float dt = api.dtime();
+//     auto  *C = m_actor;
+
+//     glm::vec3 kd = glm::vec3(0.0f);
+
+//     if (idk::IO::keyDown(idk::Keycode::A)) kd.x -= dt;
+//     if (idk::IO::keyDown(idk::Keycode::D)) kd.x += dt;
+//     if (idk::IO::keyDown(idk::Keycode::W)) kd.z -= dt;
+//     if (idk::IO::keyDown(idk::Keycode::S)) kd.z += dt;
+
+//     if (idk::IO::keyDown(idk::Keycode::LSHIFT))
+//     {
+//         C->run(kd);
+//     }
+
+//     else
+//     {
+//         C->walk(kd);
+//     }
+
+//     return BNode::SUCCESS;
+// }
+
+
+
+// BNode::Status
+// BehaviourUserMouseInput::update( idk::EngineAPI &api, meat::World &world )
+// {
+//     glm::vec2 md = glm::vec2(-1) * 0.0005f * idk::IO::mouseDelta();
+
+//     m_actor->look(md);
+//     return BNode::SUCCESS;
+// }
+
+
+
+
+// BNode::Status
+// BNodeGravity::update( idk::EngineAPI &api, meat::World &world )
+// {
+//     float dt = api.dtime();
+//     auto *C  = m_actor;
+
+//     if (C->isGrounded() == false)
+//     {
+//         C->addForce(glm::vec3(0.0f, -0.1f*idk::PhysicsConstants::G, 0.0f));
+//     }
+
+//     return BNode::SUCCESS;
+// }
+
+
+
+// BNode::Status
+// BNodeTerrainCollision::update( idk::EngineAPI &api, meat::World &world )
+// {
+//     float dt = api.dtime();
+//     auto *C  = m_actor;
+
+
+//     glm::vec3  vel = C->getVelocity();
+//     glm::vec3  acc = C->getAcc();
+//     glm::vec3 &pos = idk::TransformSys::getLocalPosition(C->getID());
+//     float      h   = idk::TerrainRenderer::heightQuery(pos.x, pos.z);
+
+//     float overlap = h - (pos.y - C->getHeight());
+
+//     if (overlap > 0.0f)
+//     {
+//         m_airtime = 0.0f;
+//         C->setGrounded(true);
+//     }
+
+//     else
+//     {
+//         m_airtime += dt;
+//     }
+
+//     if (m_airtime > dt_threshold)
+//     {
+//         C->setGrounded(false);
+//     }
+
+//     if (C->isGrounded())
+//     {
+//         pos.y = h + C->getHeight();
+//     }
+
+
+//     return BNode::SUCCESS;
+// }
+
+
+
+
+
+// CharacterPlayerFPS::CharacterPlayerFPS( World &world, const glm::vec3 &pos, float yaw )
+// :   CharacterFreecam(world, pos, yaw)
+// {
+//     setActorDesc({1.75f, 2.0f, 4.0f});
+
+//     idk::ECS2::setGameObjectName(m_root_obj, "Player");
+//     giveItem<ItemFlashlight>();
+//     giveItem<ItemWeaponInventory>();
+
+//     // giveBehaviour<BehaviourPlayerKeyInput>();
+//     // giveBehaviour<BehaviourPlayerMouseInput>();
+//     // giveBehaviour<BehaviourPlayerZoom>();
+
+//     // giveBehaviour<BehaviourGravity>();
+//     // giveBehaviour<BehaviourCollideWithTerrain>();
+//     // giveBehaviour<BehaviourDriveVehicle>();
+
+
+
+//     m_sounds0[0] = idk::AudioSystem::createEmitter("assets/audio/dialogue/omg-boat1.wav");
+//     m_sounds0[1] = idk::AudioSystem::createEmitter("assets/audio/dialogue/hello-boat.wav");
+//     m_sounds0[2] = idk::AudioSystem::createEmitter("assets/audio/dialogue/ily-boat.wav");
+//     m_sounds0[3] = idk::AudioSystem::createEmitter("assets/audio/dialogue/later-boat.wav");
+
+//     m_sounds1[0] = idk::AudioSystem::createEmitter("assets/audio/dialogue/hello-big-boy.wav");
+//     m_sounds1[1] = idk::AudioSystem::createEmitter("assets/audio/dialogue/seeya-later-big-boy.wav");
+
+//     m_sounds2[0] = idk::AudioSystem::createEmitter("assets/audio/dialogue/i-have-a-gun.wav");
+
+
+//     world.EM.on("VehicleCanoe::drive", [this]( ActorBase *A ) {
+//         if (A == this) { idk::AudioSystem::playSound(m_sounds0[rand()%3], false); }
+//     });
+
+//     world.EM.on("VehicleCanoe::undrive", [this]( ActorBase *A ) {
+//         if (A == this) { idk::AudioSystem::playSound(m_sounds0[3], false); }
+//     });
+
+//     world.EM.on("VehicleTruck::drive", [this]( ActorBase *A ) {
+//         if (A == this) { idk::AudioSystem::playSound(m_sounds1[0], false); }
+//     });
+
+//     world.EM.on("VehicleTruck::undrive", [this]( ActorBase *A ) {
+//         if (A == this) { idk::AudioSystem::playSound(m_sounds1[1], false); }
+//     });
+
+//     world.EM.on("WeaponRanged::WeaponRanged", [this]( ActorBase *A ) {
+//         if (A == this) { idk::AudioSystem::playSound(m_sounds2[0], false); }
+//     });
+
+// }
+
+
+void
+CharacterFreecam::move( const glm::vec3 &delta )
 {
-    ECS2::deleteGameObject(m_hinge_obj);
+    glm::mat3 R = glm::mat3(idk::TransformSys::getModelMatrix(m_attach_obj));
+    glm::vec3 dir = (R * delta);
+
+    float l0 = glm::length2(delta);
+    float l1 = glm::length2(dir);
+
+    if (l0 > 0.0f && l1 > 0.0f)
+    {
+        dir = sqrt(l0) * glm::normalize(dir);
+        ActorBase::move(delta);
+    }
 }
 
 
 void
-meatworld::Player::move( idk::EngineAPI &api, const CharacterMotion &motion )
+CharacterFreecam::look( const glm::vec2 &delta )
 {
-    using namespace idk;
+    auto &cmp0 = idk::TransformSys::getTransformCmp(m_root_obj);
+    auto &cmp1 = idk::TransformSys::getTransformCmp(m_hinge_obj);
 
-    float dt = api.getEngine().deltaTime();
-
-    ECS2::getComponent<SmoothFollowCmp>(m_hinge_obj).anchor_id = m_head_obj;
-    ECS2::getComponent<SmoothFollowCmp>(m_hinge_obj).speed     = 16.0f;
-
-    {
-        TransformSys::pitch(m_hinge_obj, motion.pitch);
-        TransformSys::yaw(m_hinge_obj, motion.yaw);
-    }
-
-    {
-        float &A = TransformSys::getTransformCmp(m_root_obj).yaw;
-        float  B = TransformSys::getTransformCmp(m_hinge_obj).yaw;
-
-        float alpha = 0.0f;
-
-        if (motion.aim)
-        {
-            alpha = 0.25f;
-        }
-
-        else if (glm::length2(motion.delta) > 0.0f)
-        {
-            alpha = 0.05f;
-        }
-
-        A = idk::mixRadians(A, B, alpha);
-
-
-        float &C = TransformSys::getTransformCmp(m_head_obj).pitch;
-        float  D = TransformSys::getTransformCmp(m_hinge_obj).pitch;
-        C = idk::mixRadians(C, D, 0.1f);
-
-    }
-
-
-    if (motion.aim)
-    {
-        glm::vec3 pos   = TransformSys::getWorldPosition(m_cam_obj);
-        glm::vec3 front = 4.0f * TransformSys::getFront(m_cam_obj);
-
-        reachFor(pos+front);
-    }
-
-    Humanoid::move(api, motion);
-
-    // if (motion.aim)
-    // {
-    //     auto &cmp = ECS2::getComponent<CameraCmp>(m_cam_obj);
-    //     glm::vec3 &pos = TransformSys::getTransform(m_cam_obj).position;
-
-    //     TransformSys::getTransformCmp(m_weapon_obj).pitch = TransformSys::getTransformCmp(m_hinge_obj).pitch;
-
-    //     if (cmp.camera.fov_offset > -25.0f)
-    //     {
-    //         cmp.camera.fov_offset -= 200.0f * dt;
-    //     }
-
-    //     // if (pos.x > m_arms[1]->getOffset().x + 0.25)
-    //     // {
-    //     //     pos.x -= 0.05f;
-    //     // }
-
-    //     if (pos.z > 0.5f)
-    //     {
-    //         pos.z -= 0.05f;
-    //     }
-    // }
-
-    // else
-    // {
-    //     auto &cmp = ECS2::getComponent<CameraCmp>(m_cam_obj);
-    //     glm::vec3 &pos = TransformSys::getTransform(m_cam_obj).position;
-    //     // TransformSys::getTransformCmp(m_weapon_obj).pitch = glm::radians(-45.0f);
-    //     // TransformSys::getTransformCmp(m_weapon_obj).yaw   = glm::radians(16.0f);
-
-    //     if (cmp.camera.fov_offset < 0.0f)
-    //     {
-    //         cmp.camera.fov_offset += 200.0f * dt;
-    //     }
-
-    //     if (pos.x < 0.5f)
-    //     {
-    //         pos.x += 0.05f;
-    //     }
-
-    //     if (pos.z < 1.25f)
-    //     {
-    //         pos.z += 0.05f;
-    //     }
-    // }
-
+    cmp0.yaw   += delta.x;
+    cmp1.pitch += delta.y;
 }
 
 
 
-// meatworld::Player::~Player()
-// {
-//     // ECS2::deleteGameObject(m_cam_obj);
-// }
+
+void
+CharacterPlayerFPS::move( const glm::vec3 &delta )
+{
+    glm::mat3 R = glm::mat3(idk::TransformSys::getModelMatrix(m_attach_obj));
+    glm::vec3 dir = delta * glm::vec3(1.0f, 0.0f, 1.0f);
+
+    auto &pitch = idk::TransformSys::getTransformCmp(m_attach_obj).pitch;
+    auto &roll  = idk::TransformSys::getTransformCmp(m_attach_obj).roll;
+
+    roll += 0.005f * glm::sign(delta.x);
+    roll = idk::mixRadians(roll, 0.0f, 0.002f);
+
+    // pitch += 0.25f * delta.z;
+    // pitch = glm::mix(pitch, 0.0f, 0.025f);
 
 
-// meatworld::Player::Player()
-// {
-//     using namespace idk;
+    float l0 = glm::length2(delta);
+    float l1 = glm::length2(dir);
 
-//     m_obj_id = ECS2::createGameObject("Player", false);
-//     ECS2::giveComponent<TransformCmp>(m_obj_id);
-//     ECS2::giveComponent<AudioListenerCmp>(m_obj_id);
-//     TransformSys::setPositionLocalspace(m_obj_id, glm::vec3(0.0f));
-
-
-
-//     m_torso_obj = ECS2::createGameObject("torso", false);
-//     m_head_obj  = ECS2::createGameObject("head", false);
-
-//     ECS2::giveComponent<TransformCmp>(m_torso_obj);
-//     ECS2::giveComponent<TransformCmp>(m_head_obj);
-//     ECS2::giveComponent<ModelCmp>(m_torso_obj);
-//     ECS2::giveComponent<ModelCmp>(m_head_obj);
-
-//     ECS2::giveChild(m_obj_id, m_torso_obj);
-//     ECS2::giveChild(m_torso_obj, m_head_obj);
-
-//     TransformSys::setPositionLocalspace(m_torso_obj, glm::vec3(0.0f));
-//     TransformSys::setPositionLocalspace(m_head_obj, glm::vec3(0.0f, 1.0f, 0.0f));
-
-//     TransformSys::getUniformScale(m_torso_obj) = 0.2f;
-//     TransformSys::getUniformScale(m_head_obj)  = 0.2f;
-
-//     ModelSys::assignModel(m_torso_obj, "assets/models/npc/meat-torso.idkvi");
-//     ModelSys::assignModel(m_head_obj,  "assets/models/npc/meat-head.idkvi");
+    if (l0 > 0.0f && l1 > 0.0f)
+    {
+        dir = sqrt(l0) * glm::normalize(dir);
+        ActorBase::move(dir);
+    }
+}
 
 
+void
+CharacterPlayerFPS::look( const glm::vec2 &delta )
+{
+    auto &cmp0 = idk::TransformSys::getTransformCmp(m_root_obj);
+    auto &cmp1 = idk::TransformSys::getTransformCmp(m_hinge_obj);
+
+    cmp0.yaw   += delta.x;
+    cmp1.pitch += delta.y;
 
 
-//     if (m_audio_emitter == -1)
-//     {
-//         int sound = AudioSystem::loadWav("assets/audio/footsteps.wav");
-//         m_audio_emitter = AudioSystem::createEmitter(AudioSystem::Emitter(sound));
-//     }
+    auto &roll  = idk::TransformSys::getTransformCmp(m_attach_obj).roll;
 
-//     m_cam_obj = ECS2::createGameObject("camera", false);
-//     ECS2::giveComponent<TransformCmp>(m_cam_obj);
-//     ECS2::giveComponent<CameraCmp>(m_cam_obj);
-
-//     TransformSys::getLocalPosition(m_cam_obj) = glm::vec3(0.5f, 0.5f, 0.7f);
-//     TransformSys::getTransformCmp(m_cam_obj).yaw = 0.0f;
-//     TransformSys::getTransform(m_cam_obj).rotation = glm::quat(glm::vec3(0.0f));
-
-//     m_hit_obj = ECS2::createGameObject("hitbox", false);
-//     ECS2::giveComponent<CharacterHitBoxCmp>(m_hit_obj);
-//     TransformSys::getLocalPosition(m_hit_obj) = glm::vec3(0.0f, -0.11f, 0.08f);
-//     TransformSys::getXYZScale(m_hit_obj) = glm::vec3(0.5f, 0.481f, 0.33f);
-
-//     auto &cmp = ECS2::getComponent<CharacterHitBoxCmp>(m_hit_obj);
-//     cmp.callback = [this]()
-//     {
-//         m_health -= 1;
-//         std::cout << "Health: " << m_health << "\n";
-//     };
+    roll += 0.25f * delta.x;
+    roll = idk::mixRadians(roll, 0.0f, 0.05f);
 
 
-//     ECS2::giveChild(m_obj_id, m_cam_obj);
-//     ECS2::giveChild(m_obj_id, m_hit_obj);
-
-//     m_flashlight.init(m_cam_obj);
-
-// }
-
-
-// meatworld::Player::~Player()
-// {
-//     using namespace idk;
-//     std::cout << "Player::~Player\n";
-//     ECS2::deleteGameObject(m_obj_id);
-// }
-
-
-
+}
 
 // void
-// meatworld::Player::move( idk::EngineAPI &api, const CharacterMotion &motion )
+// CharacterPlayerFPS::jump()
 // {
-//     using namespace idk;
-
-//     float dtime  = api.getEngine().deltaTime();
-//     auto &ren    = api.getRenderer();
-    
-//     auto &events = api.getEventSys();
-//     auto &K      = events.keylog();
-
-
-//     // glm::vec3 up    = TransformSys::getUp(m_obj_id);
-//     // glm::vec3 right = TransformSys::getRight(m_cam_obj);
-//     // glm::vec3 front = TransformSys::getFront(m_cam_obj);
-
-//     glm::mat4 T = TransformSys::getModelMatrix(m_obj_id);
-//     glm::vec3 delta = glm::mat3(T) * motion.delta;
-
-
-//     auto &cmp = ECS2::getComponent<KinematicCapsuleCmp>(m_obj_id);
-//     PhysicsSys::addForce(m_obj_id, delta);
-
-//     if (motion.jump)
-//     {
-//         PhysicsSys::jump(m_obj_id, m_jump_force);
-//     }
-
-//     if (motion.crouch)
-//     {
-//         cmp.crouch = true;
-//     }
-
-//     TransformSys::pitch(m_cam_obj, motion.pitch);
-//     TransformSys::yaw(m_obj_id, motion.yaw);
-
-//     TransformSys::roll(m_cam_obj, 0.05f * motion.yaw);
-//     TransformSys::getTransformCmp(m_cam_obj).roll *= 0.98f;
-// };
-
-
-
-// void
-// meatworld::Player::update( idk::EngineAPI &api )
-// {
-//     using namespace idk;
-
-//     float dt  = api.getEngine().deltaTime();
-//     auto &ren = api.getRenderer();
-    
-//     auto &events = api.getEventSys();
-//     auto &K      = events.keylog();
-
-//     if (events.mouseCaptured() == false)
+//     if (this->isGrounded() == false)
 //     {
 //         return;
 //     }
 
-//     if (K.keyTapped(idk::Keycode::F))
-//     {
-//         m_flashlight.toggle();
-//     }
+//     this->setGrounded(false);
+//     std::cout << "\nJUMP\n";
 
+//     const float G = idk::PhysicsConstants::G;
 
-//     // this->move(api, delta, dmouse.x, dmouse.y);
+//     auto &adesc = getActorDesc();
 
+//     glm::vec3 imp = adesc.jmp_imp * glm::vec3(0.0f, G, 0.0f);
+//     glm::vec3 acc = adesc.jmp_acc * glm::vec3(0.0f, G, 0.0f);
 
-//     if (K.keyTapped(Keycode::N1))
-//     {
-//         giveWeapon<Glock>();
-//     }
+//     this->multiplyVel(glm::vec3(1, 0, 1));
+//     this->multiplyForce(glm::vec3(1, 0, 1));
 
-//     else if (K.keyTapped(Keycode::N2))
-//     {
-//         giveWeapon<HL2_AR2>();
-//     }
-
-//     // if (m_weapon)
-//     // {
-//     //     m_weapon->update(api, dmouse.x, dmouse.y);
-    
-//     //     if (events.mouseClicked(MouseButton::LEFT))
-//     //     {
-//     //         m_weapon->attack(api);
-//     //     }
-//     // }
-
-// };
-
-
-
-// void
-// meatworld::Player::update( idk::EngineAPI &api, meatnet::PeerData &data )
-// {
-//     using namespace idk;
-
-//     int obj_id = m_obj_id;
-
-//     auto &pcmp = TransformSys::getTransformCmp(obj_id);
-//     auto &ccmp = TransformSys::getTransformCmp(m_cam_obj);
-
-//     data.position = TransformSys::getWorldPosition(obj_id);
-//     data.pitch = uint8_t(255.0f * ccmp.pitch / (2.0 * M_PI));
-//     data.yaw   = uint8_t(255.0f * pcmp.yaw   / (2.0 * M_PI));
-
-//     uint32_t action = 0;
-
-//     if (api.getEventSys().mouseClicked(MouseButton::LEFT))
-//     {
-//         action |= meatnet::ACTION_SHOOT;
-//     }
-
-
-//     uint32_t state = 0;
-
-//     if (m_flashlight.m_on)
-//     {
-//         state |= meatnet::STATE_FLASHLIGHT;
-//     }
-
-
-//     uint32_t weapon = 0;
-
-//     if (m_weapon)
-//     {
-//         if (m_weapon->getDesc().name == "Glock")
-//         {
-//             weapon |= meatnet::WEAPON_GLOCK;
-//         }
-
-//         else if (m_weapon->getDesc().name == "AR2")
-//         {
-//             weapon |= meatnet::WEAPON_AR2;
-//         }
-//     }
-
-
-//     data.action = action;
-//     data.state  = state;
-//     data.weapon = weapon;
-
+//     this->addImpulse(imp);
+//     this->addForce(acc);
 // }
 
 
-
-
-// void
-// meatworld::EditorPlayer::update( idk::EngineAPI &api )
-// {
-//     using namespace idk;
-
-//     float dtime  = api.getEngine().deltaTime();
-//     auto &ren    = api.getRenderer();
-    
-//     auto &events = api.getEventSys();
-//     auto &K      = events.keylog();
-
-//     if (events.mouseCaptured() == false)
-//     {
-//         return;
-//     }
-
-//     glm::vec3 delta = glm::vec3(0.0f);
-//     glm::vec3 up    = TransformSys::getUp(m_obj_id);
-//     glm::vec3 right = TransformSys::getRight(m_cam_obj);
-//     glm::vec3 front = TransformSys::getFront(m_cam_obj);
-
-
-//     if (K.keyDown(idk::Keycode::A)) { delta -= right; }
-//     if (K.keyDown(idk::Keycode::D)) { delta += right; }
-//     if (K.keyDown(idk::Keycode::W)) { delta += front; }
-//     if (K.keyDown(idk::Keycode::S)) { delta -= front; }
-
-//     delta.y = 0.0f;
-
-//     if (K.keyDown(idk::Keycode::SPACE)) { delta += up; }
-//     if (K.keyDown(idk::Keycode::LCTRL)) { delta -= up; }
-
-//     if (fabs(delta.x) > 0.01f|| fabs(delta.y) > 0.01f || fabs(delta.z) > 0.01f)
-//     {
-//         delta = 0.0025f * m_walk_speed * glm::normalize(delta);
-//     }
-
-
-//     TransformSys::translateWorldspace(m_obj_id, delta);
-
-//     glm::vec2 dmouse = 0.1f * events.mouseDelta();
-//     TransformSys::pitch(m_cam_obj, -dmouse.y);
-//     TransformSys::yaw(m_obj_id, -dmouse.x);
-// };

@@ -6,28 +6,16 @@
 
 #include <string>
 
-#include "gamedata.hpp"
-#include "player/player.hpp"
 
-
-
-class MeatWorldGame: public idk::Game
+class IDK_VISIBLE MeatWorldGame: public idk::Game
 {
 public:
-
-    inline static meatworld::GameData gamedata;
-
-    MeatWorldGame(): idk::Game("MEATWORLD") {  };
+    virtual std::string getName() final { return "MEATWORLD"; }
 
     virtual void registerModules ( idk::EngineAPI& ) final;
     virtual void setup           ( const std::vector<std::string>&, idk::EngineAPI& ) final;
     virtual void mainloop        ( idk::EngineAPI& ) final;
     virtual void shutdown        (                 ) final;
-
-
-    void registerPrefabs();
-    void onSceneLoad();
-    void preSceneLoad();
 
 };
 

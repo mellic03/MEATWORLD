@@ -15,6 +15,8 @@ struct IDK_Camera
     vec4 position;
     mat4 P, V;
     mat4 prev_P, prev_V;
+    vec4 jitter, prev_jitter;
+    mat4 P_nojitter, prev_P_nojitter;
 
     float width, height, near, far;
     float exposure, gamma, shutter, pad0;
@@ -27,6 +29,7 @@ struct IDK_Dirlight
     mat4 transform;
     mat4 transforms[4];
     vec4 cascades;
+    vec4 cascade_zmult;
 
     vec4 direction;
     vec4 ambient;
@@ -68,10 +71,17 @@ layout (std430, binding = 0) readonly buffer IDK_SSBO_Indirect
 {
     sampler2D   IDK_SSBO_textures          [MAX_TEXTURES];
     mat4        IDK_SSBO_transforms        [MAX_TRANSFORMS];
+    mat4        IDK_SSBO_prev_transforms   [MAX_TRANSFORMS];
     uint        IDK_SSBO_transform_offsets [MAX_DRAW_CALLS];
     uint        IDK_SSBO_texture_offsets   [MAX_DRAW_CALLS];
 };
 
+
+
+IDK_Camera IDK_GetCamera()
+{
+    return IDK_UBO_cameras[0];
+}
 
 
 IDK_Camera IDK_RenderData_GetCamera()

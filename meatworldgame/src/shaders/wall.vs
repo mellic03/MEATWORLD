@@ -9,11 +9,18 @@ layout (location = 1) in vec3 vsin_normal;
 layout (location = 2) in vec3 vsin_tangent;
 layout (location = 3) in vec2 vsin_texcoords;
 
-out vec3 fsin_fragpos;
-out vec3 fsin_normal;
-out vec3 fsin_tangent;
-out vec2 fsin_texcoords;
-flat out uint drawID;
+
+out FS_in
+{
+    vec3 fragpos;
+    vec3 normal;
+    vec3 tangent;
+    vec2 texcoord;
+    flat uint drawID;
+
+    vec4 pos_curr;
+    vec4 pos_prev;
+} vsout;
 
 out vec3 TBN_viewpos;
 out vec3 TBN_fragpos;
@@ -25,12 +32,13 @@ uniform uint un_draw_offset;
 
 void main()
 {
-    drawID = gl_DrawID + un_draw_offset;
+    vsout.drawID = gl_DrawID + un_draw_offset;
 
     IDK_Camera camera = IDK_UBO_cameras[0];
 
-    const uint offset = IDK_SSBO_transform_offsets[drawID];
+    const uint offset = IDK_SSBO_transform_offsets[vsout.drawID];
     const mat4 model  = IDK_SSBO_transforms[offset + gl_InstanceID];
+    const mat4 prev_T = IDK_SSBO_prev_transforms[offset + gl_InstanceID];
 
     vec4 position = model * vec4(vsin_pos,     1.0);
     vec4 normal   = model * vec4(vsin_normal,  0.0);
@@ -44,18 +52,20 @@ void main()
     B = normalize(B - dot(B, N) * N);
 
 
-    fsin_fragpos   = position.xyz;
-    fsin_normal    = N;
-    fsin_tangent   = T;
+    vsout.fragpos   = position.xyz;
+    vsout.normal    = N;
+    vsout.tangent   = T;
 
-    fsin_texcoords   = vsin_pos.xy;
-    fsin_texcoords.x = 1.0 - fsin_texcoords.x;
-    fsin_texcoords  *= 0.25 * vec2(length(vec3(model[0])), length(vec3(model[1])));
+    vsout.pos_curr = camera.P * camera.V * model * vec4(vsin_pos, 1.0);
+    vsout.pos_prev = camera.prev_P * camera.prev_V * prev_T * vec4(vsin_pos, 1.0);
+
+    vsout.texcoord  = vec2(length(vec3(model[0]))*vsin_pos.x + length(vec3(model[2]))*vsin_pos.z, vsin_pos.y);
+    vsout.texcoord *= 0.25 * vec2(1.0, length(vec3(model[1])));
 
     TBN  = mat3(T, B, N);
     TBNT = transpose(TBN);
-    TBN_fragpos = TBNT * fsin_fragpos;
+    TBN_fragpos = TBNT * vsout.fragpos;
     TBN_viewpos = TBNT * camera.position.xyz;
 
-    gl_Position = (camera.P * camera.V) * position;
+    gl_Position = camera.P * camera.V * position;
 }

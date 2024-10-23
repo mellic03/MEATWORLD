@@ -6,7 +6,7 @@
 #include <IDKBuiltinCS/sys-particle.hpp>
 
 #include <IDKEvents/IDKEvents.hpp>
-#include <IDKGraphics/UI/idk_ui.hpp>
+// #include <IDKGraphics/UI/idk_ui.hpp>
 #include <libidk/idk_log.hpp>
 
 #include "../game.hpp"

@@ -47,73 +47,72 @@ meatworld::WeaponSys::update( idk::EngineAPI &api )
 {
     using namespace idk;
 
-    auto &ren = api.getRenderer();
+    // auto &ren = api.getRenderer();
 
 
-    for (int i=0; i<A.size(); i++)
-    {
-        // ren.drawLine(A[i], B[i], 0.05f);
-        // ren.drawSphere(A[i], 0.1f);
-    }
+    // for (int i=0; i<A.size(); i++)
+    // {
+    //     // ren.drawLine(A[i], B[i], 0.05f);
+    //     // ren.drawSphere(A[i], 0.1f);
+    // }
 
-    for (int i=0; i<C.size(); i++)
-    {
-        // ren.drawSphere(C[i], 0.1f);
-        ren.drawDecal(decal, C[i]+0.01f*D[i], D[i], 0.15f);
-    }
-
-
-    if (A.size() > 50)
-    {
-        A.pop_front();
-        B.pop_front();
-    }
-
-    if (C.size() > 50)
-    {
-        C.pop_front();
-        D.pop_front();
-    }
+    // for (int i=0; i<C.size(); i++)
+    // {
+    //     // ren.drawSphere(C[i], 0.1f);
+    //     ren.drawDecal(decal, C[i]+0.01f*D[i], D[i], 0.15f);
+    // }
 
 
-    for (auto &proj: m_projectiles)
-    {
-        glm::vec3 hit_pos;
-        glm::vec3 hit_normal;
-        int       hit_obj;
+    // if (A.size() > 50)
+    // {
+    //     A.pop_front();
+    //     B.pop_front();
+    // }
 
-        glm::vec3 pos = proj.pos;
-        glm::vec3 dir = proj.dir;
-        auto &desc = proj.desc;
+    // if (C.size() > 50)
+    // {
+    //     C.pop_front();
+    //     D.pop_front();
+    // }
 
-        for (int i=0; i<desc.shots; i++)
-        {
-            float spread = (proj.aim) ? desc.inner_spread : desc.outer_spread;
 
-            glm::vec3 N = glm::vec3(
-                idk::randf_guassian(spread, 2),
-                idk::randf_guassian(spread, 2),
-                idk::randf_guassian(spread, 2)
-            );
+    // for (auto &proj: m_projectiles)
+    // {
+    //     glm::vec3 hit_pos;
+    //     glm::vec3 hit_normal;
+    //     int       hit_obj;
 
-            N = glm::normalize(dir + N); 
+    //     glm::vec3 pos = proj.pos;
+    //     glm::vec3 dir = proj.dir;
+    //     auto &desc = proj.desc;
 
-            A.push_back(pos);
-            B.push_back(pos + 32.0f*N);
+    //     for (int i=0; i<desc.shots; i++)
+    //     {
+    //         float spread = (proj.aim) ? desc.inner_spread : desc.outer_spread;
 
-            if (_raycast(api, proj, pos, N, &hit_pos, &hit_normal, &hit_obj))
-            {
-                proj.callback(hit_pos, hit_normal);
+    //         glm::vec3 N = glm::vec3(
+    //             idk::randf_guassian(spread, 2),
+    //             idk::randf_guassian(spread, 2),
+    //             idk::randf_guassian(spread, 2)
+    //         );
 
-                C.push_back(hit_pos);
-                D.push_back(hit_normal);
-            }
-        }
+    //         N = glm::normalize(dir + N); 
 
-    }
+    //         A.push_back(pos);
+    //         B.push_back(pos + 32.0f*N);
 
-    m_projectiles.clear();
+    //         if (_raycast(api, proj, pos, N, &hit_pos, &hit_normal, &hit_obj))
+    //         {
+    //             proj.callback(hit_pos, hit_normal);
 
+    //             C.push_back(hit_pos);
+    //             D.push_back(hit_normal);
+    //         }
+    //     }
+
+    // }
+
+    // m_projectiles.clear();
 
     // for (auto &cmp: ECS2::getComponentArray<WeaponCmp>())
     // {
@@ -140,7 +139,7 @@ meatworld::WeaponSys::update( idk::EngineAPI &api )
 
     //             std::cout << N.x << ", " << N.y << "\n";
 
-    //             _raycast(api, cmp, pos, glm::normalize(dir * N));
+    //             // _raycast(api, cmp, pos, glm::normalize(dir * N));
     //         }
 
     //         cmp.fire = false;
@@ -150,26 +149,26 @@ meatworld::WeaponSys::update( idk::EngineAPI &api )
     // }
 
 
-    for (auto &cmp: ECS2::getComponentArray<HitSphereCmp>())
-    {
-        glm::vec3 pos = TransformSys::getWorldPosition(cmp.obj_id);
+    // for (auto &cmp: ECS2::getComponentArray<HitSphereCmp>())
+    // {
+    //     glm::vec3 pos = TransformSys::getWorldPosition(cmp.obj_id);
 
-        if (cmp.is_hit)
-        {
-            cmp.is_hit = false;
-        }
-    }
+    //     if (cmp.is_hit)
+    //     {
+    //         cmp.is_hit = false;
+    //     }
+    // }
 
 
-    for (auto &cmp: ECS2::getComponentArray<HitBoxCmp>())
-    {
-        glm::vec3 pos = TransformSys::getWorldPosition(cmp.obj_id);
+    // for (auto &cmp: ECS2::getComponentArray<HitBoxCmp>())
+    // {
+    //     glm::vec3 pos = TransformSys::getWorldPosition(cmp.obj_id);
 
-        if (cmp.is_hit)
-        {
-            cmp.is_hit = false;
-        }
-    }
+    //     if (cmp.is_hit)
+    //     {
+    //         cmp.is_hit = false;
+    //     }
+    // }
 
 }
 
